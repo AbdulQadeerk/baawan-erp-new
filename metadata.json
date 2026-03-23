@@ -1,0 +1,5 @@
+{
+  "name": "Baawan ERP",
+  "description": "A high-performance, professional ERP system for business intelligence, sales, and inventory management.",
+  "requestFramePermissions": ["geolocation"]
+}
