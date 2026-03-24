@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './lib/auth-context';
+import { ToastContainer } from './components/ToastContainer';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { InvoiceList } from './components/InvoiceList';
@@ -14,8 +16,9 @@ import { CurrencyList } from './components/masters/CurrencyList';
 import { CurrencyCreate } from './components/masters/CurrencyCreate';
 import { ExtraChargeList } from './components/masters/ExtraChargeList';
 import { ExtraChargeCreate } from './components/masters/ExtraChargeCreate';
-import { GroupCreate } from './components/masters/GroupCreate';
-import { GroupList } from './components/masters/GroupList';
+import { GroupCreate } from './components/masters/group/GroupCreate';
+import { GroupList } from './components/masters/group/GroupList';
+import type { GroupRecord } from './services/group.service';
 import { ItemCreate } from './components/masters/ItemCreate';
 import { ItemList } from './components/masters/ItemList';
 import { LedgerCreate } from './components/masters/LedgerCreate';
@@ -65,12 +68,13 @@ import { ScheduleReport } from './components/ScheduleReport';
 import { ScheduleToInvoice } from './components/ScheduleToInvoice';
 import { MultipleLedgerOutstanding } from './components/MultipleLedgerOutstanding';
 import { Login } from './components/Login';
-import { authService } from './services/api';
 import { Page, Tab, SplitMode } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import { FileText, Package, Loader2, Maximize2 } from 'lucide-react';
 
-function App() {
+function AppContent() {
+  const { isAuthenticated, isLoading: isCheckingAuth, logout } = useAuth();
+
   const [tabs, setTabs] = useState<Tab[]>([
     { id: 'dashboard', type: 'dashboard', title: 'Dashboard', closable: false }
   ]);
@@ -82,18 +86,8 @@ function App() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [isWidgetLibraryOpen, setIsWidgetLibraryOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-
-  useEffect(() => {
-    // Session check bypassed as per user request
-    const currentSessionId = localStorage.getItem('sessionId');
-    const isInvalid = currentSessionId && (currentSessionId.trim().startsWith('<!doctype') || currentSessionId.trim().startsWith('<html'));
-    
-    if (!currentSessionId || isInvalid) {
-      localStorage.setItem('sessionId', 'bypassed-session-id');
-    }
-  }, []);
+  const [editGroupId, setEditGroupId] = useState<number | null>(null);
+  const [pendingGroupSave, setPendingGroupSave] = useState<{ record: GroupRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -225,9 +219,34 @@ function App() {
       case 'extra-charge-create':
         return <ExtraChargeCreate onBack={() => removeTab(tab.id)} />;
       case 'group-create':
-        return <GroupCreate />;
+        return (
+          <GroupCreate
+            editId={editGroupId}
+            onBack={() => {
+              setEditGroupId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditGroupId(null);
+              setPendingGroupSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'group-list':
-        return <GroupList onCreateNew={() => addTab('group-create', 'Create Group')} />;
+        return (
+          <GroupList
+            onCreateNew={() => {
+              setEditGroupId(null);
+              addTab('group-create', 'Create Group');
+            }}
+            onEdit={(id: number) => {
+              setEditGroupId(id);
+              addTab('group-create', 'Edit Group');
+            }}
+            pendingSave={pendingGroupSave}
+            onPendingSaveConsumed={() => setPendingGroupSave(null)}
+          />
+        );
       case 'item-create':
         return <ItemCreate onBack={() => removeTab(tab.id)} />;
       case 'item-list':
@@ -340,7 +359,7 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <Login onLoginSuccess={() => setIsAuthenticated(true)} />;
+    return <Login />;
   }
 
   return (
@@ -413,10 +432,7 @@ function App() {
         }} 
         isDark={isDark} 
         toggleDark={() => setIsDark(!isDark)} 
-        onLogout={() => {
-          authService.logout();
-          setIsAuthenticated(false);
-        }}
+        onLogout={logout}
         splitMode={splitMode}
         onSplitChange={handleSplitChange}
       />
@@ -510,7 +526,18 @@ function App() {
           <Package size={20} className="group-hover:text-blue-500 transition-colors" />
         </button>
       </div>
+      <ToastContainer />
     </div>
+  );
+}
+
+// Wrap the app with AuthProvider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+      <ToastContainer />
+    </AuthProvider>
   );
 }
 

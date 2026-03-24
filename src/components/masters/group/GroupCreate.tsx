@@ -15,15 +15,16 @@ import {
   groupApi,
   type GroupDropdownItem,
   type GroupCreatePayload,
-} from '../../services/group.service';
-import { toast } from '../../lib/toast';
+  type GroupRecord,
+} from '../../../services/group.service';
+import { toast } from '../../../lib/toast';
 
 interface GroupCreateProps {
   /** If provided, we are editing an existing group */
   editId?: number | null;
   onBack?: () => void;
-  /** Called after successful create/update to refresh the list */
-  onSaved?: () => void;
+  /** Called after successful create/update — returns the saved record so the list can update without a re-fetch */
+  onSaved?: (record: GroupRecord, isUpdate: boolean) => void;
 }
 
 // ─── Validation regex (letters, spaces, dots, hyphens) ──────────────────────
@@ -131,18 +132,41 @@ export const GroupCreate: React.FC<GroupCreateProps> = ({ editId, onBack, onSave
     };
 
     try {
+      // Resolve parent info from dropdown for immediate list update
+      const parentItem = groupList.find(x => String(x.id) === parentId);
+
       if (isEditMode && editId) {
         // Update
         payload.id = editId;
         await groupApi.update(payload);
         toast.success('Record updated successfully.', 'Info');
+
+        const updatedRecord: GroupRecord = {
+          id: editId,
+          name: name.trim(),
+          parentId: parentId ? parseInt(parentId, 10) : null,
+          parent: parentItem?.name ?? '',
+          nature: parentItem?.field3 ?? '',
+          isCr: parentItem?.field2 === 'true' || (parentItem?.field2 as any) === true,
+        };
+        onSaved?.(updatedRecord, true);
       } else {
         // Create
-        await groupApi.create(payload);
+        const newId = await groupApi.create(payload);
         toast.success('Record created successfully.', 'Info');
+
+        const newRecord: GroupRecord = {
+          id: typeof newId === 'number' ? newId : 0,
+          name: name.trim(),
+          parentId: parentId ? parseInt(parentId, 10) : null,
+          parent: parentItem?.name ?? '',
+          nature: parentItem?.field3 ?? '',
+          isCr: parentItem?.field2 === 'true' || (parentItem?.field2 as any) === true,
+          modifiedDate: new Date().toISOString(),
+        };
+        onSaved?.(newRecord, false);
       }
 
-      onSaved?.();
       onBack?.();
     } catch (err: any) {
       if (!err?._processedByInterceptor) {

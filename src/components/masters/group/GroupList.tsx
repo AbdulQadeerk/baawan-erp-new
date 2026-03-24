@@ -9,7 +9,6 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
-  Filter,
   FolderTree,
   ChevronDown,
   Download,
@@ -23,18 +22,27 @@ import {
   isSystemGroup,
   type GroupRecord,
   type GroupSearchPayload,
-} from '../../services/group.service';
+} from '../../../services/group.service';
 import { GroupDetailsModal } from './GroupDetailsModal';
-import { toast } from '../../lib/toast';
+import { toast } from '../../../lib/toast';
 
 interface GroupListProps {
   onCreateNew?: () => void;
   onEdit?: (id: number) => void;
+  /** Called by App.tsx to pass a newly saved record for immediate list update */
+  pendingSave?: { record: GroupRecord; isUpdate: boolean } | null;
+  /** App.tsx calls this after we consume the pendingSave */
+  onPendingSaveConsumed?: () => void;
 }
 
-const PAGE_SIZE = 50; // all records returned from API, we do client-side paging
+const PAGE_SIZE = 50;
 
-export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => {
+export const GroupList: React.FC<GroupListProps> = ({
+  onCreateNew,
+  onEdit,
+  pendingSave,
+  onPendingSaveConsumed,
+}) => {
   // ─── State ──────────────────────────────────────────────────────────────────
   const [groups, setGroups] = useState<GroupRecord[]>([]);
   const [filteredGroups, setFilteredGroups] = useState<GroupRecord[]>([]);
@@ -56,16 +64,34 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<GroupRecord | null>(null);
 
-  // ─── Load data on mount ─────────────────────────────────────────────────────
+  // ─── Load data on mount (default load, no search needed) ────────────────────
   useEffect(() => {
     fetchGroups();
   }, []);
+
+  // ─── Consume pendingSave from App.tsx (create / update auto-update) ─────────
+  useEffect(() => {
+    if (!pendingSave) return;
+
+    const { record, isUpdate } = pendingSave;
+
+    if (isUpdate) {
+      // Update existing row in-place
+      setGroups(prev =>
+        prev.map(g => (g.id === record.id ? { ...g, ...record } : g))
+      );
+    } else {
+      // Prepend new record at top (mirrors Angular's addIndex: 0)
+      setGroups(prev => [record, ...prev]);
+    }
+
+    onPendingSaveConsumed?.();
+  }, [pendingSave]);
 
   // ─── Client-side filter whenever list or filters change ─────────────────────
   useEffect(() => {
     let result = [...groups];
 
-    // Quick filter by name
     if (searchName.trim()) {
       const term = searchName.trim().toLowerCase();
       result = result.filter(
@@ -80,13 +106,15 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
   }, [groups, searchName]);
 
   // ─── API Calls ──────────────────────────────────────────────────────────────
-  const fetchGroups = useCallback(async () => {
+  const fetchGroups = useCallback(async (overrides?: Partial<GroupSearchPayload>) => {
     setIsLoading(true);
     try {
       const payload: GroupSearchPayload = {
         isSync: false,
-        name: searchName.trim() || null,
-        nature: natureFilter ? parseInt(natureFilter, 10) : null,
+        name: overrides?.name !== undefined ? overrides.name : (searchName.trim() || null),
+        nature: overrides?.nature !== undefined
+          ? overrides.nature
+          : (natureFilter ? parseInt(natureFilter, 10) : null),
       };
       const data = await groupApi.search(payload);
       setGroups(data.list ?? []);
@@ -107,18 +135,7 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
   const handleClear = () => {
     setSearchName('');
     setNatureFilter(null);
-    // Fetch with cleared filters
-    (async () => {
-      setIsLoading(true);
-      try {
-        const data = await groupApi.search({ isSync: false, name: null, nature: null });
-        setGroups(data.list ?? []);
-      } catch {
-        setGroups([]);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+    fetchGroups({ name: null, nature: null });
   };
 
   const handleDelete = async (group: GroupRecord) => {
@@ -172,7 +189,6 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
         nature: natureFilter ? parseInt(natureFilter, 10) : null,
       };
       const data = await groupApi.print(payload);
-      // Open print data in a new window
       if (data?.list?.length) {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
@@ -212,7 +228,7 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 space-y-6"
+      className="p-6 flex flex-col gap-6"
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -307,12 +323,17 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* Table Container — scrollable, fixed height */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
-        <div className="overflow-x-auto custom-scrollbar">
+        {/* Scrollable table body area */}
+        <div
+          className="overflow-auto custom-scrollbar"
+          style={{ maxHeight: '60vh' }}
+        >
           <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+            {/* Sticky header */}
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-slate-50 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800">
                 <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 w-36 text-center">
                   Actions
                 </th>
@@ -425,7 +446,7 @@ export const GroupList: React.FC<GroupListProps> = ({ onCreateNew, onEdit }) => 
           </table>
         </div>
 
-        {/* Footer */}
+        {/* Footer — always visible below the scroll area */}
         <div className="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-10">
             <SummaryStat label="Total Rows" value={String(groups.length)} />

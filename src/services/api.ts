@@ -1,6 +1,57 @@
-import axios from 'axios';
+/**
+ * API Service Layer — Backward-compatible exports
+ * 
+ * This file re-exports from the new lib/api-client module while maintaining
+ * the same export names that existing components use (authService, ledgerService, etc.)
+ * 
+ * Services that haven't been migrated yet still use mock data.
+ * As you migrate each feature, update the corresponding service here
+ * to use apiClient.post/get from lib/api-client.
+ */
 
-// Mock data for fallback
+import { authApi, apiClient } from '../lib/api-client';
+import { storage } from '../lib/storage';
+import { toast } from '../lib/toast';
+import { STORAGE_KEYS } from '../lib/constants';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AUTH SERVICE — Now uses real API (replaces mock)
+// ═══════════════════════════════════════════════════════════════════════════════
+export const authService = {
+  login: async (loginData: { userName: string; password: string; shortcode: string }) => {
+    // This is used by the Login component directly. 
+    // For the full login flow with localStorage writes, use useAuth().login() instead.
+    const data = await authApi.login({
+      username: loginData.userName,
+      password: loginData.password,
+      shortcode: loginData.shortcode,
+    });
+    return data;
+  },
+
+  checkSession: async () => {
+    const tokenInfo = storage.getItem<any>(STORAGE_KEYS.TOKEN_INFO);
+    const sessionId = tokenInfo?.user?.currentSessionId;
+    if (!sessionId) return false;
+    try {
+      await authApi.checkSession(sessionId);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  logout: () => {
+    storage.removeItem(STORAGE_KEYS.TOKEN_INFO);
+    toast.success('You have been logged out.', 'Success');
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SERVICES THAT STILL USE MOCK DATA (to be migrated later)
+// Keep these so existing components don't break
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const MOCK_LEDGERS = [
   { id: '1', name: 'Cash in Hand', ledgerName: 'Cash in Hand', groupName: 'Cash-in-hand', openingBalance: 5000, balanceType: 'Dr' },
   { id: '2', name: 'HDFC Bank', ledgerName: 'HDFC Bank', groupName: 'Bank Accounts', openingBalance: 125000, balanceType: 'Dr' },
@@ -16,54 +67,16 @@ const MOCK_ITEMS = [
   { id: '4', itemName: 'Keyboard Mechanical', itemCode: 'ITM004', hsnCode: '8471', mrp: 4500, sellRate: 3800, gstPercentage: 18, stock: 22 },
 ];
 
-const BASE_URL = '/api-proxy';
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor to add X-Session-ID to headers
-api.interceptors.request.use((config) => {
-  const sessionId = localStorage.getItem('sessionId');
-  if (sessionId && !sessionId.trim().startsWith('<!doctype') && !sessionId.trim().startsWith('<html')) {
-    config.headers['X-Session-ID'] = sessionId;
-  }
-  return config;
-});
-
-export const authService = {
-  login: async (loginData: any) => {
-    console.log('Mock Login with:', loginData.userName);
-    const mockSessionId = 'mock-session-id-' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('sessionId', mockSessionId);
-    return { sessionId: mockSessionId, userName: loginData.userName, status: 'success' };
-  },
-  checkSession: async () => {
-    return true;
-  },
-  logout: () => {
-    localStorage.removeItem('sessionId');
-  },
-};
-
 export const ledgerService = {
   search: async (params: any) => {
-    console.log('Mock Ledger Search:', params);
     const searchText = (params.searchText || '').toLowerCase();
     return MOCK_LEDGERS.filter(l => 
       l.name.toLowerCase().includes(searchText) || 
       l.groupName.toLowerCase().includes(searchText)
     );
   },
-  list: async () => {
-    console.log('Mock Ledger List');
-    return MOCK_LEDGERS;
-  },
+  list: async () => MOCK_LEDGERS,
   create: async (ledgerData: any) => {
-    console.log('Mock Ledger Create:', ledgerData);
     const newLedger = {
       ...ledgerData,
       id: Math.random().toString(36).substr(2, 9),
@@ -75,19 +88,14 @@ export const ledgerService = {
 
 export const itemService = {
   search: async (params: any) => {
-    console.log('Mock Item Search:', params);
     const searchText = (params.searchText || '').toLowerCase();
     return MOCK_ITEMS.filter(i => 
       i.itemName.toLowerCase().includes(searchText) || 
       i.itemCode.toLowerCase().includes(searchText)
     );
   },
-  list: async () => {
-    console.log('Mock Item List');
-    return MOCK_ITEMS;
-  },
+  list: async () => MOCK_ITEMS,
   create: async (itemData: any) => {
-    console.log('Mock Item Create:', itemData);
     const newItem = {
       ...itemData,
       id: Math.random().toString(36).substr(2, 9),
@@ -99,149 +107,86 @@ export const itemService = {
 
 export const invoiceService = {
   create: async (invoiceData: any) => {
-    console.log('Mock Invoice Create:', invoiceData);
     const invoiceNo = 'INV-' + Math.floor(Math.random() * 10000);
     return { status: 'success', invoiceNo, docNo: invoiceNo };
   },
   search: async (params: any) => {
-    console.log('Mock Invoice Search:', params);
     return [
       { id: '1', bill_No: 'MLCO-30008/25-26', date: '2026-03-21T09:47:00', partyName: 'Shri Parshwa Sales', refNo: '', item_SubTotal: 4300.00, grandTotal: 5074.00, billStatus: 0, salesPerson: 'Jigar Mehta' }
     ];
   },
   getVoucherDependency: async (voucherId: string) => {
-    console.log('Mock Voucher Dependency:', voucherId);
     return [
       { id: '1', type: 'Enquiry', docNo: 'ENQ-2026-001', date: '2026-03-01', status: 'Converted', amount: 5000 },
       { id: '2', type: 'Sales Order', docNo: 'SO-2026-001', date: '2026-03-05', status: 'Converted', amount: 5000 },
-      { id: '3', type: 'Proforma Invoice', docNo: 'PI-2026-001', date: '2026-03-10', status: 'Converted', amount: 5000 },
-      { id: '4', type: 'Sales Invoice', docNo: 'MLCO-30008/25-26', date: '2026-03-21', status: 'Active', amount: 5074 },
-      { id: '5', type: 'Billing/Payment', docNo: 'PAY-2026-001', date: '2026-03-22', status: 'Paid', amount: 5074 },
     ];
   },
 };
 
 export const reportService = {
-  getPNL: async (params: any) => {
-    console.log('Mock PNL Report:', params);
-    return {
-      revenue: 1250000,
-      expenses: 850000,
-      netProfit: 400000,
-      details: []
-    };
-  },
-  getAgeing: async (params: any) => {
-    console.log('Mock Ageing Report:', params);
-    return { data: [] };
-  },
-  getInventory: async (params: any) => {
-    console.log('Mock Inventory Report:', params);
-    return { data: MOCK_ITEMS };
-  },
-  getSalesRegister: async (params: any) => {
-    console.log('Mock Sales Register:', params);
-    return { data: [] };
-  },
-  getLedgerOutstanding: async (params: any) => {
-    console.log('Mock Ledger Outstanding:', params);
-    return {
-      data: [
-        { id: '1', partyName: 'ABC Corporation', billNo: 'INV-001', date: '2024-03-01', amount: 25000, pendingAmount: 15000 },
-        { id: '2', partyName: 'XYZ Industries', billNo: 'INV-005', date: '2024-03-10', amount: 12000, pendingAmount: 12000 },
-      ]
-    };
-  },
-  getTrialBalance: async (params: any) => {
-    console.log('Mock Trial Balance:', params);
-    return {
-      data: MOCK_LEDGERS.map(l => ({
-        ...l,
-        opening: l.openingBalance,
-        debit: 0,
-        credit: 0,
-        closing: l.openingBalance
-      }))
-    };
-  },
-  getCurrentStock: async (params: any) => {
-    console.log('Mock Current Stock:', params);
-    return { data: MOCK_ITEMS };
-  },
+  getPNL: async (params: any) => ({ revenue: 1250000, expenses: 850000, netProfit: 400000, details: [] }),
+  getAgeing: async (params: any) => ({ data: [] }),
+  getInventory: async (params: any) => ({ data: MOCK_ITEMS }),
+  getSalesRegister: async (params: any) => ({ data: [] }),
+  getLedgerOutstanding: async (params: any) => ({
+    data: [
+      { id: '1', partyName: 'ABC Corporation', billNo: 'INV-001', date: '2024-03-01', amount: 25000, pendingAmount: 15000 },
+      { id: '2', partyName: 'XYZ Industries', billNo: 'INV-005', date: '2024-03-10', amount: 12000, pendingAmount: 12000 },
+    ]
+  }),
+  getTrialBalance: async (params: any) => ({
+    data: MOCK_LEDGERS.map(l => ({ ...l, opening: l.openingBalance, debit: 0, credit: 0, closing: l.openingBalance }))
+  }),
+  getCurrentStock: async (params: any) => ({ data: MOCK_ITEMS }),
 };
 
 export const dashboardService = {
-  getPurchaseTrend: async (params: any) => {
-    console.log('Mock Purchase Trend:', params);
-    return [
-      { date: '2024-03-14', amount: 45000 },
-      { date: '2024-03-15', amount: 32000 },
-      { date: '2024-03-16', amount: 58000 },
-      { date: '2024-03-17', amount: 21000 },
-      { date: '2024-03-18', amount: 64000 },
-      { date: '2024-03-19', amount: 48000 },
-      { date: '2024-03-20', amount: 55000 },
-    ];
-  },
-  getInventorySummary: async (params: any) => {
-    console.log('Mock Inventory Summary:', params);
-    return {
-      totalItems: 156,
-      lowStockItems: 12,
-      outOfStockItems: 3,
-      totalValue: 2540000
-    };
-  },
-  getTopSellingItems: async (params: any) => {
-    console.log('Mock Top Selling Items:', params);
-    return [
-      { name: 'Laptop Pro 15', quantity: 45, amount: 3060000 },
-      { name: 'Wireless Mouse', quantity: 128, amount: 153600 },
-      { name: 'Monitor 27"', quantity: 32, amount: 624000 },
-    ];
-  },
+  getPurchaseTrend: async (params: any) => [
+    { date: '2024-03-14', amount: 45000 },
+    { date: '2024-03-15', amount: 32000 },
+    { date: '2024-03-16', amount: 58000 },
+    { date: '2024-03-17', amount: 21000 },
+    { date: '2024-03-18', amount: 64000 },
+    { date: '2024-03-19', amount: 48000 },
+    { date: '2024-03-20', amount: 55000 },
+  ],
+  getInventorySummary: async (params: any) => ({
+    totalItems: 156, lowStockItems: 12, outOfStockItems: 3, totalValue: 2540000
+  }),
+  getTopSellingItems: async (params: any) => [
+    { name: 'Laptop Pro 15', quantity: 45, amount: 3060000 },
+    { name: 'Wireless Mouse', quantity: 128, amount: 153600 },
+    { name: 'Monitor 27"', quantity: 32, amount: 624000 },
+  ],
 };
 
-export const groupService = {
-  list: async () => {
-    return [
-      { id: 1, name: 'Cash-in-hand' },
-      { id: 2, name: 'Bank Accounts' },
-      { id: 3, name: 'Indirect Expenses' },
-      { id: 4, name: 'Sales Accounts' },
-      { id: 5, name: 'Sundry Debtors' },
-    ];
-  }
-};
+// Group Service — now uses real API (migrated from Angular GroupServiceService)
+export { groupApi as groupService } from './group.service';
 
 export const brandService = {
-  list: async () => {
-    return [
-      { id: 1, name: 'Apple' },
-      { id: 2, name: 'Logitech' },
-      { id: 3, name: 'Dell' },
-    ];
-  }
+  list: async () => [
+    { id: 1, name: 'Apple' },
+    { id: 2, name: 'Logitech' },
+    { id: 3, name: 'Dell' },
+  ]
 };
 
 export const categoryService = {
-  list: async () => {
-    return [
-      { id: 1, name: 'Electronics' },
-      { id: 2, name: 'Accessories' },
-      { id: 3, name: 'Peripherals' },
-    ];
-  }
+  list: async () => [
+    { id: 1, name: 'Electronics' },
+    { id: 2, name: 'Accessories' },
+    { id: 3, name: 'Peripherals' },
+  ]
 };
 
 export const unitService = {
-  list: async () => {
-    return [
-      { id: 1, name: 'Nos' },
-      { id: 2, name: 'Kgs' },
-      { id: 3, name: 'Pcs' },
-    ];
-  }
+  list: async () => [
+    { id: 1, name: 'Nos' },
+    { id: 2, name: 'Kgs' },
+    { id: 3, name: 'Pcs' },
+  ]
 };
 
-export default api;
+// Re-export the api client as default for direct use
+export { apiClient } from '../lib/api-client';
+export default apiClient;
