@@ -14,8 +14,9 @@ import { BOMList } from './components/masters/BOMList';
 import { BOMCreate } from './components/masters/BOMCreate';
 import { CurrencyList } from './components/masters/CurrencyList';
 import { CurrencyCreate } from './components/masters/CurrencyCreate';
-import { ExtraChargeList } from './components/masters/ExtraChargeList';
-import { ExtraChargeCreate } from './components/masters/ExtraChargeCreate';
+import { ExtraChargeList } from './components/masters/extra-charge/ExtraChargeList';
+import { ExtraChargeCreate } from './components/masters/extra-charge/ExtraChargeCreate';
+import type { ExtraChargeRecord } from './services/extra-charge.service';
 import { GroupCreate } from './components/masters/group/GroupCreate';
 import { GroupList } from './components/masters/group/GroupList';
 import type { GroupRecord } from './services/group.service';
@@ -88,6 +89,8 @@ function AppContent() {
   const [isWidgetLibraryOpen, setIsWidgetLibraryOpen] = useState(false);
   const [editGroupId, setEditGroupId] = useState<number | null>(null);
   const [pendingGroupSave, setPendingGroupSave] = useState<{ record: GroupRecord; isUpdate: boolean } | null>(null);
+  const [editExtraChargeId, setEditExtraChargeId] = useState<number | null>(null);
+  const [pendingExtraChargeSave, setPendingExtraChargeSave] = useState<{ record: ExtraChargeRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -215,9 +218,34 @@ function AppContent() {
       case 'currency-create':
         return <CurrencyCreate onBack={() => removeTab(tab.id)} />;
       case 'extra-charge-list':
-        return <ExtraChargeList onCreateNew={() => addTab('extra-charge-create', 'Create Extra Charge')} />;
+        return (
+          <ExtraChargeList
+            onCreateNew={() => {
+              setEditExtraChargeId(null);
+              addTab('extra-charge-create', 'Create Extra Charge');
+            }}
+            onEdit={(id: number) => {
+              setEditExtraChargeId(id);
+              addTab('extra-charge-create', 'Edit Extra Charge');
+            }}
+            pendingSave={pendingExtraChargeSave}
+            onPendingSaveConsumed={() => setPendingExtraChargeSave(null)}
+          />
+        );
       case 'extra-charge-create':
-        return <ExtraChargeCreate onBack={() => removeTab(tab.id)} />;
+        return (
+          <ExtraChargeCreate
+            editId={editExtraChargeId}
+            onBack={() => {
+              setEditExtraChargeId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditExtraChargeId(null);
+              setPendingExtraChargeSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'group-create':
         return (
           <GroupCreate
