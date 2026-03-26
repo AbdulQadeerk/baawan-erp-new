@@ -30,10 +30,12 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { dashboardService } from '../services/api';
+import { useAuth } from '../lib/auth-context';
 
 export const Dashboard: React.FC<{ onModuleClick?: (type: any, title: string) => void }> = ({ onModuleClick }) => {
   const [purchaseTrend, setPurchaseTrend] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const { user } = useAuth();
 
   React.useEffect(() => {
     const fetchDashboardData = async () => {
@@ -81,7 +83,7 @@ export const Dashboard: React.FC<{ onModuleClick?: (type: any, title: string) =>
           <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl p-10 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center">
             <div className="relative z-10 space-y-2">
               <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Welcome back, <span className="text-primary">Admin</span>
+                Welcome back, <span className="text-primary">{user?.first_Name || 'Admin'} {user?.lastname || ''}</span>
               </h1>
               <p className="text-slate-500 dark:text-slate-400 max-w-lg">
                 Manage your business operations seamlessly with the latest insights and powerful ERP tools at your fingertips.

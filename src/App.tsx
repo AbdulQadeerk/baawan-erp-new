@@ -26,11 +26,13 @@ import { LedgerCreate } from './components/masters/LedgerCreate';
 import { LedgerList } from './components/masters/LedgerList';
 import { SalesPersonList } from './components/masters/SalesPersonList';
 import { SalesPersonCreate } from './components/masters/SalesPersonCreate';
-import { StockPlaceList } from './components/masters/StockPlaceList';
-import { StockPlaceCreate } from './components/masters/StockPlaceCreate';
+import { StockPlaceList } from './components/masters/stock-place/StockPlaceList';
+import { StockPlaceCreate } from './components/masters/stock-place/StockPlaceCreate';
+import type { StockPlaceRecord } from './services/stock-place.service';
 import { TermsList } from './components/masters/TermsList';
-import { UnitList } from './components/masters/UnitList';
-import { UnitCreate } from './components/masters/UnitCreate';
+import { UnitList } from './components/masters/unit/UnitList';
+import { UnitCreate } from './components/masters/unit/UnitCreate';
+import type { UnitRecord } from './services/unit.service';
 import { UserList } from './components/masters/UserList';
 import { UserCreate } from './components/masters/UserCreate';
 import { UserRoleList } from './components/masters/UserRoleList';
@@ -91,6 +93,10 @@ function AppContent() {
   const [pendingGroupSave, setPendingGroupSave] = useState<{ record: GroupRecord; isUpdate: boolean } | null>(null);
   const [editExtraChargeId, setEditExtraChargeId] = useState<number | null>(null);
   const [pendingExtraChargeSave, setPendingExtraChargeSave] = useState<{ record: ExtraChargeRecord; isUpdate: boolean } | null>(null);
+  const [editStockPlaceId, setEditStockPlaceId] = useState<number | null>(null);
+  const [pendingStockPlaceSave, setPendingStockPlaceSave] = useState<{ record: StockPlaceRecord; isUpdate: boolean } | null>(null);
+  const [editUnitId, setEditUnitId] = useState<number | null>(null);
+  const [pendingUnitSave, setPendingUnitSave] = useState<{ record: UnitRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -288,15 +294,65 @@ function AppContent() {
       case 'sales-person-create':
         return <SalesPersonCreate onBack={() => removeTab(tab.id)} />;
       case 'stock-place-list':
-        return <StockPlaceList onCreateNew={() => addTab('stock-place-create', 'Create Stock Place')} />;
+        return (
+          <StockPlaceList
+            onCreateNew={() => {
+              setEditStockPlaceId(null);
+              addTab('stock-place-create', 'Create Stock Place');
+            }}
+            onEdit={(id: number) => {
+              setEditStockPlaceId(id);
+              addTab('stock-place-create', 'Edit Stock Place');
+            }}
+            pendingSave={pendingStockPlaceSave}
+            onPendingSaveConsumed={() => setPendingStockPlaceSave(null)}
+          />
+        );
       case 'stock-place-create':
-        return <StockPlaceCreate onBack={() => removeTab(tab.id)} />;
+        return (
+          <StockPlaceCreate
+            editId={editStockPlaceId}
+            onBack={() => {
+              setEditStockPlaceId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditStockPlaceId(null);
+              setPendingStockPlaceSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'terms-list':
         return <TermsList />;
       case 'unit-list':
-        return <UnitList onCreateNew={() => addTab('unit-create', 'Create Unit')} />;
+        return (
+          <UnitList
+            onCreateNew={() => {
+              setEditUnitId(null);
+              addTab('unit-create', 'Create Unit');
+            }}
+            onEdit={(id: number) => {
+              setEditUnitId(id);
+              addTab('unit-create', 'Edit Unit');
+            }}
+            pendingSave={pendingUnitSave}
+            onPendingSaveConsumed={() => setPendingUnitSave(null)}
+          />
+        );
       case 'unit-create':
-        return <UnitCreate onBack={() => removeTab(tab.id)} />;
+        return (
+          <UnitCreate
+            editId={editUnitId}
+            onBack={() => {
+              setEditUnitId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditUnitId(null);
+              setPendingUnitSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'user-list':
         return <UserList onCreateUser={() => addTab('user-create', 'Create User')} />;
       case 'user-create':

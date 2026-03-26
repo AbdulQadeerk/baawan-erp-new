@@ -2,53 +2,54 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search,
   Plus,
-  RefreshCw,
-  FileText,
+  Printer,
+  Download,
   Edit3,
   Trash2,
   Eye,
   ChevronLeft,
   ChevronRight,
-  Layers,
-  Download,
+  Filter,
+  RefreshCw,
+  Warehouse,
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  extraChargeApi,
-  getTaxTypeText,
-  type ExtraChargeRecord,
-  type ExtraChargeSearchPayload,
-} from '../../../services/extra-charge.service';
-import { ExtraChargeDetailsModal } from './ExtraChargeDetailsModal';
+  stockPlaceApi,
+  type StockPlaceRecord,
+  type StockPlaceSearchPayload,
+} from '../../../services/stock-place.service';
+import { StockPlaceDetailsModal } from './StockPlaceDetailsModal';
 import { toast } from '../../../lib/toast';
 
-interface ExtraChargeListProps {
+interface StockPlaceListProps {
   onCreateNew?: () => void;
   onEdit?: (id: number) => void;
-  /** Passes a newly saved record for immediate list update */
-  pendingSave?: { record: ExtraChargeRecord; isUpdate: boolean } | null;
+  pendingSave?: { record: StockPlaceRecord; isUpdate: boolean } | null;
   onPendingSaveConsumed?: () => void;
 }
 
 const PAGE_SIZE = 50;
 
-export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
+export const StockPlaceList: React.FC<StockPlaceListProps> = ({
   onCreateNew,
   onEdit,
   pendingSave,
   onPendingSaveConsumed,
 }) => {
   // ─── State ──────────────────────────────────────────────────────────────────
-  const [charges, setCharges] = useState<ExtraChargeRecord[]>([]);
-  const [filteredCharges, setFilteredCharges] = useState<ExtraChargeRecord[]>([]);
+  const [places, setPlaces] = useState<StockPlaceRecord[]>([]);
+  const [filteredPlaces, setFilteredPlaces] = useState<StockPlaceRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
 
   // Search
-  const [searchText, setSearchText] = useState('');
+  const [searchName, setSearchName] = useState('');
+  const [searchArea, setSearchArea] = useState('');
+  const [searchCity, setSearchCity] = useState('');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,7 +59,7 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
   const [detailRecordId, setDetailRecordId] = useState<number | null>(null);
 
   // Delete confirmation
-  const [deleteTarget, setDeleteTarget] = useState<ExtraChargeRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<StockPlaceRecord | null>(null);
 
   // ─── Load data on mount ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -72,70 +73,66 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
     const { record, isUpdate } = pendingSave;
 
     if (isUpdate) {
-      setCharges(prev =>
+      setPlaces(prev =>
         prev.map(c =>
-          c.extraCharges_ID === record.extraCharges_ID ? { ...c, ...record } : c
+          c.sp_ID === record.sp_ID ? { ...c, ...record } : c
         )
       );
     } else {
-      setCharges(prev => [record, ...prev]);
+      setPlaces(prev => [record, ...prev]);
     }
 
     onPendingSaveConsumed?.();
   }, [pendingSave]);
 
-  // ─── Client-side filter ─────────────────────────────────────────────────────
+  // ─── Client-side filter (Optional) ──────────────────────────────────────────
   useEffect(() => {
-    let result = [...charges];
-
-    if (searchText.trim()) {
-      const term = searchText.trim().toLowerCase();
-      result = result.filter(
-        c =>
-          c.name?.toLowerCase().includes(term) ||
-          c.ledger?.toLowerCase().includes(term)
-      );
-    }
-
-    setFilteredCharges(result);
+    // We already fetch via API based on filters, so client side filtering is 
+    // minimal unless the user just typed and didn't hit 'Search'. 
+    // To match Angular exactly, search action triggers the network request.
+    setFilteredPlaces(places);
     setCurrentPage(1);
-  }, [charges, searchText]);
+  }, [places]);
 
   // ─── API Calls ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(
-    async (textOverride?: string | null) => {
+    async (override?: { name?: string, area?: string, city?: string }) => {
       setIsLoading(true);
       try {
-        const payload: ExtraChargeSearchPayload = {
+        const payload: StockPlaceSearchPayload = {
           isSync: false,
-          text: textOverride !== undefined ? textOverride : (searchText.trim() || null),
+          name: override?.name !== undefined ? override.name : (searchName.trim() || null),
+          area: override?.area !== undefined ? override.area : (searchArea.trim() || null),
+          city: override?.city !== undefined ? override.city : (searchCity.trim() || null),
         };
-        const data = await extraChargeApi.search(payload);
-        setCharges(data.list ?? []);
+        const data = await stockPlaceApi.search(payload);
+        setPlaces(data.list ?? []);
       } catch (err: any) {
         if (!err?._processedByInterceptor) {
-          toast.error('Failed to load extra charges.');
+          toast.error('Failed to load stock places.');
         }
-        setCharges([]);
+        setPlaces([]);
       } finally {
         setIsLoading(false);
       }
     },
-    [searchText]
+    [searchName, searchArea, searchCity]
   );
 
   const handleSearch = () => fetchData();
 
   const handleClear = () => {
-    setSearchText('');
-    fetchData(null);
+    setSearchName('');
+    setSearchArea('');
+    setSearchCity('');
+    fetchData({ name: '', area: '', city: '' });
   };
 
-  const handleDelete = async (charge: ExtraChargeRecord) => {
+  const handleDelete = async (place: StockPlaceRecord) => {
     try {
-      await extraChargeApi.delete(charge.extraCharges_ID);
+      await stockPlaceApi.delete(place.sp_ID);
       toast.success('Record deleted successfully.', 'Success');
-      setCharges(prev => prev.filter(c => c.extraCharges_ID !== charge.extraCharges_ID));
+      setPlaces(prev => prev.filter(c => c.sp_ID !== place.sp_ID));
       setDeleteTarget(null);
     } catch (err: any) {
       if (!err?._processedByInterceptor) {
@@ -148,16 +145,18 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const payload: ExtraChargeSearchPayload = {
+      const payload: StockPlaceSearchPayload = {
         isSync: false,
-        text: searchText.trim() || null,
+        name: searchName.trim() || null,
+        area: searchArea.trim() || null,
+        city: searchCity.trim() || null,
       };
-      const blob = await extraChargeApi.exportToExcel(payload);
+      const blob = await stockPlaceApi.exportToExcel(payload);
       if (blob.size) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.setAttribute('download', 'ExtraChargeExport.xlsx');
+        a.setAttribute('download', 'StockPlaceExport.xlsx');
         a.click();
         URL.revokeObjectURL(url);
       } else {
@@ -175,24 +174,38 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
   const handlePrint = async () => {
     setIsPrinting(true);
     try {
-      const payload: ExtraChargeSearchPayload = {
+      const payload: StockPlaceSearchPayload = {
         isSync: false,
-        text: searchText.trim() || null,
+        name: searchName.trim() || null,
+        area: searchArea.trim() || null,
+        city: searchCity.trim() || null,
       };
-      const data = await extraChargeApi.print(payload);
+      const data = await stockPlaceApi.print(payload);
       if (data?.list?.length) {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
           printWindow.document.write(`
-            <html><head><title>Extra Charge List</title>
+            <html><head><title>Stock Place List</title>
             <style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}</style>
             </head><body>
-            <h2>Extra Charge List</h2>
-            <table><thead><tr><th>Name</th><th>Tax Type</th><th>Tax %</th><th>Ledger</th></tr></thead><tbody>
+            <h2>Stock Place List</h2>
+            <table><thead><tr>
+              <th>Name</th>
+              <th>Code</th>
+              <th>Area</th>
+              <th>City</th>
+              <th>Phone</th>
+            </tr></thead><tbody>
             ${data.list
               .map(
                 (r: any) =>
-                  `<tr><td>${r.name || ''}</td><td>${getTaxTypeText(r.tax_Type) || r.taxType || ''}</td><td>${r.taxPercent ?? ''}</td><td>${r.ledger || ''}</td></tr>`
+                  `<tr>
+                    <td>${r.name || ''}</td>
+                    <td>${r.code || ''}</td>
+                    <td>${r.area || ''}</td>
+                    <td>${r.city || ''}</td>
+                    <td>${r.phone || ''}</td>
+                   </tr>`
               )
               .join('')}
             </tbody></table></body></html>
@@ -213,8 +226,8 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
   };
 
   // ─── Pagination ─────────────────────────────────────────────────────────────
-  const totalPages = Math.max(1, Math.ceil(filteredCharges.length / PAGE_SIZE));
-  const paginatedCharges = filteredCharges.slice(
+  const totalPages = Math.max(1, Math.ceil(filteredPlaces.length / PAGE_SIZE));
+  const paginatedPlaces = filteredPlaces.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
@@ -226,89 +239,100 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className="p-6 flex flex-col gap-6"
     >
-      {/* Header & Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-4">
-          <div className="bg-rose-600 p-2.5 rounded-2xl shadow-lg shadow-rose-600/20">
-            <Layers size={22} className="text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                Extra Charge Listings
-              </h1>
-              <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-md">
-                Management
-              </span>
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-3">
+            <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-600/20">
+              <Warehouse size={24} className="text-white" />
             </div>
-          </div>
+            Stock Place Listings
+          </h1>
+          <p className="text-sm text-slate-500 font-bold uppercase tracking-widest opacity-60 mt-1">
+            Manage and track your warehouse locations globally.
+          </p>
         </div>
 
-        {/* Toolbar aligned to right */}
-        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-          {/* Search Input */}
-          <div className="relative w-full sm:w-64 group">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-              <Search size={16} />
-            </span>
-            <input
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all shadow-sm"
-              placeholder="Search Name..."
-              type="text"
-              value={searchText}
-              onChange={e => setSearchText(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-
-          {/* Search Button */}
-          <button
-            onClick={handleSearch}
-            disabled={isLoading}
-            className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
-            title="Search"
-          >
-            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
-          </button>
-
-          {/* Refresh Button */}
-          <button
-            onClick={handleClear}
-            className="p-2.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all shadow-sm active:scale-95"
-            title="Clear & Refresh"
-          >
-            <RefreshCw size={18} />
-          </button>
-
-          {/* Create Button */}
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-3">
           {onCreateNew && (
             <button
               onClick={onCreateNew}
-              className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-95 shadow-blue-600/20"
-              title="Create New"
+              className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-600/20"
             >
-              <Plus size={18} strokeWidth={3} />
+              <Plus size={18} /> Create
             </button>
           )}
-
-          {/* Export Button */}
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all shadow-sm active:scale-95 disabled:opacity-50 shadow-emerald-600/20"
-            title="Export to Excel"
+            className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
           >
-            {isExporting ? <Loader2 size={18} className="animate-spin" /> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/><line x1="15" x2="15" y1="9" y2="21"/></svg>}
+            {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            Export
           </button>
-
-          {/* Print Button */}
           <button
             onClick={handlePrint}
             disabled={isPrinting}
-            className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all shadow-sm active:scale-95 disabled:opacity-50 shadow-emerald-600/20"
-            title="Print PDF"
+            className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
           >
-            {isPrinting ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
+            {isPrinting ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
+            Print
+          </button>
+        </div>
+      </div>
+
+      {/* Search & Filters */}
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="relative">
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+            <Search size={16} />
+          </span>
+          <input
+            className="block w-full pl-12 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800 text-xs font-bold focus:ring-4 focus:ring-rose-600/10 focus:border-rose-600 outline-none transition-all dark:text-white placeholder-slate-400"
+            placeholder="Search Name..."
+            type="text"
+            value={searchName}
+            onChange={e => setSearchName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          />
+        </div>
+        <div className="relative">
+          <input 
+            className="block w-full px-5 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800 text-xs font-bold focus:ring-4 focus:ring-rose-600/10 focus:border-rose-600 outline-none transition-all dark:text-white placeholder-slate-400" 
+            placeholder="Area" 
+            type="text"
+            value={searchArea}
+            onChange={e => setSearchArea(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          />
+        </div>
+        <div className="relative">
+          <input 
+            className="block w-full px-5 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800 text-xs font-bold focus:ring-4 focus:ring-rose-600/10 focus:border-rose-600 outline-none transition-all dark:text-white placeholder-slate-400" 
+            placeholder="City" 
+            type="text"
+            value={searchCity}
+            onChange={e => setSearchCity(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          />
+        </div>
+        
+        <div className="flex items-center gap-2 md:col-span-1 lg:col-span-2">
+          <button
+            onClick={handleSearch}
+            disabled={isLoading}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Filter size={14} />} 
+            Search
+          </button>
+          <button
+            onClick={handleClear}
+            className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 rounded-2xl transition-all active:scale-95"
+            title="Clear Filters"
+          >
+            <RefreshCw size={18} />
           </button>
         </div>
       </div>
@@ -316,30 +340,39 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
       {/* Table — scrollable, fixed height */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-auto custom-scrollbar" style={{ maxHeight: '60vh' }}>
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead className="sticky top-0 z-10">
               <tr className="bg-slate-50 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800">
                 <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 w-36 text-center">
                   Actions
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 min-w-[150px]">
                   Name
                 </th>
                 <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  Tax Type
+                  Code
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 text-right">
-                  Tax %
+                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 min-w-[200px]">
+                  Address Details
                 </th>
                 <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  Ledger
+                  Area
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  Location
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  Pin Code
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  Phone
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {isLoading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-16">
+                  <td colSpan={8} className="text-center py-16">
                     <div className="flex items-center justify-center gap-3 text-slate-400">
                       <Loader2 className="animate-spin" size={24} />
                       <span className="text-sm font-bold uppercase tracking-widest">Loading...</span>
@@ -348,29 +381,29 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
                 </tr>
               )}
 
-              {!isLoading && paginatedCharges.length === 0 && (
+              {!isLoading && paginatedPlaces.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-16">
+                  <td colSpan={8} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3 text-slate-400">
-                      <Layers size={40} className="opacity-30" />
-                      <span className="text-sm font-bold uppercase tracking-widest">No extra charges found</span>
-                      <span className="text-xs opacity-60">Try searching or click Create to add a new charge.</span>
+                      <Warehouse size={40} className="opacity-30" />
+                      <span className="text-sm font-bold uppercase tracking-widest">No stock places found</span>
+                      <span className="text-xs opacity-60">Try searching or click Create to add a new place.</span>
                     </div>
                   </td>
                 </tr>
               )}
 
               {!isLoading &&
-                paginatedCharges.map(charge => (
+                paginatedPlaces.map(place => (
                   <tr
-                    key={charge.extraCharges_ID}
+                    key={place.sp_ID}
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group"
                   >
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => {
-                            setDetailRecordId(charge.extraCharges_ID);
+                            setDetailRecordId(place.sp_ID);
                             setDetailModalOpen(true);
                           }}
                           className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-xl transition-all active:scale-90"
@@ -379,15 +412,16 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
                           <Eye size={18} />
                         </button>
                         <button
-                          onClick={() => onEdit?.(charge.extraCharges_ID)}
+                          onClick={() => onEdit?.(place.sp_ID)}
                           className="text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-2 rounded-xl transition-all active:scale-90"
                           title="Edit"
                         >
                           <Edit3 size={18} />
                         </button>
                         <button
-                          onClick={() => setDeleteTarget(charge)}
-                          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-all active:scale-90"
+                          onClick={() => setDeleteTarget(place)}
+                          disabled={place.name?.toLowerCase() === 'main' || place.sp_ID === 0} // Can't delete main/default
+                          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-all active:scale-90 disabled:opacity-30"
                           title="Delete"
                         >
                           <Trash2 size={18} />
@@ -395,20 +429,35 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight text-sm">
-                      {charge.name}
+                      {place.name}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getTaxTypeBadgeStyle(charge.tax_Type)}`}
-                      >
-                        {getTaxTypeText(charge.tax_Type) || charge.taxType || '-'}
+                      <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black font-mono uppercase tracking-widest">
+                        {place.code}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-mono font-black text-slate-700 dark:text-slate-300">
-                      {charge.taxPercent != null ? `${charge.taxPercent}%` : '-'}
+                    <td className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 italic max-w-xs truncate">
+                      {place.address_1}
+                      {place.address_2 ? `, ${place.address_2}` : ''}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 italic font-medium">
-                      {charge.ledger || '-'}
+                    <td className="px-6 py-4 text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">
+                      {place.area || '-'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight">
+                          {place.city || '-'}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          {place.state || '-'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
+                      {place.pin || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-xs font-black text-slate-700 dark:text-slate-300">
+                      {place.phone || '-'}
                     </td>
                   </tr>
                 ))}
@@ -419,8 +468,8 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
         {/* Footer */}
         <div className="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-10">
-            <SummaryStat label="Total Rows" value={String(charges.length)} />
-            <SummaryStat label="Filtered" value={String(filteredCharges.length)} color="text-blue-600" />
+            <SummaryStat label="Total Rows" value={String(places.length)} />
+            <SummaryStat label="Filtered" value={String(filteredPlaces.length)} color="text-blue-600" />
           </div>
           {totalPages > 1 && (
             <div className="flex items-center gap-4">
@@ -467,7 +516,7 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
       </div>
 
       {/* Details Modal */}
-      <ExtraChargeDetailsModal
+      <StockPlaceDetailsModal
         isOpen={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         recordId={detailRecordId}
@@ -526,20 +575,6 @@ export const ExtraChargeList: React.FC<ExtraChargeListProps> = ({
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-function getTaxTypeBadgeStyle(taxType?: number) {
-  switch (taxType) {
-    case 6:
-    case 7:
-      return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
-    case 8:
-      return 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800';
-    case 1:
-      return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
-    default:
-      return 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
-  }
-}
 
 const SummaryStat = ({
   label,
