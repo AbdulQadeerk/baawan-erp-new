@@ -12,8 +12,9 @@ import { TabBar } from './components/TabBar';
 import { OutstandingReport } from './components/OutstandingReport';
 import { BOMList } from './components/masters/BOMList';
 import { BOMCreate } from './components/masters/BOMCreate';
-import { CurrencyList } from './components/masters/CurrencyList';
-import { CurrencyCreate } from './components/masters/CurrencyCreate';
+import { CurrencyList } from './components/masters/currency/CurrencyList';
+import { CurrencyCreate } from './components/masters/currency/CurrencyCreate';
+import type { CurrencyRecord } from './services/currency.service';
 import { ExtraChargeList } from './components/masters/extra-charge/ExtraChargeList';
 import { ExtraChargeCreate } from './components/masters/extra-charge/ExtraChargeCreate';
 import type { ExtraChargeRecord } from './services/extra-charge.service';
@@ -97,6 +98,8 @@ function AppContent() {
   const [pendingStockPlaceSave, setPendingStockPlaceSave] = useState<{ record: StockPlaceRecord; isUpdate: boolean } | null>(null);
   const [editUnitId, setEditUnitId] = useState<number | null>(null);
   const [pendingUnitSave, setPendingUnitSave] = useState<{ record: UnitRecord; isUpdate: boolean } | null>(null);
+  const [editCurrencyId, setEditCurrencyId] = useState<number | null>(null);
+  const [pendingCurrencySave, setPendingCurrencySave] = useState<{ record: CurrencyRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -220,9 +223,34 @@ function AppContent() {
       case 'bom-create':
         return <BOMCreate onBack={() => removeTab(tab.id)} />;
       case 'currency-list':
-        return <CurrencyList onCreateNew={() => addTab('currency-create', 'Create Currency')} />;
+        return (
+          <CurrencyList
+            onCreateNew={() => {
+              setEditCurrencyId(null);
+              addTab('currency-create', 'Create Currency');
+            }}
+            onEdit={(id: number) => {
+              setEditCurrencyId(id);
+              addTab('currency-create', 'Edit Currency');
+            }}
+            pendingSave={pendingCurrencySave}
+            onPendingSaveConsumed={() => setPendingCurrencySave(null)}
+          />
+        );
       case 'currency-create':
-        return <CurrencyCreate onBack={() => removeTab(tab.id)} />;
+        return (
+          <CurrencyCreate
+            editId={editCurrencyId}
+            onBack={() => {
+              setEditCurrencyId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditCurrencyId(null);
+              setPendingCurrencySave({ record, isUpdate });
+            }}
+          />
+        );
       case 'extra-charge-list':
         return (
           <ExtraChargeList
