@@ -25,8 +25,9 @@ import { ItemCreate } from './components/masters/ItemCreate';
 import { ItemList } from './components/masters/ItemList';
 import { LedgerCreate } from './components/masters/LedgerCreate';
 import { LedgerList } from './components/masters/LedgerList';
-import { SalesPersonList } from './components/masters/SalesPersonList';
-import { SalesPersonCreate } from './components/masters/SalesPersonCreate';
+import { SalesPersonList } from './components/masters/sales-person/SalesPersonList';
+import { SalesPersonCreate } from './components/masters/sales-person/SalesPersonCreate';
+import type { SalesPersonRecord } from './services/sales-person.service';
 import { StockPlaceList } from './components/masters/stock-place/StockPlaceList';
 import { StockPlaceCreate } from './components/masters/stock-place/StockPlaceCreate';
 import type { StockPlaceRecord } from './services/stock-place.service';
@@ -100,6 +101,8 @@ function AppContent() {
   const [pendingUnitSave, setPendingUnitSave] = useState<{ record: UnitRecord; isUpdate: boolean } | null>(null);
   const [editCurrencyId, setEditCurrencyId] = useState<number | null>(null);
   const [pendingCurrencySave, setPendingCurrencySave] = useState<{ record: CurrencyRecord; isUpdate: boolean } | null>(null);
+  const [editSalesPersonId, setEditSalesPersonId] = useState<number | null>(null);
+  const [pendingSalesPersonSave, setPendingSalesPersonSave] = useState<{ record: SalesPersonRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -318,9 +321,34 @@ function AppContent() {
       case 'ledger-list':
         return <LedgerList onCreateNew={() => addTab('ledger-create', 'Create Ledger')} />;
       case 'sales-person-list':
-        return <SalesPersonList onCreateNew={() => addTab('sales-person-create', 'Create Sales Person')} />;
+        return (
+          <SalesPersonList
+            onCreateNew={() => {
+              setEditSalesPersonId(null);
+              addTab('sales-person-create', 'Create Sales Person');
+            }}
+            onEdit={(id: number) => {
+              setEditSalesPersonId(id);
+              addTab('sales-person-create', 'Edit Sales Person');
+            }}
+            pendingSave={pendingSalesPersonSave}
+            onPendingSaveConsumed={() => setPendingSalesPersonSave(null)}
+          />
+        );
       case 'sales-person-create':
-        return <SalesPersonCreate onBack={() => removeTab(tab.id)} />;
+        return (
+          <SalesPersonCreate
+            editId={editSalesPersonId}
+            onBack={() => {
+              setEditSalesPersonId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditSalesPersonId(null);
+              setPendingSalesPersonSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'stock-place-list':
         return (
           <StockPlaceList
