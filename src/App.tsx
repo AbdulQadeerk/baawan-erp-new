@@ -23,23 +23,31 @@ import { GroupList } from './components/masters/group/GroupList';
 import type { GroupRecord } from './services/group.service';
 import { ItemCreate } from './components/masters/ItemCreate';
 import { ItemList } from './components/masters/ItemList';
+import { ItemCategoryCreate } from './components/masters/item-category/ItemCategoryCreate';
+import { ItemCategoryList } from './components/masters/item-category/ItemCategoryList';
+import type { ItemCategoryRecord } from './services/item-category.service';
 import { LedgerCreate } from './components/masters/LedgerCreate';
 import { LedgerList } from './components/masters/LedgerList';
+import { LedgerTargetList } from './components/masters/ledger-target/LedgerTargetList';
+import { LedgerTargetCreate } from './components/masters/ledger-target/LedgerTargetCreate';
+import { ProjectSiteList } from './components/masters/project-site/ProjectSiteList';
+import { ProjectSiteCreate } from './components/masters/project-site/ProjectSiteCreate';
+import type { ProjectSiteRecord } from './services/project-site.service';
 import { SalesPersonList } from './components/masters/sales-person/SalesPersonList';
 import { SalesPersonCreate } from './components/masters/sales-person/SalesPersonCreate';
 import type { SalesPersonRecord } from './services/sales-person.service';
 import { StockPlaceList } from './components/masters/stock-place/StockPlaceList';
 import { StockPlaceCreate } from './components/masters/stock-place/StockPlaceCreate';
 import type { StockPlaceRecord } from './services/stock-place.service';
-import { TermsList } from './components/masters/TermsList';
+import { TermsList } from './components/masters/terms-condition/TermsList';
+import { TermsCreate } from './components/masters/terms-condition/TermsCreate';
+import type { TermsConditionRecord } from './services/terms-condition.service';
 import { UnitList } from './components/masters/unit/UnitList';
 import { UnitCreate } from './components/masters/unit/UnitCreate';
 import type { UnitRecord } from './services/unit.service';
 import { UserList } from './components/masters/UserList';
 import { UserCreate } from './components/masters/UserCreate';
 import { UserRoleList } from './components/masters/UserRoleList';
-import { ProjectSiteList } from './components/masters/ProjectSiteList';
-import { ProjectSiteCreate } from './components/masters/ProjectSiteCreate';
 import { ReceiptVoucherList } from './components/masters/ReceiptVoucherList';
 import { ReceiptVoucherCreate } from './components/masters/ReceiptVoucherCreate';
 import { PaymentVoucherList } from './components/masters/PaymentVoucherList';
@@ -103,6 +111,14 @@ function AppContent() {
   const [pendingCurrencySave, setPendingCurrencySave] = useState<{ record: CurrencyRecord; isUpdate: boolean } | null>(null);
   const [editSalesPersonId, setEditSalesPersonId] = useState<number | null>(null);
   const [pendingSalesPersonSave, setPendingSalesPersonSave] = useState<{ record: SalesPersonRecord; isUpdate: boolean } | null>(null);
+  const [editItemCategoryId, setEditItemCategoryId] = useState<number | null>(null);
+  const [pendingItemCategorySave, setPendingItemCategorySave] = useState<{ record: ItemCategoryRecord; isUpdate: boolean } | null>(null);
+  const [editLedgerTargetId, setEditLedgerTargetId] = useState<number | null>(null);
+  const [pendingLedgerTargetSave, setPendingLedgerTargetSave] = useState<{ record: any; isUpdate: boolean } | null>(null);
+  const [editProjectSiteId, setEditProjectSiteId] = useState<number | null>(null);
+  const [pendingProjectSiteSave, setPendingProjectSiteSave] = useState<{ record: ProjectSiteRecord; isUpdate: boolean } | null>(null);
+  const [editTermsId, setEditTermsId] = useState<number | null>(null);
+  const [pendingTermsSave, setPendingTermsSave] = useState<{ record: TermsConditionRecord; isUpdate: boolean } | null>(null);
 
   // Handle dark mode
   useEffect(() => {
@@ -316,10 +332,97 @@ function AppContent() {
         return <ItemCreate onBack={() => removeTab(tab.id)} />;
       case 'item-list':
         return <ItemList onCreateNew={() => addTab('item-create', 'Create Item')} />;
+      case 'item-category-list':
+        return (
+          <ItemCategoryList
+            onCreateNew={() => {
+              setEditItemCategoryId(null);
+              addTab('item-category-create', 'Create Item Rate Category');
+            }}
+            onEdit={(id: number) => {
+              setEditItemCategoryId(id);
+              addTab('item-category-create', 'Edit Item Rate Category');
+            }}
+            pendingSave={pendingItemCategorySave}
+            onPendingSaveConsumed={() => setPendingItemCategorySave(null)}
+          />
+        );
+      case 'item-category-create':
+        return (
+          <ItemCategoryCreate
+            editId={editItemCategoryId}
+            onBack={() => {
+              setEditItemCategoryId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditItemCategoryId(null);
+              setPendingItemCategorySave({ record, isUpdate });
+            }}
+          />
+        );
       case 'ledger-create':
         return <LedgerCreate onBack={() => removeTab(tab.id)} />;
       case 'ledger-list':
         return <LedgerList onCreateNew={() => addTab('ledger-create', 'Create Ledger')} />;
+      case 'ledger-target-list':
+        return (
+          <LedgerTargetList
+            onCreateNew={() => {
+              setEditLedgerTargetId(null);
+              addTab('ledger-target-create', 'Create Ledger Targets');
+            }}
+            onEdit={(id: number) => {
+              setEditLedgerTargetId(id);
+              addTab('ledger-target-create', 'Edit Ledger Targets');
+            }}
+            pendingSave={pendingLedgerTargetSave}
+            onPendingSaveConsumed={() => setPendingLedgerTargetSave(null)}
+          />
+        );
+      case 'ledger-target-create':
+        return (
+          <LedgerTargetCreate
+            editId={editLedgerTargetId}
+            onBack={() => {
+              setEditLedgerTargetId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditLedgerTargetId(null);
+              setPendingLedgerTargetSave({ record, isUpdate });
+            }}
+          />
+        );
+      case 'project-site-list':
+        return (
+          <ProjectSiteList
+            onCreateNew={() => {
+              setEditProjectSiteId(null);
+              addTab('project-site-create', 'Create Project Site');
+            }}
+            onEdit={(id: number) => {
+              setEditProjectSiteId(id);
+              addTab('project-site-create', 'Edit Project Site');
+            }}
+            pendingSave={pendingProjectSiteSave}
+            onPendingSaveConsumed={() => setPendingProjectSiteSave(null)}
+          />
+        );
+      case 'project-site-create':
+        return (
+          <ProjectSiteCreate
+            editId={editProjectSiteId}
+            onBack={() => {
+              setEditProjectSiteId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditProjectSiteId(null);
+              setPendingProjectSiteSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'sales-person-list':
         return (
           <SalesPersonList
@@ -379,7 +482,34 @@ function AppContent() {
           />
         );
       case 'terms-list':
-        return <TermsList />;
+        return (
+          <TermsList
+            onCreateNew={() => {
+              setEditTermsId(null);
+              addTab('terms-create', 'Create Terms & Conditions');
+            }}
+            onEdit={(id: number) => {
+              setEditTermsId(id);
+              addTab('terms-create', 'Edit Terms & Conditions');
+            }}
+            pendingSave={pendingTermsSave}
+            onPendingSaveConsumed={() => setPendingTermsSave(null)}
+          />
+        );
+      case 'terms-create':
+        return (
+          <TermsCreate
+            editId={editTermsId}
+            onBack={() => {
+              setEditTermsId(null);
+              removeTab(tab.id);
+            }}
+            onSaved={(record, isUpdate) => {
+              setEditTermsId(null);
+              setPendingTermsSave({ record, isUpdate });
+            }}
+          />
+        );
       case 'unit-list':
         return (
           <UnitList
@@ -522,13 +652,20 @@ function AppContent() {
             'group-list': 'Group Master',
             'item-create': 'Create Item',
             'item-list': 'Item Master',
+            'item-category-list': 'Item Rate Category List',
+            'item-category-create': 'Create Item Rate Category',
             'ledger-create': 'Create Ledger',
             'ledger-list': 'Ledger Master',
+            'ledger-target-list': 'Ledger Targets',
+            'ledger-target-create': 'Create Ledger Targets',
+            'project-site-list': 'Project Site Master',
+            'project-site-create': 'Create Project Site',
             'sales-person-list': 'Sales Person Master',
             'sales-person-create': 'Create Sales Person',
             'stock-place-list': 'Stock Place Master',
             'stock-place-create': 'Create Stock Place',
             'terms-list': 'Terms & Conditions',
+            'terms-create': 'Create Terms & Conditions',
             'unit-list': 'Unit Master',
             'unit-create': 'Create Unit',
             'user-list': 'User Master',
@@ -538,8 +675,6 @@ function AppContent() {
             'ledger-outstanding-list': 'Ledger Outstanding',
             'receipt-voucher-create': 'New Receipt Voucher',
             'bi-dashboard': 'Business Intelligence',
-            'project-site-list': 'Project Site Master',
-            'project-site-create': 'Create Project Site',
             'receipt-voucher-list': 'Receipt Vouchers',
             'payment-voucher-list': 'Payment Vouchers',
             'payment-voucher-create': 'New Payment Voucher',

@@ -44,8 +44,8 @@ export const LedgerCreate: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const data = await groupService.list();
-        setGroups(Array.isArray(data) ? data : []);
+        const res = await groupService.search({ isSync: false });
+        setGroups(Array.isArray(res.list) ? res.list : []);
       } catch (error) {
         console.error('Error fetching groups:', error);
       }

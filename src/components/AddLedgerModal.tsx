@@ -48,8 +48,8 @@ export const AddLedgerModal: React.FC<AddLedgerModalProps> = ({ isOpen, onClose,
     if (isOpen) {
       const fetchGroups = async () => {
         try {
-          const data = await groupService.list();
-          setGroups(Array.isArray(data) ? data : []);
+          const result = await groupService.search({ isSync: false });
+          setGroups(Array.isArray(result.list) ? result.list : []);
         } catch (error) {
           console.error('Error fetching groups:', error);
         }

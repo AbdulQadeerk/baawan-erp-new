@@ -238,8 +238,8 @@ export const apiClient = {
   get<T = any>(url: string, params?: any): Promise<T> {
     return api.get<T>(url, { params }).then(r => r.data);
   },
-  post<T = any>(url: string, data?: any): Promise<T> {
-    return api.post<T>(url, data).then(r => r.data);
+  post<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    return api.post<T>(url, data, config).then(r => r.data);
   },
   put<T = any>(url: string, data?: any): Promise<T> {
     return api.put<T>(url, data).then(r => r.data);
