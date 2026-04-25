@@ -60,7 +60,7 @@ import { BillWiseDrilldownScreen } from './components/BillWiseDrilldown';
 import { LotBatchSummary } from './components/LotBatchSummary';
 import { LedgerOutstandingList } from './components/LedgerOutstandingList';
 import { TrialBalanceReport } from './components/TrialBalanceReport';
-import { CurrentStockReport } from './components/CurrentStockReport';
+import { CurrentStockReport } from './components/reports/CurrentStockReport';
 import { ReceiptVoucherForm } from './components/ReceiptVoucherForm';
 import { BIDashboard } from './components/BIDashboard';
 import { InventoryMovementAnalysis } from './components/InventoryMovementAnalysis';
