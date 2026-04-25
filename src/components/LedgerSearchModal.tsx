@@ -60,7 +60,18 @@ export const LedgerSearchModal: React.FC<LedgerSearchModalProps> = ({ isOpen, on
     setError(null);
     try {
       const data = await ledgerService.list();
-      const mappedLedgers = Array.isArray(data) ? data : [];
+      const mappedLedgers: Ledger[] = Array.isArray(data) ? data.map((ledger: any) => ({
+        id: ledger.id,
+        name: ledger.ledgerName || ledger.name || '',
+        address: ledger.address || '',
+        city: ledger.city || '',
+        area: ledger.area || '',
+        mobile: ledger.mobile || '',
+        parentCompany: ledger.groupName || '',
+        gstin: ledger.gstNo || ledger.gstin || '',
+        openingDate: ledger.openingDate || '',
+        pan: ledger.pan || '',
+      })) : [];
       setLedgers(mappedLedgers);
       if (mappedLedgers.length > 0) {
         setActiveLedger(mappedLedgers[0]);

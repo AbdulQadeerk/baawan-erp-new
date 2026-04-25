@@ -26,6 +26,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, typ
 import { storage } from './storage';
 import { toast } from './toast';
 import { authApi } from './api-client';
+import { masterSyncService } from '../services/master-sync.service';
 import { STORAGE_KEYS } from './constants';
 import type { LoginPayload, LoginResponse, AuthUser, AuthCompany, UserLoginDetail } from './auth-types';
 
@@ -103,6 +104,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => window.removeEventListener('bw-session-expired', handleSessionExpired);
   }, [logout]);
 
+  // ─── Auto-sync Master Data if missing (e.g., after hot reload or manual clear) ──
+  useEffect(() => {
+    if (isAuthenticated) {
+      const itemListRaw = localStorage.getItem(STORAGE_KEYS.ITEM_LIST);
+      const ledgerListRaw = localStorage.getItem(STORAGE_KEYS.LEDGER_LIST);
+      
+      const hasItemList = itemListRaw && itemListRaw !== '{}' && itemListRaw !== '[]';
+      const hasLedgerList = ledgerListRaw && ledgerListRaw !== '{}' && ledgerListRaw !== '[]';
+      
+      if (!hasItemList || !hasLedgerList) {
+        console.log('[Auth] Master data missing. Triggering auto-sync...');
+        masterSyncService.syncAll();
+      }
+    }
+  }, [isAuthenticated]);
+
   // ─── Login ──────────────────────────────────────────────────────────────
   // Mirrors Angular login.component.ts onSubmit()
   const login = useCallback(async (payload: LoginPayload) => {
@@ -137,7 +154,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUserLoginDetail(loginDetail);
       setIsAuthenticated(true);
 
+      // Check if company changed to clear stale sync data
+      masterSyncService.checkAndClearIfCompanyChanged(data.company.id || data.company.compId);
+
       toast.success('You have successfully logged in.', 'Success');
+
+      // Trigger sync of master data after login
+      masterSyncService.syncAll();
     } finally {
       setIsLoading(false);
     }

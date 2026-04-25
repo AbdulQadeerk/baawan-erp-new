@@ -61,12 +61,15 @@ export type Page =
   | 'sales-margin-report'
   | 'sales-commission-report'
   | 'sales-order-summary'
+  | 'item-register-report'
   | 'item-batch-register'
   | 'lot-batch-summary'
   | 'process-order-report'
   | 'schedule-report'
   | 'schedule-to-invoice'
-  | 'multiple-ledger-outstanding';
+  | 'multiple-ledger-outstanding'
+  | 'pending-report'
+  | 'supplier-wise-pending';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 

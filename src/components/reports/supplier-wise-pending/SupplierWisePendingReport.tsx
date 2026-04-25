@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, 
+  RotateCcw, 
   FileSpreadsheet, 
   Loader2, 
   FileText,
-  AlertCircle,
-  RotateCcw
+  AlertCircle
 } from 'lucide-react';
-import { reportApi } from '../services/report.service';
+import { reportApi } from '../../../services/report.service';
 
-export const SalesOrderSummaryReport: React.FC = () => {
+export const SupplierWisePendingReport: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Default to today
   const [filters, setFilters] = useState({
     fromDate: new Date().toISOString().split('T')[0],
@@ -22,7 +22,8 @@ export const SalesOrderSummaryReport: React.FC = () => {
   });
 
   const getFormattedFilters = () => {
-    // Format dates to exactly match Angular 'DD/MM/yyyy HH:mm:ss'
+    // Format dates to match exactly what Angular sent
+    // "DD/MM/yyyy HH:mm:ss"
     const formatDt = (dtStr: string, time: string) => {
       if (!dtStr) return null;
       const [y, m, d] = dtStr.split('-');
@@ -39,19 +40,9 @@ export const SalesOrderSummaryReport: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await reportApi.soSummary(getFormattedFilters());
-      if (result && result.length > 0) {
-        // The API returns an array with summaryData at index 0, where SOData is a stringified JSON array
-        const rawSOData = result[0]?.SOData;
-        if (rawSOData) {
-          const parsed = JSON.parse(rawSOData);
-          setData(parsed);
-        } else {
-          setData([]);
-          setError('No valid data received.');
-        }
-      } else {
-        setData([]);
+      const result = await reportApi.supplierWisePendingReport(getFormattedFilters());
+      setData(result || []);
+      if (!result || result.length === 0) {
         setError('No data found for the selected date range.');
       }
     } catch (err: any) {
@@ -66,12 +57,12 @@ export const SalesOrderSummaryReport: React.FC = () => {
   const handleExport = async () => {
     setExportLoading(true);
     try {
-      const exportData = await reportApi.soSummaryExport(getFormattedFilters());
+      const exportData = await reportApi.supplierWisePendingReportExport(getFormattedFilters());
       if (exportData) {
         const a = document.createElement('a');
         const objectUrl = URL.createObjectURL(exportData);
         a.href = objectUrl;
-        a.setAttribute('download', 'so-summary.xlsx');
+        a.setAttribute('download', 'supplier-wise-pending.xlsx');
         a.click();
         URL.revokeObjectURL(objectUrl);
       }
@@ -97,49 +88,22 @@ export const SalesOrderSummaryReport: React.FC = () => {
     return isNaN(n) ? val : n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const formatDate = (val: string) => {
-    if (!val) return '';
-    const date = new Date(val);
-    if (isNaN(date.getTime())) return val;
-    // Format to DD/MM/YYYY hh:mm A
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = date.getFullYear();
-    let h = date.getHours();
-    const min = date.getMinutes().toString().padStart(2, '0');
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12;
-    h = h ? h : 12; // the hour '0' should be '12'
-    const hStr = h.toString().padStart(2, '0');
-    return `${d}/${m}/${y} ${hStr}:${min} ${ampm}`;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Full Pending': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-      case 'Partial Pending': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-      case 'Closed': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-      case 'Cancelled':
-      case 'Partial Cancelled': return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
-      default: return 'text-slate-500 bg-slate-500/10 border-slate-500/20';
-    }
-  };
-
   // Subtotals
-  const totalItemAmount = data.reduce((s, i) => s + (parseFloat(i.Item_SubTotal) || 0), 0);
-  const totalBillAmount = data.reduce((s, i) => s + (parseFloat(i.GrandTotal) || 0), 0);
+  const totalPurchaseQty = data.reduce((s, i) => s + (parseFloat(i.PurchaseQty) || 0), 0);
+  const totalInwardPending = data.reduce((s, i) => s + (parseFloat(i.InwardPending) || 0), 0);
+  const totalOutwardPending = data.reduce((s, i) => s + (parseFloat(i.OutwardPending) || 0), 0);
 
   return (
     <div className="font-sans text-slate-700 dark:text-slate-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+          <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-lg text-orange-600 dark:text-orange-400">
             <FileText size={20} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Sales Order (SO) Summary Report</h1>
-            <p className="text-xs text-slate-500 font-medium">Sales order status and summary.</p>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Purchase Invoice Adjustment Report</h1>
+            <p className="text-xs text-slate-500 font-medium">Supplier wise pending inward and outward tracking.</p>
           </div>
         </div>
       </div>
@@ -171,7 +135,7 @@ export const SalesOrderSummaryReport: React.FC = () => {
           <button 
             onClick={submitReport} 
             disabled={loading}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20 disabled:opacity-70"
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-orange-600/20 disabled:opacity-70"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             <span className="hidden sm:inline">Search</span>
@@ -182,7 +146,7 @@ export const SalesOrderSummaryReport: React.FC = () => {
           <button 
             onClick={handleExport} 
             disabled={exportLoading}
-            className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-70"
+            className="p-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 disabled:opacity-70"
           >
             {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
           </button>
@@ -194,30 +158,29 @@ export const SalesOrderSummaryReport: React.FC = () => {
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead className="sticky top-0 z-10">
               <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">SO Date</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">SO No</th>
                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Party Name</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">SO No</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Item Code</th>
                 <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ref No</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">SO Qty</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Taxable Value</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Grand Total</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sales Person</th>
-                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">SO Status</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Purchase No</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Purchase Qty</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Inward Pending</th>
+                <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Outward Pending</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <Loader2 size={24} className="animate-spin text-blue-600" />
-                      <span className="text-xs text-slate-500 font-medium">Fetching summary...</span>
+                      <Loader2 size={24} className="animate-spin text-orange-600" />
+                      <span className="text-xs text-slate-500 font-medium">Fetching supplier data...</span>
                     </div>
                   </td>
                 </tr>
               ) : error && !data.length ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <AlertCircle size={24} className="text-rose-500" />
                       <span className="text-xs text-rose-500 font-medium">{error}</span>
@@ -226,27 +189,22 @@ export const SalesOrderSummaryReport: React.FC = () => {
                 </tr>
               ) : !data.length ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-sm text-slate-400">
+                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-slate-400">
                     Use the filters above to generate the report.
                   </td>
                 </tr>
               ) : (
                 data.map((item, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
-                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{formatDate(item.Date)}</td>
-                    <td className="px-4 py-2 text-xs font-bold text-blue-600 dark:text-blue-400">{item.SONo}</td>
                     <td className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200">{item.PartyName}</td>
+                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{item.SONo}</td>
+                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{item.Item_CodeTxt}</td>
                     <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{item.RefNo}</td>
+                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{item.PurchaseNo}</td>
                     
-                    <td className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 text-right">{formatNumber(item.SOQty)}</td>
-                    <td className="px-4 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 text-right">{formatNumber(item.Item_SubTotal)}</td>
-                    <td className="px-4 py-2 text-xs font-black text-emerald-600 dark:text-emerald-400 text-right">{formatNumber(item.GrandTotal)}</td>
-                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">{item.SalesPerson}</td>
-                    <td className="px-4 py-2">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded border ${getStatusColor(item.SOStatus)}`}>
-                        {item.SOStatus}
-                      </span>
-                    </td>
+                    <td className="px-4 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 text-right">{formatNumber(item.PurchaseQty)}</td>
+                    <td className="px-4 py-2 text-xs font-bold text-orange-600 dark:text-orange-400 text-right">{formatNumber(item.InwardPending)}</td>
+                    <td className="px-4 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 text-right">{formatNumber(item.OutwardPending)}</td>
                   </tr>
                 ))
               )}
@@ -264,12 +222,16 @@ export const SalesOrderSummaryReport: React.FC = () => {
           </div>
           <div className="flex gap-6">
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total Taxable Value</p>
-              <p className="text-sm font-black text-amber-600 dark:text-amber-400">{formatNumber(totalItemAmount)}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Purchase Qty</p>
+              <p className="text-sm font-black text-blue-600 dark:text-blue-400">{formatNumber(totalPurchaseQty)}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Overall Grand Total</p>
-              <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatNumber(totalBillAmount)}</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Inward Pending</p>
+              <p className="text-sm font-black text-orange-600 dark:text-orange-400">{formatNumber(totalInwardPending)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Outward Pending</p>
+              <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatNumber(totalOutwardPending)}</p>
             </div>
           </div>
         </div>

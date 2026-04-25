@@ -26,6 +26,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onS
     brand: '',
     category: '',
     subCategory: '',
+    type: '',
     brandCode: '',
     hsnNo: '',
     productType: 'Goods',
@@ -416,7 +417,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onS
                 <button 
                   type="button"
                   onClick={() => setFormData({
-                    itemCode: '', itemName: '', brand: '', category: '', subCategory: '', brandCode: '',
+                    itemCode: '', itemName: '', brand: '', category: '', subCategory: '', type: '', brandCode: '',
                     hsnNo: '', productType: 'Goods', mrp: '0', uom: 'PCS', salesLedger: 'Sales',
                     taxPercent: '0', allowNegativeStock: false, batchLotReq: false, rate: '0',
                     lastPurRate: '0', purchaseLedger: 'Purchase'

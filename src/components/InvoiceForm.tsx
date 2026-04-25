@@ -76,7 +76,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onBack }) => {
       console.log('Fetching ledgers...');
       const data = await ledgerService.list();
       console.log('Ledgers data received:', data);
-      setLedgers(Array.isArray(data) ? data : []);
+      const mappedLedgers: Ledger[] = Array.isArray(data) ? data.map((ledger: any) => ({
+        id: ledger.id,
+        name: ledger.ledgerName || ledger.name || '',
+        address: ledger.address || '',
+        city: ledger.city || '',
+        area: ledger.area || '',
+        mobile: ledger.mobile || '',
+        parentCompany: ledger.groupName || '',
+        gstin: ledger.gstNo || ledger.gstin || '',
+        openingDate: ledger.openingDate || '',
+        pan: ledger.pan || '',
+      })) : [];
+      setLedgers(mappedLedgers);
     } catch (err) {
       console.error('Error fetching ledgers:', err);
     } finally {

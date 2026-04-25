@@ -70,12 +70,17 @@ const MOCK_ITEMS = [
 export const ledgerService = {
   search: async (params: any) => {
     const searchText = (params.searchText || '').toLowerCase();
-    return MOCK_LEDGERS.filter(l => 
-      l.name.toLowerCase().includes(searchText) || 
-      l.groupName.toLowerCase().includes(searchText)
+    let list = storage.getItem<any[]>(STORAGE_KEYS.LEDGER_LIST);
+    if (!Array.isArray(list) || list.length === 0) list = MOCK_LEDGERS;
+    return list.filter(l => 
+      (l.name || l.ledgerName || '').toLowerCase().includes(searchText) || 
+      (l.groupName || '').toLowerCase().includes(searchText)
     );
   },
-  list: async () => MOCK_LEDGERS,
+  list: async () => {
+    const list = storage.getItem<any[]>(STORAGE_KEYS.LEDGER_LIST);
+    return Array.isArray(list) && list.length > 0 ? list : MOCK_LEDGERS;
+  },
   create: async (ledgerData: any) => {
     const newLedger = {
       ...ledgerData,
@@ -89,12 +94,17 @@ export const ledgerService = {
 export const itemService = {
   search: async (params: any) => {
     const searchText = (params.searchText || '').toLowerCase();
-    return MOCK_ITEMS.filter(i => 
-      i.itemName.toLowerCase().includes(searchText) || 
-      i.itemCode.toLowerCase().includes(searchText)
+    let list = storage.getItem<any[]>(STORAGE_KEYS.ITEM_LIST);
+    if (!Array.isArray(list) || list.length === 0) list = MOCK_ITEMS;
+    return list.filter(i => 
+      (i.itemName || i.name || '').toLowerCase().includes(searchText) || 
+      (i.itemCode || i.code || '').toLowerCase().includes(searchText)
     );
   },
-  list: async () => MOCK_ITEMS,
+  list: async () => {
+    const list = storage.getItem<any[]>(STORAGE_KEYS.ITEM_LIST);
+    return Array.isArray(list) && list.length > 0 ? list : MOCK_ITEMS;
+  },
   create: async (itemData: any) => {
     const newItem = {
       ...itemData,

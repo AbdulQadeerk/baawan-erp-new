@@ -60,7 +60,7 @@ import { BillWiseDrilldownScreen } from './components/BillWiseDrilldown';
 import { LotBatchSummary } from './components/LotBatchSummary';
 import { LedgerOutstandingList } from './components/LedgerOutstandingList';
 import { TrialBalanceReport } from './components/TrialBalanceReport';
-import { CurrentStockReport } from './components/reports/CurrentStockReport';
+import { CurrentStockReport } from './components/reports/current-stock/CurrentStockReport';
 import { ReceiptVoucherForm } from './components/ReceiptVoucherForm';
 import { BIDashboard } from './components/BIDashboard';
 import { InventoryMovementAnalysis } from './components/InventoryMovementAnalysis';
@@ -69,17 +69,20 @@ import { ChartOfAccounts } from './components/ChartOfAccounts';
 import { BOMBuilder } from './components/BOMBuilder';
 import { PermissionsMatrix } from './components/PermissionsMatrix';
 import { BalanceSheet } from './components/BalanceSheet';
-import { InventoryReport } from './components/InventoryReport';
+import { InventoryReport } from './components/reports/inventory-report/InventoryReport';
 import { StockValuationReport } from './components/StockValuationReport';
 import { SalesRegisterTax } from './components/SalesRegisterTax';
 import { SalesMarginReport } from './components/SalesMarginReport';
 import { SalesCommissionReport } from './components/SalesCommissionReport';
 import { SalesOrderSummaryReport } from './components/SalesOrderSummaryReport';
+import { ItemRegisterReport } from './components/reports/item-register/ItemRegisterReport';
 import { ItemBatchRegister } from './components/ItemBatchRegister';
 import { ProcessOrderReport } from './components/ProcessOrderReport';
 import { ScheduleReport } from './components/ScheduleReport';
 import { ScheduleToInvoice } from './components/ScheduleToInvoice';
 import { MultipleLedgerOutstanding } from './components/MultipleLedgerOutstanding';
+import { PendingReport } from './components/reports/pending-report/PendingReport';
+import { SupplierWisePendingReport } from './components/reports/supplier-wise-pending/SupplierWisePendingReport';
 import { Login } from './components/Login';
 import { Page, Tab, SplitMode } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -540,7 +543,7 @@ function AppContent() {
           />
         );
       case 'user-list':
-        return <UserList onCreateUser={() => addTab('user-create', 'Create User')} />;
+        return <UserList onCreateNew={() => addTab('user-create', 'Create User')} />;
       case 'user-create':
         return <UserCreate onBack={() => removeTab(tab.id)} />;
       case 'project-site-list':
@@ -603,6 +606,8 @@ function AppContent() {
         return <SalesCommissionReport />;
       case 'sales-order-summary':
         return <SalesOrderSummaryReport />;
+      case 'item-register-report':
+        return <ItemRegisterReport />;
       case 'item-batch-register':
         return <ItemBatchRegister />;
       case 'process-order-report':
@@ -613,6 +618,10 @@ function AppContent() {
         return <ScheduleToInvoice />;
       case 'multiple-ledger-outstanding':
         return <MultipleLedgerOutstanding />;
+      case 'pending-report':
+        return <PendingReport />;
+      case 'supplier-wise-pending':
+        return <SupplierWisePendingReport />;
       default:
         return <Dashboard />;
     }
@@ -696,12 +705,15 @@ function AppContent() {
             'sales-margin-report': 'Sales Margin Report',
             'sales-commission-report': 'Sales Commission & Performance',
             'sales-order-summary': 'Sales Order Summary',
+            'item-register-report': 'Item Register',
             'item-batch-register': 'Item Batch Register',
             'lot-batch-summary': 'Lot / Batch Summary',
             'process-order-report': 'Process Order Report',
             'schedule-report': 'Schedule Report',
             'schedule-to-invoice': 'Schedule to Invoice',
-            'multiple-ledger-outstanding': 'Multiple Ledger Outstanding'
+            'multiple-ledger-outstanding': 'Multiple Ledger Outstanding',
+            'pending-report': 'Pending Report',
+            'supplier-wise-pending': 'Purchase Invoice Adjustment Report'
           };
           addTab(page, titles[page]);
         }} 

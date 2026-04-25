@@ -25,14 +25,15 @@ export const storage = {
    * Retrieve a value from localStorage (JSON parsed)
    * Returns empty object if key doesn't exist — matching Angular behavior
    */
-  getItem<T = any>(key: string): T {
-    if (typeof window === 'undefined') return {} as T;
+  getItem<T = any>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
     try {
       const raw = localStorage.getItem(key);
-      return JSON.parse(raw || '{}') as T;
+      if (!raw) return null;
+      return JSON.parse(raw) as T;
     } catch (e) {
       console.error(`[Storage] Failed to get item "${key}":`, e);
-      return {} as T;
+      return null;
     }
   },
 
@@ -63,14 +64,15 @@ export const storage = {
     }
   },
 
-  getSessionItem<T = any>(key: string): T {
-    if (typeof window === 'undefined') return {} as T;
+  getSessionItem<T = any>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
     try {
       const raw = sessionStorage.getItem(key);
-      return JSON.parse(raw || '{}') as T;
+      if (!raw) return null;
+      return JSON.parse(raw) as T;
     } catch (e) {
       console.error(`[Storage] Failed to get session item "${key}":`, e);
-      return {} as T;
+      return null;
     }
   },
 

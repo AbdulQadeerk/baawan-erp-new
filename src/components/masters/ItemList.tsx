@@ -32,7 +32,19 @@ export const ItemList: React.FC<{ onCreateNew?: () => void }> = ({ onCreateNew }
     setError(null);
     try {
       const data = await itemService.list();
-      setItems(Array.isArray(data) ? data : []);
+      const mappedItems: Item[] = Array.isArray(data) ? data.map((item: any) => ({
+        id: item.id || item.iid,
+        code: item.itemCode || item.code || '',
+        name: item.itemName || item.name || '',
+        brand: item.brand || '',
+        category: item.category || '',
+        rate: item.sellRate || item.rate || 0,
+        unit: item.unit || '',
+        hsn: item.hsnCode || item.hsn || '',
+        gstPercent: item.gstPercentage || item.gstPercent || 0,
+        image: item.image || ''
+      })) : [];
+      setItems(mappedItems);
     } catch (err: any) {
       console.error('Error fetching items:', err);
       setError('Failed to load items from the API.');

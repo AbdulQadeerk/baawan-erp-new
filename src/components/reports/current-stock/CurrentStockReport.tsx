@@ -4,10 +4,10 @@ import {
   LayoutGrid, Loader2, X, ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { reportApi } from '../../services/report.service';
-import { commonApi } from '../../lib/api-client';
-import { apiClient } from '../../lib/api-client';
-import { ItemRegisterView } from './ItemRegisterView';
+import { reportApi } from '../../../services/report.service';
+import { commonApi } from '../../../lib/api-client';
+import { apiClient } from '../../../lib/api-client';
+import { ItemRegisterView } from '../ItemRegisterView';
 import * as XLSX from 'xlsx';
 
 interface TabItem {
@@ -21,6 +21,8 @@ interface AutocompleteOption {
   [key: string]: any;
 }
 
+import { CommonAutocompleteTemplate } from '../../../shared/CommonAutocompleteTemplate';
+
 // ─── Autocomplete Input Component ──────────────────────────────────────────
 const AutocompleteInput: React.FC<{
   label: string;
@@ -29,7 +31,8 @@ const AutocompleteInput: React.FC<{
   onChange: (val: any) => void;
   placeholder: string;
   displayField?: string;
-}> = ({ label, value, options, onChange, placeholder, displayField = 'name' }) => {
+  templateType?: string;
+}> = ({ label, value, options, onChange, placeholder, displayField = 'name', templateType = 'name' }) => {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -62,7 +65,7 @@ const AutocompleteInput: React.FC<{
           {filtered.map((opt, i) => (
             <button key={i} onClick={() => { onChange(opt); setSearch(''); setOpen(false); }}
               className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
-              {opt[displayField]}
+              <CommonAutocompleteTemplate result={opt} templateType={templateType} />
             </button>
           ))}
         </div>
@@ -154,6 +157,15 @@ export const CurrentStockReport: React.FC = () => {
     commonApi.dropdown({ table: 27 }).then(d => {
       setPriceCategoryList(d.map((item: any) => ({ priceCategoryID: item.id, priceCategoryName: item.name })));
     }).catch(() => {});
+
+    try {
+      const items = JSON.parse(localStorage.getItem('item-list') || '[]');
+      const formattedItems = items.filter((ele: any) => ele.isact).map((ele: any) => {
+        const particular = [ele.nm, ele.ict, ele.typ, ele.brd, ele.siz, ele.ig].filter(Boolean).join(' ');
+        return { ...ele, particular, name: ele.nm };
+      });
+      setItemList(formattedItems);
+    } catch {}
 
     singleItemRef.current?.focus();
   }, []);
@@ -287,10 +299,10 @@ export const CurrentStockReport: React.FC = () => {
         console.warn('Item/GetById failed, trying localStorage fallback:', apiErr);
       }
 
-      // Fallback: resolve from localStorage item-lst
+      // Fallback: resolve from localStorage item-list
       if (!itemData || !itemData.nm) {
         try {
-          const items = JSON.parse(localStorage.getItem('item-lst') || '[]');
+          const items = JSON.parse(localStorage.getItem('item-list') || '[]');
           const found = items.find((it: any) => it.iid === itemid || it.iid === String(itemid));
           if (found) {
             itemData = {
@@ -390,12 +402,16 @@ export const CurrentStockReport: React.FC = () => {
 
         {/* Row 2: Single Item + Stock Place + Buttons */}
         <div className="flex flex-wrap items-end gap-4">
-          <div className="space-y-1 min-w-[250px]">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Single Item</label>
-            <input ref={singleItemRef} type="search" placeholder="Search item..."
-              value={filters.item ? `${filters.item.ict || ''} ${filters.item.nm || ''}` : ''}
-              onChange={() => setFilters({ ...filters, item: null })}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+          <div className="min-w-[250px]">
+            <AutocompleteInput
+              label="Single Item"
+              value={filters.item}
+              options={itemList}
+              onChange={v => setFilters({ ...filters, item: v })}
+              placeholder="Search item..."
+              displayField="particular"
+              templateType="item"
+            />
           </div>
           <div className="space-y-1 min-w-[180px]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Stock Place</label>
