@@ -109,4 +109,42 @@ export const reportApi = {
   batchStockSummary(data: any): Promise<any[]> {
     return apiClient.post<any[]>('/api/Report/BatchStockSummary', data);
   },
+
+  /** POST /api/Report/TrialBalanceReport — Angular: ReportServiceService.TrialBalanceReport() */
+  trialBalanceReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/TrialBalanceReport', data);
+  },
+
+  /** POST /api/Report/TrialBalanceReportExport — returns Excel blob */
+  async trialBalanceReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/TrialBalanceReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/LedgerRegister — Angular: ReportServiceService.LedgerRegister() */
+  ledgerRegister(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/LedgerRegister', data);
+  },
+
+  /** POST /api/Report/PNLReport — Angular: ReportServiceService.ProfitLossReport() */
+  profitLossReport(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/PNLReport', data);
+  },
+
+  /** POST /api/Report/BalanceSheetReport — Angular: ReportServiceService.BalanceSheetReport() */
+  balanceSheetReport(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/BalanceSheetReport', data);
+  },
+
+  /** POST /api/Report/BalanceSheetReportExport — returns Excel blob */
+  async balanceSheetReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/BalanceSheetReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };

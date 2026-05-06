@@ -14,7 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { reportApi } from '../services/report.service';
+import { reportApi } from '../../../services/report.service';
 
 export const LotBatchSummary: React.FC = () => {
   const [loading, setLoading] = useState(false);

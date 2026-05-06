@@ -4,8 +4,8 @@ import {
   LayoutGrid, Loader2, Calculator, Landmark, X, Eye, Info
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { reportApi } from '../services/report.service';
-import { commonApi, apiClient } from '../lib/api-client';
+import { reportApi } from '../../../services/report.service';
+import { commonApi, apiClient } from '../../../lib/api-client';
 import * as XLSX from 'xlsx';
 
 interface AutocompleteOption {
@@ -13,7 +13,7 @@ interface AutocompleteOption {
   [key: string]: any;
 }
 
-import { CommonAutocompleteTemplate } from '../shared/CommonAutocompleteTemplate';
+import { CommonAutocompleteTemplate } from '../../../shared/CommonAutocompleteTemplate';
 
 // ─── Autocomplete Input Component ──────────────────────────────────────────
 const AutocompleteInput: React.FC<{

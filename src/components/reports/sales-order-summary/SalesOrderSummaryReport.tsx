@@ -7,7 +7,7 @@ import {
   AlertCircle,
   RotateCcw
 } from 'lucide-react';
-import { reportApi } from '../services/report.service';
+import { reportApi } from '../../../services/report.service';
 
 export const SalesOrderSummaryReport: React.FC = () => {
   const [loading, setLoading] = useState(false);

@@ -1,273 +1,346 @@
-import React, { useState } from 'react';
-import { 
-  RefreshCw, 
-  ChevronDown, 
-  FileText, 
-  FileSpreadsheet, 
-  Mail, 
-  Plus, 
-  Minus,
-  TrendingUp,
-  Lightbulb,
-  Bell,
-  Search,
-  LayoutGrid,
-  Calendar
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip,
-  Legend
-} from 'recharts';
+import React, { useState, useCallback, useRef } from 'react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, X, TrendingUp, Scale, ChevronRight } from 'lucide-react';
+import { reportApi } from '../services/report.service';
+import { toast } from '../lib/toast';
+import * as H from './reports/trial-balance/trialBalanceHelpers';
+import { TrialBalanceGroupDetail } from './reports/trial-balance/trial-balance-group-detail/TrialBalanceGroupDetail';
+import { TrialBalanceLedgerRegister } from './reports/trial-balance/trial-balance-ledger-register/TrialBalanceLedgerRegister';
 
-const expenseData = [
-  { name: 'COGS', value: 2.27, color: '#2563eb' },
-  { name: 'OPERATING', value: 0.58, color: '#3b82f6' },
-  { name: 'TAX & OTHER', value: 0.51, color: '#93c5fd' },
-];
+// ─── P&L Group ID mapping (same as Angular) ─────────────────────────────────
+const GROUP_NAME_MAP: Record<number, string> = {
+  10: 'Purchase Accounts',
+  5: 'Direct Expenses',
+  6: 'Indirect Expenses',
+  9: 'Sales Accounts',
+  11: 'Direct Incomes',
+  12: 'Indirect Incomes',
+};
 
-interface PLRow {
-  particulars: string;
-  amount: number;
-  percent: number;
-  type: 'header' | 'item' | 'total';
-  isNegative?: boolean;
+interface PnLData {
+  purchase: { OpenStock: number; Purchase: number; DirectExpense: number; GrossProfit: number; IndirectExp: number; NetProfit: number };
+  sales: { Sales: number; DirectIncome: number; CloseStock: number; GrossLoss: number; IndirectIncome: number; NetLoss: number };
 }
 
-const plData: PLRow[] = [
-  { particulars: 'INCOME', amount: 0, percent: 0, type: 'header' },
-  { particulars: 'Sales Revenue', amount: 4250000, percent: 100.0, type: 'item' },
-  { particulars: 'Service Income', amount: 840000, percent: 19.8, type: 'item' },
-  { particulars: 'Other Operating Income', amount: 12500, percent: 0.3, type: 'item' },
-  { particulars: 'DIRECT EXPENSES (COGS)', amount: 0, percent: 0, type: 'header' },
-  { particulars: 'Raw Material Consumption', amount: 1850000, percent: 43.5, type: 'item', isNegative: true },
-  { particulars: 'Direct Labor Costs', amount: 420000, percent: 9.9, type: 'item', isNegative: true },
-  { particulars: 'GROSS PROFIT', amount: 2832500, percent: 66.6, type: 'total' },
-  { particulars: 'OPERATING EXPENSES', amount: 0, percent: 0, type: 'header' },
-  { particulars: 'Administrative Salaries', amount: 310000, percent: 7.3, type: 'item', isNegative: true },
-  { particulars: 'Marketing & Sales', amount: 185000, percent: 4.4, type: 'item', isNegative: true },
-  { particulars: 'IT & Infrastructure', amount: 92400, percent: 2.2, type: 'item', isNegative: true },
-  { particulars: 'EBITDA', amount: 2245100, percent: 52.8, type: 'total' },
-  { particulars: 'Interest Expense', amount: 45000, percent: 1.1, type: 'item', isNegative: true },
-  { particulars: 'Corporate Income Tax', amount: 460000, percent: 10.8, type: 'item', isNegative: true },
-];
+interface TabItem { id: number; text: string; isGroup: boolean; groupItem?: any; filterobj?: any; }
+
+const normalizePnLData = (data: any): PnLData => {
+  const res: PnLData = {
+    purchase: { OpenStock: 0, Purchase: 0, DirectExpense: 0, GrossProfit: 0, IndirectExp: 0, NetProfit: 0 },
+    sales: { Sales: 0, DirectIncome: 0, CloseStock: 0, GrossLoss: 0, IndirectIncome: 0, NetLoss: 0 },
+  };
+  if (!data) return res;
+  if (data.purchase) {
+    res.purchase.OpenStock = Number(data.purchase.openStock ?? data.purchase.OpenStock) || 0;
+    res.purchase.Purchase = Number(data.purchase.purchase ?? data.purchase.Purchase) || 0;
+    res.purchase.DirectExpense = Number(data.purchase.directExpense ?? data.purchase.DirectExpense) || 0;
+    res.purchase.GrossProfit = Number(data.purchase.grossProfit ?? data.purchase.GrossProfit) || 0;
+    res.purchase.IndirectExp = Number(data.purchase.indirectExp ?? data.purchase.IndirectExp) || 0;
+    res.purchase.NetProfit = Number(data.purchase.netProfit ?? data.purchase.NetProfit) || 0;
+  }
+  if (data.sales) {
+    res.sales.Sales = Number(data.sales.sales ?? data.sales.Sales) || 0;
+    res.sales.DirectIncome = Number(data.sales.directIncome ?? data.sales.DirectIncome) || 0;
+    res.sales.CloseStock = Number(data.sales.closeStock ?? data.sales.CloseStock) || 0;
+    res.sales.GrossLoss = Number(data.sales.grossLoss ?? data.sales.GrossLoss) || 0;
+    res.sales.IndirectIncome = Number(data.sales.indirectIncome ?? data.sales.IndirectIncome) || 0;
+    res.sales.NetLoss = Number(data.sales.netLoss ?? data.sales.NetLoss) || 0;
+  }
+  return res;
+};
 
 export const ProfitLossReport: React.FC = () => {
-  const [viewType, setViewType] = useState<'standard' | 'comparison'>('standard');
+  const grpList = useRef(H.getGroupList()).current;
+  const precision = H.getPrecision();
+  const currencySymbol = H.getCurrencySymbol();
+  const fyDates = H.getFYDates();
+
+  const [fromDate, setFromDate] = useState(fyDates.fromDate);
+  const [toDate, setToDate] = useState(fyDates.toDate);
+  const [withStock, setWithStock] = useState(false);
+  const [lst, setLst] = useState<PnLData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(1);
+  const [tabs, setTabs] = useState<TabItem[]>([]);
+  const [counter, setCounter] = useState(2);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const getFilters = useCallback(() => ({
+    fromDate: H.formatDateForApi(fromDate, '00:00:00'),
+    toDate: H.formatDateForApi(toDate, '23:59:59'),
+    withStock,
+  }), [fromDate, toDate, withStock]);
+
+  const submitReportView = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await reportApi.profitLossReport(getFilters());
+      setLst(normalizePnLData(data));
+      if (!data) toast.info('No data found', 'Info');
+    } catch { setLst(null); } finally { setLoading(false); }
+  }, [getFilters]);
+
+  const handleSearch = () => {
+    if (!fromDate || !toDate) { toast.info('Please select date range', 'Validation'); return; }
+    if (new Date(fromDate) > new Date(toDate)) { toast.info('From Date cannot be after To Date', 'Validation'); return; }
+    setTabs([]); setSelectedTab(1);
+    submitReportView();
+  };
+
+  const handleClear = () => {
+    const d = H.getFYDates();
+    setFromDate(d.fromDate); setToDate(d.toDate); setLst(null); setTabs([]); setSelectedTab(1);
+  };
+
+  // ─── Drill-down into P&L groups (reuses Trial Balance infrastructure) ───
+  const toggleDetails = (groupId: number) => {
+    const item: any = { ID: groupId, NAME: GROUP_NAME_MAP[groupId], ISGROUP: true, isChildDataLoaded: false };
+    const rec = grpList.find((x: any) => x.id == groupId);
+    if (rec) item.groupInfo = rec;
+    onDetailToggle(item);
+  };
+
+  const onDetailToggle = (item: any) => {
+    if (item.ISGROUP) {
+      if (!item.isChildDataLoaded) { item.openTabAfterLoad = true; loadGroupChildren(item); }
+      else { onAddNewTab(item); }
+    } else { onAddNewTab(item); }
+  };
+
+  const loadGroupChildren = async (item: any) => {
+    const fdata: any = getFilters();
+    fdata.groupId = item.ID;
+    try {
+      const data = await reportApi.trialBalanceReport(fdata);
+      if (data?.length) {
+        data.forEach((child: any) => {
+          child.NAME = child.NAME || child.Name;
+          child.ID = child.ID || child.Ledger_ID || child.LedgerId || child.ledgerId || child.id;
+          child.ISGROUP = child.ISGROUP ?? child.IsGroup ?? false;
+          child.parentName = item.NAME;
+          if (child.ISGROUP) {
+            const rec = grpList.find((x: any) => x.id == child.ID);
+            if (rec) { child.groupInfo = rec; H.processTrialBalanceItem(child, rec); }
+          } else if (item.groupInfo) {
+            child.groupInfo = item.groupInfo;
+            H.processTrialBalanceItem(child, item.groupInfo);
+          }
+        });
+        item.isChildDataLoaded = true;
+        item.childNodeData = data;
+        if (item.openTabAfterLoad) { onAddNewTab(item); item.openTabAfterLoad = false; }
+      }
+    } catch { }
+  };
+
+  const onAddNewTab = (item: any) => {
+    const groupInfo = item.ISGROUP ? item : item.groupInfo;
+    const isPnL = groupInfo && (groupInfo.nature === 3 || groupInfo.nature === 4);
+    const obVal = item.ISOP ?? item.isOp ?? (isPnL ? false : false);
+    const resolvedId = item.ID || item.Ledger_ID || item.LedgerId || item.ledgerId || item.id;
+
+    item.filterobj = {
+      value: {
+        from: fromDate, to: toDate, ledgerId: resolvedId, runningBalance: true,
+        openingBalance: obVal, billDetails: false, bankDetails: false,
+        isPdc: false, includeChildLedgers: true, monthWise: true,
+      },
+      name: item.NAME, parentName: item.parentName || '',
+    };
+    const existing = tabs.find(t => t.text === item.NAME);
+    if (!existing) {
+      const newId = counter;
+      setCounter(c => c + 1);
+      setTabs(prev => [...prev, { id: newId, text: item.NAME, isGroup: !!item.ISGROUP, groupItem: item, filterobj: item.filterobj }]);
+      setSelectedTab(newId);
+    } else { setSelectedTab(existing.id); }
+  };
+
+  const closeTab = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    const remaining = tabs.filter(t => t.id !== id);
+    setTabs(remaining);
+    if (selectedTab === id) setSelectedTab(remaining.length > 0 ? remaining[remaining.length - 1].id : 1);
+  };
+
+  const onChildRefreshRequested = (tabItem: TabItem) => {
+    if (tabItem.groupItem) {
+      tabItem.groupItem.isChildDataLoaded = false;
+      tabItem.groupItem.childNodeData = [];
+      loadGroupChildren(tabItem.groupItem);
+    }
+  };
+
+  const fmt = (val: number) => H.formatNumber(Math.abs(val), precision);
+  const p = lst?.purchase;
+  const s = lst?.sales;
+  const expenseSubtotal = p ? p.OpenStock + p.Purchase + p.DirectExpense + p.GrossProfit : 0;
+  const incomeSubtotal = s ? s.Sales + s.DirectIncome + s.CloseStock + s.GrossLoss : 0;
+  const totalExpense = s && p ? s.GrossLoss + p.IndirectExp + p.NetProfit : 0;
+  const totalIncome = p && s ? p.GrossProfit + s.IndirectIncome + s.NetLoss : 0;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-[1600px] mx-auto p-6 space-y-6"
-    >
+    <div className="font-sans text-slate-700 dark:text-slate-200">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Profit & Loss Statement</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Interactive vertical analysis for corporate reporting</p>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2.5 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <TrendingUp size={22} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Profit & Loss Account</h1>
+            <p className="text-xs text-slate-500 font-medium">Income vs expense analysis with drill-down</p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-            <button 
-              onClick={() => setViewType('standard')}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${
-                viewType === 'standard' 
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
-              }`}
-            >
-              Standard
-            </button>
-            <button 
-              onClick={() => setViewType('comparison')}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${
-                viewType === 'comparison' 
-                  ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
-              }`}
-            >
-              Comparison
-            </button>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[320px]">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">From Date <span className="text-red-500">*</span></label>
+                <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+              </div>
+              <div className="flex-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-red-500">*</span></label>
+                <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer select-none pb-2">
+                <input type="checkbox" checked={withStock} onChange={e => setWithStock(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">With Stock</span>
+              </label>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200">
-                <Calendar size={14} /> FY 2023-24 <ChevronDown size={14} />
-              </button>
-            </div>
-            <div className="relative">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200">
-                <LayoutGrid size={14} /> All Branches <ChevronDown size={14} />
-              </button>
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
-              <RefreshCw size={14} /> Refresh Data
+            <button onClick={handleSearch} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-600/20">
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              <span className="hidden sm:inline">Search</span>
             </button>
+            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"><RotateCcw size={16} /></button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main P&L Table */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800">
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Particulars</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-right">Amount (USD)</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-right">% of Revenue</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                {plData.map((row, i) => (
-                  <tr key={i} className={`
-                    ${row.type === 'header' ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}
-                    ${row.type === 'total' ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}
-                  `}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {row.type === 'item' && (
-                          <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded text-slate-400">
-                            <Plus size={10} />
-                          </div>
-                        )}
-                        <span className={`text-sm ${
-                          row.type === 'header' ? 'font-bold text-blue-600 dark:text-blue-400 text-[10px] uppercase tracking-wider' : 
-                          row.type === 'total' ? 'font-bold text-emerald-700 dark:text-emerald-400' :
-                          'text-slate-700 dark:text-slate-200'
-                        }`}>
-                          {row.particulars}
-                        </span>
-                      </div>
-                    </td>
-                    <td className={`px-6 py-4 text-sm text-right ${
-                      row.type === 'total' ? 'font-bold text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'
-                    }`}>
-                      {row.amount === 0 ? '' : (row.isNegative ? `($${row.amount.toLocaleString()}.00)` : `$${row.amount.toLocaleString()}.00`)}
-                    </td>
-                    <td className={`px-6 py-4 text-sm text-right ${
-                      row.type === 'total' ? 'font-bold text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
-                    }`}>
-                      {row.percent === 0 ? '' : `${row.percent.toFixed(1)}%`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="bg-blue-600 p-6 flex items-center justify-between text-white">
-            <span className="text-xl font-bold uppercase tracking-tight">Net Profit</span>
-            <div className="text-right">
-              <span className="text-2xl font-black">$1,740,100.00</span>
-              <span className="ml-4 text-lg font-medium opacity-80">40.9%</span>
-            </div>
-          </div>
-        </div>
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-700 mb-0 overflow-x-auto">
+        <button onClick={() => setSelectedTab(1)}
+          className={`px-4 py-2.5 text-sm font-semibold rounded-t-lg transition-all whitespace-nowrap ${selectedTab === 1 ? 'bg-white dark:bg-slate-900 text-emerald-600 border border-b-0 border-slate-200 dark:border-slate-700 -mb-[1px]' : 'text-slate-500 hover:text-slate-700'}`}>
+          Profit & Loss
+        </button>
+        {tabs.map(tab => (
+          <button key={tab.id} onClick={() => setSelectedTab(tab.id)}
+            className={`px-3 py-2.5 text-xs font-medium rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap max-w-[180px] ${selectedTab === tab.id ? 'bg-white dark:bg-slate-900 text-emerald-600 border border-b-0 border-slate-200 dark:border-slate-700 -mb-[1px]' : 'text-slate-500 hover:text-slate-700'}`}>
+            <span className="truncate">{tab.text}</span>
+            <span onClick={(e) => closeTab(e, tab.id)} className="ml-1 p-0.5 rounded hover:bg-red-100 hover:text-red-500 transition-colors flex-shrink-0"><X size={12} /></span>
+          </button>
+        ))}
+      </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Financial Health */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp size={18} className="text-blue-600" />
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white">Financial Health</h3>
-            </div>
-            
-            <div className="flex flex-col items-center justify-center py-4">
-              <p className="text-xs text-slate-400 mb-4">Net Profit Margin</p>
-              <div className="relative w-48 h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { value: 40.9, color: '#2563eb' },
-                        { value: 59.1, color: '#f1f5f9' }
-                      ]}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={65}
-                      outerRadius={85}
-                      startAngle={225}
-                      endAngle={-45}
-                      paddingAngle={0}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      <Cell fill="#2563eb" />
-                      <Cell fill="#f1f5f9" className="dark:fill-slate-800" />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-black text-slate-800 dark:text-white">40.9%</span>
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Healthy</span>
+      {/* Content */}
+      <div className="bg-white dark:bg-slate-900 rounded-b-xl border border-t-0 border-slate-200 dark:border-slate-700 shadow-sm">
+        {selectedTab === 1 && (
+          <div className="p-4">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <Loader2 size={28} className="animate-spin text-emerald-500 mb-3" />
+                <span className="text-sm text-slate-500 font-medium">Loading P&L data...</span>
+              </div>
+            ) : !lst ? (
+              <div className="text-center py-16">
+                <TrendingUp size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                <p className="text-slate-500 text-sm">Select date range and click Search to generate the report.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* EXPENSE Side */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                    <span className="text-sm font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Expense</span>
+                    <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+                  </div>
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <PnLRow label="Opening Stock" value={fmt(p!.OpenStock)} />
+                      <PnLRow label="Purchase Accounts" value={fmt(p!.Purchase)} clickable onClick={() => toggleDetails(10)} />
+                      <PnLRow label="Direct Expenses" value={fmt(p!.DirectExpense)} clickable onClick={() => toggleDetails(5)} />
+                      <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} highlight />
+                      <PnLRow label="" value={<span className="font-black">{fmt(expenseSubtotal)}</span>} subtotal />
+                      {p!.IndirectExp !== 0 && <PnLRow label="Indirect Expenses" value={fmt(p!.IndirectExp)} clickable onClick={() => toggleDetails(6)} />}
+                      {p!.NetProfit !== 0 && <PnLRow label="Net Profit" value={fmt(p!.NetProfit)} highlight />}
+                    </tbody>
+                  </table>
+                  <div className="bg-red-600 px-4 py-3 flex items-center justify-between text-white font-bold">
+                    <span className="text-sm uppercase">Total of Expense</span>
+                    <span className="text-base font-mono">{fmt(totalExpense)}</span>
+                  </div>
+                </div>
+
+                {/* INCOME Side */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Income</span>
+                    <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+                  </div>
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <PnLRow label="Sales Accounts" value={fmt(s!.Sales)} clickable onClick={() => toggleDetails(9)} />
+                      <PnLRow label="Direct Incomes" value={fmt(s!.DirectIncome)} clickable onClick={() => toggleDetails(11)} />
+                      <PnLRow label="Closing Stock" value={fmt(s!.CloseStock)} />
+                      <PnLRow label="Gross Loss" value={fmt(s!.GrossLoss)} highlight />
+                      <PnLRow label="" value={<span className="font-black">{fmt(incomeSubtotal)}</span>} subtotal />
+                      {p!.GrossProfit !== 0 && <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} />}
+                      {s!.IndirectIncome !== 0 && <PnLRow label="Indirect Incomes" value={fmt(s!.IndirectIncome)} clickable onClick={() => toggleDetails(12)} />}
+                      {s!.NetLoss !== 0 && <PnLRow label="Nett Loss" value={fmt(s!.NetLoss)} highlight />}
+                    </tbody>
+                  </table>
+                  <div className="bg-emerald-600 px-4 py-3 flex items-center justify-between text-white font-bold">
+                    <span className="text-sm uppercase">Total of Income</span>
+                    <span className="text-base font-mono">{fmt(totalIncome)}</span>
+                  </div>
                 </div>
               </div>
-              <p className="text-[10px] text-slate-400 italic mt-2">+5.2% vs. Previous Year</p>
-            </div>
+            )}
           </div>
+        )}
 
-          {/* Expenses Breakdown */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-white mb-6 uppercase tracking-wider">Expenses Breakdown</h3>
-            <div className="space-y-6">
-              {expenseData.map((item, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                    <span className="text-slate-800 dark:text-white">{item.name}</span>
-                    <span className="text-slate-400">${item.value}M</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(item.value / 3.36) * 100}%` }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Dynamic drill-down tabs */}
+        {tabs.filter(t => t.id === selectedTab).map(tab => (
+          <div key={tab.id} className="p-4">
+            {tab.isGroup ? (
+              <TrialBalanceGroupDetail
+                groupItem={tab.groupItem}
+                showOpeningBalance={true} showDebit={true} showCredit={true}
+                onItemSelected={onDetailToggle}
+                onRefresh={() => onChildRefreshRequested(tab)}
+              />
+            ) : (
+              <TrialBalanceLedgerRegister recordData={tab.filterobj} refreshTrigger={refreshTrigger} />
+            )}
           </div>
-
-          {/* Smart Insight */}
-          <div className="bg-amber-50 dark:bg-amber-900/10 p-6 rounded-xl border border-amber-100 dark:border-amber-900/30">
-            <div className="flex items-center gap-2 mb-3">
-              <Lightbulb size={18} className="text-amber-500" />
-              <h3 className="text-sm font-bold text-amber-800 dark:text-amber-400">Smart Insight</h3>
-            </div>
-            <p className="text-xs text-amber-700 dark:text-amber-500/80 leading-relaxed">
-              Your 'Raw Material' costs have increased by 8% this quarter. Consider negotiating supplier contracts to maintain gross margins.
-            </p>
-          </div>
-
-          {/* Share Report */}
-          <div className="space-y-3">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Share Report</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center gap-2 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200">
-                <FileText size={14} /> PDF
-              </button>
-              <button className="flex items-center justify-center gap-2 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200">
-                <FileSpreadsheet size={14} className="text-emerald-600" /> Excel
-              </button>
-            </div>
-            <button className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
-              <Mail size={16} /> Email to Stakeholders
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
+
+// ─── Sub-component: P&L table row ────────────────────────────────────────────
+const PnLRow: React.FC<{
+  label: string; value: React.ReactNode; clickable?: boolean; onClick?: () => void; highlight?: boolean; subtotal?: boolean;
+}> = ({ label, value, clickable, onClick, highlight, subtotal }) => (
+  <tr className={`${clickable ? 'cursor-pointer hover:bg-blue-50/50 dark:hover:bg-slate-800/50' : ''} ${subtotal ? 'bg-slate-50 dark:bg-slate-800/50' : ''}`}
+    onClick={clickable ? onClick : undefined}>
+    <td className="px-4 py-3">
+      <div className="flex items-center gap-2">
+        {clickable && <ChevronRight size={14} className="text-blue-500 flex-shrink-0" />}
+        <span className={`text-sm ${highlight ? 'font-semibold text-emerald-700 dark:text-emerald-400' : clickable ? 'font-semibold text-blue-600 dark:text-blue-400 hover:underline' : 'text-slate-700 dark:text-slate-300'}`}>
+          {label}
+        </span>
+      </div>
+    </td>
+    <td className="px-4 py-3 text-right text-sm font-mono text-slate-800 dark:text-slate-200">{value}</td>
+  </tr>
+);

@@ -1,306 +1,232 @@
-import React, { useState } from 'react';
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Upload, 
-  Download, 
-  Mail, 
-  FileText, 
-  Table, 
-  Info, 
-  CheckCircle2,
-  Calendar,
-  Layers,
-  ArrowUpRight,
-  ArrowDownRight,
-  Activity
-} from 'lucide-react';
-import { motion } from 'motion/react';
+import React, { useState, useCallback } from 'react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, Layers, CheckCircle2 } from 'lucide-react';
+import { reportApi } from '../services/report.service';
+import { toast } from '../lib/toast';
+import * as H from './reports/trial-balance/trialBalanceHelpers';
 
-interface BalanceRow {
-  id: string;
-  description: string;
-  current: string;
-  previous: string;
-  change: string;
-  isPositive: boolean;
-  isHeader?: boolean;
-  isSubHeader?: boolean;
-  isTotal?: boolean;
-  children?: BalanceRow[];
-  isOpen?: boolean;
-}
+interface BSItem { NAME: string; Amount: number; }
+interface BSData { liabilities: BSItem[]; assets: BSItem[]; totalLiabilities: number; totalAssets: number; }
 
-const initialData: BalanceRow[] = [
-  {
-    id: 'assets',
-    description: 'ASSETS',
-    current: '',
-    previous: '',
-    change: '',
-    isPositive: true,
-    isHeader: true,
-    children: [
-      {
-        id: 'current-assets',
-        description: 'Current Assets',
-        current: '$ 1,240,000.00',
-        previous: '$ 1,100,000.00',
-        change: '+12.7%',
-        isPositive: true,
-        isSubHeader: true,
-        isOpen: true,
-        children: [
-          { id: 'cash', description: 'Cash & Equivalents', current: '$ 450,000.00', previous: '$ 410,000.00', change: '+9.7%', isPositive: true },
-          { id: 'receivables', description: 'Accounts Receivable', current: '$ 790,000.00', previous: '$ 690,000.00', change: '+14.4%', isPositive: true },
-        ]
-      },
-      {
-        id: 'fixed-assets',
-        description: 'Fixed Assets',
-        current: '$ 4,500,000.00',
-        previous: '$ 4,550,000.00',
-        change: '-1.1%',
-        isPositive: false,
-        isSubHeader: true,
-      },
-      {
-        id: 'investments',
-        description: 'Investments',
-        current: '$ 300,000.00',
-        previous: '$ 250,000.00',
-        change: '+20.0%',
-        isPositive: true,
-        isSubHeader: true,
-      }
-    ]
+const LIABILITIES_MAP: Record<string, string> = {
+  capitalAccount: 'Capital Account',
+  loansLiability: 'Loans (Liability)',
+  currentLiabilities: 'Current Liabilities',
+  profitNLoss: 'Profit & Loss A/c',
+};
+const ASSETS_MAP: Record<string, string> = {
+  fixedAssets: 'Fixed Assets',
+  investment: 'Investments',
+  currentAssets: 'Current Assets',
+};
+
+const normalizeBS = (data: any): BSData => {
+  const res: BSData = { liabilities: [], assets: [], totalLiabilities: 0, totalAssets: 0 };
+  if (!data) return res;
+
+  // Liabilities
+  if (data.liabilities) {
+    if (Array.isArray(data.liabilities)) { res.liabilities = data.liabilities; }
+    else {
+      Object.keys(LIABILITIES_MAP).forEach(key => {
+        if (data.liabilities[key] !== undefined) {
+          res.liabilities.push({ NAME: LIABILITIES_MAP[key], Amount: Number(data.liabilities[key]) || 0 });
+        }
+      });
+    }
   }
-];
+  // Assets
+  if (data.assets) {
+    if (Array.isArray(data.assets)) { res.assets = data.assets; }
+    else {
+      Object.keys(ASSETS_MAP).forEach(key => {
+        if (data.assets[key] !== undefined) {
+          res.assets.push({ NAME: ASSETS_MAP[key], Amount: Number(data.assets[key]) || 0 });
+        }
+      });
+    }
+  }
+  res.totalLiabilities = res.liabilities.reduce((s, i) => s + (i.Amount || 0), 0);
+  res.totalAssets = res.assets.reduce((s, i) => s + (i.Amount || 0), 0);
+  return res;
+};
 
 export const BalanceSheet: React.FC = () => {
-  const [data, setData] = useState<BalanceRow[]>(initialData);
-  const [viewType, setViewType] = useState<'summary' | 'detailed'>('summary');
+  const precision = H.getPrecision();
+  const currencySymbol = H.getCurrencySymbol();
+  const fyDates = H.getFYDates();
+
+  const [fromDate, setFromDate] = useState(fyDates.fromDate);
+  const [toDate, setToDate] = useState(fyDates.toDate);
+  const [lst, setLst] = useState<BSData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const getFilters = useCallback(() => ({
+    fromDate: H.formatDateForApi(fromDate, '00:00:00'),
+    toDate: H.formatDateForApi(toDate, '23:59:59'),
+  }), [fromDate, toDate]);
+
+  const submitReportView = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await reportApi.balanceSheetReport(getFilters());
+      if (data) { setLst(normalizeBS(data)); }
+      else { setLst(null); toast.info('No data found', 'Info'); }
+    } catch { setLst(null); }
+    finally { setLoading(false); }
+  }, [getFilters]);
+
+  const handleSearch = () => {
+    if (!fromDate || !toDate) { toast.info('Please select date range', 'Validation'); return; }
+    if (new Date(fromDate) > new Date(toDate)) { toast.info('From Date cannot be after To Date', 'Validation'); return; }
+    submitReportView();
+  };
+
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const blob = await reportApi.balanceSheetReportExport(getFilters());
+      if (blob?.size) {
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url; a.download = 'balance-sheet.xlsx'; a.click(); URL.revokeObjectURL(url);
+      } else { toast.info('No data found to export.', 'Info'); }
+    } catch { } finally { setExportLoading(false); }
+  };
+
+  const handleClear = () => {
+    const d = H.getFYDates();
+    setFromDate(d.fromDate); setToDate(d.toDate); setLst(null);
+  };
+
+  const fmt = (val: number) => H.formatNumber(Math.abs(val), precision);
+  const isBalanced = lst ? Math.abs(lst.totalLiabilities - lst.totalAssets) < 0.01 : false;
 
   return (
-    <div className="flex h-[calc(100vh-112px)] overflow-hidden bg-slate-50 dark:bg-slate-950">
-      {/* Main Report Area */}
-      <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-        <div className="max-w-5xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Balance Sheet</h1>
-              <p className="text-sm text-slate-500 font-medium">Financial Year Ending Dec 2023 • Consolidated View</p>
-            </div>
-            <button className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
-              <Upload size={18} className="rotate-180" />
-              Export
-            </button>
+    <div className="font-sans text-slate-700 dark:text-slate-200">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-2.5 rounded-xl text-blue-600 dark:text-blue-400">
+            <Layers size={22} />
           </div>
-
-          {/* Filters Bar */}
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <FilterButton icon={<Calendar size={16} />} label="As of: Dec 31, 2023" />
-              <FilterButton icon={<Layers size={16} />} label="All Divisions" />
-              <FilterButton icon={<Activity size={16} />} label="Vs: Last Year" />
-            </div>
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-              <button 
-                onClick={() => setViewType('summary')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewType === 'summary' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500'}`}
-              >
-                Summary
-              </button>
-              <button 
-                onClick={() => setViewType('detailed')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewType === 'detailed' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500'}`}
-              >
-                Detailed
-              </button>
-            </div>
-          </div>
-
-          {/* Report Table */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                  <th className="px-8 py-5">Account Description</th>
-                  <th className="px-8 py-5 text-right">Current Period (USD)</th>
-                  <th className="px-8 py-5 text-right">Previous Period (USD)</th>
-                  <th className="px-8 py-5 text-center">Change %</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Assets Section */}
-                <SectionHeader icon={<Activity size={18} className="text-blue-600" />} title="ASSETS" />
-                <ReportRow 
-                  description="Current Assets" 
-                  current="$ 1,240,000.00" 
-                  previous="$ 1,100,000.00" 
-                  change="+12.7%" 
-                  isPositive={true} 
-                  isSubHeader 
-                  hasChildren
-                />
-                <ReportRow description="Cash & Equivalents" current="$ 450,000.00" previous="$ 410,000.00" change="+9.7%" isPositive={true} isChild />
-                <ReportRow description="Accounts Receivable" current="$ 790,000.00" previous="$ 690,000.00" change="+14.4%" isPositive={true} isChild />
-                
-                <ReportRow description="Fixed Assets" current="$ 4,500,000.00" previous="$ 4,550,000.00" change="-1.1%" isPositive={false} isSubHeader />
-                <ReportRow description="Investments" current="$ 300,000.00" previous="$ 250,000.00" change="+20.0%" isPositive={true} isSubHeader />
-                
-                <tr className="bg-slate-50/50 dark:bg-slate-800/30">
-                  <td className="px-8 py-6 text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">TOTAL ASSETS</td>
-                  <td className="px-8 py-6 text-sm font-black text-slate-900 dark:text-white text-right">$ 6,040,000.00</td>
-                  <td className="px-8 py-6 text-sm font-black text-slate-400 dark:text-slate-500 text-right">$ 5,900,000.00</td>
-                  <td className="px-8 py-6 text-center">
-                    <span className="text-xs font-bold text-emerald-600">+2.4%</span>
-                  </td>
-                </tr>
-
-                {/* Equity & Liabilities Section */}
-                <SectionHeader icon={<Layers size={18} className="text-amber-500" />} title="EQUITY & LIABILITIES" />
-                <ReportRow description="Current Liabilities" current="$ 850,000.00" previous="$ 900,000.00" change="-5.5%" isPositive={false} isSubHeader />
-                <ReportRow description="Long-term Debt" current="$ 2,100,000.00" previous="$ 2,000,000.00" change="+5.0%" isPositive={true} isSubHeader />
-                <ReportRow description="Total Equity" current="$ 3,090,000.00" previous="$ 3,000,000.00" change="+3.0%" isPositive={true} isSubHeader />
-              </tbody>
-            </table>
-
-            {/* Footer */}
-            <div className="p-8 bg-slate-50/30 dark:bg-slate-800/10 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Equity & Liabilities</p>
-                <p className="text-3xl font-black text-slate-900 dark:text-white">$ 6,040,000.00</p>
-              </div>
-              <div className="flex items-center gap-2 px-6 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
-                <CheckCircle2 size={20} className="text-emerald-500" />
-                <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Balance Sheet is Balanced</span>
-              </div>
-            </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Balance Sheet</h1>
+            <p className="text-xs text-slate-500 font-medium">Financial position — liabilities vs assets</p>
           </div>
         </div>
       </div>
 
-      {/* Right Sidebar - Insights */}
-      <div className="w-96 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto p-8 custom-scrollbar space-y-8">
-        <div>
-          <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6">
-            <Activity size={18} className="text-blue-600" />
-            Liquidity Insights
-          </h3>
-          
-          <div className="space-y-8">
-            <InsightGauge label="Current Ratio" value="1.45" target="1.2+" color="text-blue-600" percentage={75} />
-            <InsightGauge label="Debt-to-Equity" value="0.95" target="1.0" color="text-amber-500" percentage={60} />
+      {/* Filters */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[280px]">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">From Date <span className="text-red-500">*</span></label>
+                <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+              </div>
+              <div className="flex-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-red-500">*</span></label>
+                <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={handleSearch} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              <span className="hidden sm:inline">Search</span>
+            </button>
+            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"><RotateCcw size={16} /></button>
+            <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20">
+              {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2 mb-4">
-            <Info size={16} className="text-blue-600" />
-            <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Analysis</span>
+      {/* Content */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Loader2 size={28} className="animate-spin text-blue-500 mb-3" />
+            <span className="text-sm text-slate-500 font-medium">Loading balance sheet...</span>
           </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Liquidity is strong, but debt-to-equity ratio has increased by <span className="text-rose-500 font-bold">5%</span> since last quarter. Monitoring is recommended.
-          </p>
-        </div>
+        ) : !lst ? (
+          <div className="text-center py-16">
+            <Layers size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+            <p className="text-slate-500 text-sm">Select date range and click Search to generate the report.</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-slate-700">
+              {/* Liabilities */}
+              <div className="p-4">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 rounded-t-xl border border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Liabilities</span>
+                    <span className="text-xs font-semibold text-slate-500">Total ({currencySymbol})</span>
+                  </div>
+                </div>
+                <div className="border-x border-slate-200 dark:border-slate-700">
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {lst.liabilities.map((item, i) => (
+                        <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                          <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{item.NAME}</td>
+                          <td className="px-4 py-3 text-sm text-right font-mono text-slate-800 dark:text-slate-200">{fmt(item.Amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="bg-amber-600 px-4 py-3 rounded-b-xl flex items-center justify-between text-white font-bold">
+                  <span className="text-sm uppercase">Total ({currencySymbol})</span>
+                  <span className="text-base font-mono">{fmt(lst.totalLiabilities)}</span>
+                </div>
+              </div>
 
-        <div className="space-y-3">
-          <ActionLink icon={<FileText className="text-rose-500" />} label="Download PDF" subLabel="Official Financial Report" />
-          <ActionLink icon={<Table className="text-emerald-500" />} label="Export to Excel" subLabel="Editable Ledger Data" />
-          <ActionLink icon={<Mail className="text-blue-500" />} label="Share via Email" subLabel="Secure Direct Link" />
-        </div>
+              {/* Assets */}
+              <div className="p-4">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 rounded-t-xl border border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Assets</span>
+                    <span className="text-xs font-semibold text-slate-500">Total ({currencySymbol})</span>
+                  </div>
+                </div>
+                <div className="border-x border-slate-200 dark:border-slate-700">
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {lst.assets.map((item, i) => (
+                        <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                          <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{item.NAME}</td>
+                          <td className="px-4 py-3 text-sm text-right font-mono text-slate-800 dark:text-slate-200">{fmt(item.Amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="bg-blue-600 px-4 py-3 rounded-b-xl flex items-center justify-between text-white font-bold">
+                  <span className="text-sm uppercase">Total ({currencySymbol})</span>
+                  <span className="text-base font-mono">{fmt(lst.totalAssets)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Balance status footer */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-center">
+              <div className={`flex items-center gap-2 px-6 py-3 rounded-xl border ${isBalanced ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
+                <CheckCircle2 size={20} className={isBalanced ? 'text-emerald-500' : 'text-red-500'} />
+                <span className={`text-xs font-bold uppercase tracking-wider ${isBalanced ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+                  {isBalanced ? 'Balance Sheet is Balanced' : `Difference: ${fmt(Math.abs(lst.totalLiabilities - lst.totalAssets))}`}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 };
-
-const FilterButton = ({ icon, label }: { icon: React.ReactNode, label: string }) => (
-  <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all group">
-    <span className="text-blue-600">{icon}</span>
-    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{label}</span>
-    <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600" />
-  </button>
-);
-
-const SectionHeader = ({ icon, title }: { icon: React.ReactNode, title: string }) => (
-  <tr className="bg-slate-50/30 dark:bg-slate-800/10">
-    <td colSpan={4} className="px-8 py-4">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center">
-          {icon}
-        </div>
-        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{title}</span>
-      </div>
-    </td>
-  </tr>
-);
-
-const ReportRow = ({ description, current, previous, change, isPositive, isSubHeader, hasChildren, isChild }: any) => (
-  <tr className={`group transition-colors ${isSubHeader ? 'bg-white dark:bg-slate-900' : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30'}`}>
-    <td className={`px-8 py-4 ${isChild ? 'pl-16' : ''}`}>
-      <div className="flex items-center gap-3">
-        {isSubHeader && (
-          <div className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-            {hasChildren ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          </div>
-        )}
-        <span className={`text-sm ${isSubHeader ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-500 italic'}`}>
-          {description}
-        </span>
-      </div>
-    </td>
-    <td className={`px-8 py-4 text-sm text-right ${isSubHeader ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-      {current}
-    </td>
-    <td className="px-8 py-4 text-sm text-slate-400 dark:text-slate-500 text-right">
-      {previous}
-    </td>
-    <td className="px-8 py-4 text-center">
-      <span className={`text-[10px] font-black px-2 py-0.5 rounded ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-        {change}
-      </span>
-    </td>
-  </tr>
-);
-
-const InsightGauge = ({ label, value, target, color, percentage }: any) => (
-  <div className="flex flex-col items-center text-center">
-    <div className="relative w-32 h-32 mb-4">
-      <svg className="w-full h-full" viewBox="0 0 100 100">
-        <circle className="text-slate-100 dark:text-slate-800 stroke-current" strokeWidth="8" fill="transparent" r="40" cx="50" cy="50" />
-        <circle 
-          className={`${color} stroke-current`} 
-          strokeWidth="8" 
-          strokeDasharray={251.2} 
-          strokeDashoffset={251.2 - (251.2 * percentage) / 100} 
-          strokeLinecap="round" 
-          fill="transparent" 
-          r="40" 
-          cx="50" 
-          cy="50" 
-          transform="rotate(-90 50 50)"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-black text-slate-900 dark:text-white leading-none">{value}</span>
-        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Target: {target}</span>
-      </div>
-    </div>
-    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{label}</h4>
-    <p className="text-[10px] text-slate-500 mt-1">Measuring ability to pay short-term obligations.</p>
-  </div>
-);
-
-const ActionLink = ({ icon, label, subLabel }: any) => (
-  <button className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl hover:shadow-md transition-all group">
-    <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:scale-110 transition-transform">
-      {icon}
-    </div>
-    <div className="text-left">
-      <p className="text-sm font-bold text-slate-900 dark:text-white">{label}</p>
-      <p className="text-[10px] text-slate-500 font-medium">{subLabel}</p>
-    </div>
-  </button>
-);
