@@ -10,6 +10,9 @@ import { StockModal } from './components/StockModal';
 import { WidgetLibrary } from './components/WidgetLibrary';
 import { TabBar } from './components/TabBar';
 import { OutstandingReport } from './components/OutstandingReport';
+import { MultipleOutstandingReport } from './components/reports/outstanding/multiple-outstanding/MultipleOutstandingReport';
+import { LedgerOutstandingReport } from './components/reports/outstanding/ledger-outstanding/LedgerOutstandingReport';
+import { LedgerChildOutstandingReport } from './components/reports/outstanding/ledger-child-outstanding/LedgerChildOutstandingReport';
 import { BOMList } from './components/masters/BOMList';
 import { BOMCreate } from './components/masters/BOMCreate';
 import { CurrencyList } from './components/masters/currency/CurrencyList';
@@ -58,7 +61,6 @@ import { AgingAnalysisReport } from './components/AgingAnalysisReport';
 import { ProfitLossReport } from './components/ProfitLossReport';
 import { BillWiseDrilldownScreen } from './components/BillWiseDrilldown';
 import { LotBatchSummary } from './components/reports/lot-batch-summary/LotBatchSummary';
-import { LedgerOutstandingList } from './components/LedgerOutstandingList';
 import { TrialBalanceReport } from './components/reports/trial-balance/trial-balance/TrialBalanceReport';
 import { CurrentStockReport } from './components/reports/current-stock/CurrentStockReport';
 import { ReceiptVoucherForm } from './components/ReceiptVoucherForm';
@@ -80,7 +82,6 @@ import { ItemBatchRegister } from './components/ItemBatchRegister';
 import { ProcessOrderReport } from './components/ProcessOrderReport';
 import { ScheduleReport } from './components/ScheduleReport';
 import { ScheduleToInvoice } from './components/ScheduleToInvoice';
-import { MultipleLedgerOutstanding } from './components/MultipleLedgerOutstanding';
 import { PendingReport } from './components/reports/pending-report/PendingReport';
 import { SupplierWisePendingReport } from './components/reports/supplier-wise-pending/SupplierWisePendingReport';
 import { Login } from './components/Login';
@@ -240,6 +241,12 @@ function AppContent() {
         return <InvoiceForm onBack={() => removeTab(tab.id)} />;
       case 'outstanding-report':
         return <OutstandingReport />;
+      case 'multiple-outstanding-report':
+        return <MultipleOutstandingReport />;
+      case 'ledger-outstanding-report':
+        return <LedgerOutstandingReport />;
+      case 'ledger-child-outstanding-report':
+        return <LedgerChildOutstandingReport />;
       case 'bom-list':
         return <BOMList onCreateNew={() => addTab('bom-create', 'Create BOM')} />;
       case 'bom-create':
@@ -617,7 +624,7 @@ function AppContent() {
       case 'schedule-to-invoice':
         return <ScheduleToInvoice />;
       case 'multiple-ledger-outstanding':
-        return <MultipleLedgerOutstanding />;
+        return <MultipleOutstandingReport />;
       case 'pending-report':
         return <PendingReport />;
       case 'supplier-wise-pending':
@@ -712,6 +719,9 @@ function AppContent() {
             'schedule-report': 'Schedule Report',
             'schedule-to-invoice': 'Schedule to Invoice',
             'multiple-ledger-outstanding': 'Multiple Ledger Outstanding',
+            'multiple-outstanding-report': 'Multiple Outstanding',
+            'ledger-outstanding-report': 'Ledger Outstanding',
+            'ledger-child-outstanding-report': 'Ledger Child Outstanding',
             'pending-report': 'Pending Report',
             'supplier-wise-pending': 'Purchase Invoice Adjustment Report'
           };

@@ -147,4 +147,38 @@ export const reportApi = {
     });
     return response.data;
   },
+
+  // ─── Outstanding Report APIs ────────────────────────────────────────────────
+
+  /** POST /api/Report/LedgerOutstanding — Angular: ReportServiceService.LedgerOutstanding() */
+  ledgerOutstanding(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/LedgerOutstanding', data);
+  },
+
+  /** POST /api/Report/LedgerOutstandingExport — returns Excel blob */
+  async ledgerOutstandingExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/LedgerOutstandingExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/MultipleOutstandingExport — returns Excel blob */
+  async multipleOutstandingExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/MultipleOutstandingExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/LedgerOutstandingPrint — returns PDF blob */
+  async ledgerOutstandingPrint(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/LedgerOutstandingPrint', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };

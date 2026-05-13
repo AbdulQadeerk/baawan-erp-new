@@ -58,6 +58,7 @@ import {
   Wallet,
   Calculator,
   LogOut,
+  ListChecks,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -961,6 +962,39 @@ export const Header: React.FC<HeaderProps> = ({
                               }
                             />
                           </>
+                        ) : activeMenu === "reports_outstanding" ? (
+                          <>
+                            <ReportSubItem
+                              icon={<ListChecks size={18} />}
+                              label="Multiple Outstanding"
+                              onClick={() =>
+                                handleNavigate(
+                                  "multiple-outstanding-report",
+                                  "Multiple Outstanding",
+                                )
+                              }
+                            />
+                            <ReportSubItem
+                              icon={<Clock size={18} />}
+                              label="Ledger Outstanding"
+                              onClick={() =>
+                                handleNavigate(
+                                  "ledger-outstanding-report",
+                                  "Ledger Outstanding",
+                                )
+                              }
+                            />
+                            <ReportSubItem
+                              icon={<Users size={18} />}
+                              label="Ledger Child Outstanding"
+                              onClick={() =>
+                                handleNavigate(
+                                  "ledger-child-outstanding-report",
+                                  "Ledger Child Outstanding",
+                                )
+                              }
+                            />
+                          </>
                         ) : (
                           <>
                             <ReportSubItem
@@ -971,16 +1005,8 @@ export const Header: React.FC<HeaderProps> = ({
                             <ReportSubItem
                               icon={<Clock size={18} />}
                               label="Outstanding"
-                            />
-                            <ReportSubItem
-                              icon={<List size={18} />}
-                              label="Multiple Ledger Outstanding"
-                              onClick={() =>
-                                handleNavigate(
-                                  "multiple-ledger-outstanding",
-                                  "Multiple Ledger Outstanding",
-                                )
-                              }
+                              onMouseEnter={() => setActiveMenu("reports_outstanding")}
+                              onClick={() => setActiveMenu("reports_outstanding")}
                             />
                             <ReportSubItem
                               icon={<Receipt size={18} />}
@@ -1026,7 +1052,9 @@ export const Header: React.FC<HeaderProps> = ({
                             ? "Inventory Reports"
                             : activeMenu === "reports_marketing"
                               ? "Marketing & Performance"
-                              : "Reports in Final Acc"}
+                              : activeMenu === "reports_outstanding"
+                                ? "Outstanding Reports"
+                                : "Reports in Final Acc"}
                         </h3>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                           {activeMenu === "reports" ||
@@ -1206,6 +1234,45 @@ export const Header: React.FC<HeaderProps> = ({
                                   handleNavigate(
                                     "schedule-report",
                                     "Schedule Report",
+                                  )
+                                }
+                              />
+                            </>
+                          ) : activeMenu === "reports_outstanding" ? (
+                            <>
+                              <ReportCard
+                                icon={<ListChecks size={24} />}
+                                title="Multiple Outstanding"
+                                desc="Outstanding for multiple ledgers"
+                                color="bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "multiple-outstanding-report",
+                                    "Multiple Outstanding",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Clock size={24} />}
+                                title="Ledger Outstanding"
+                                desc="Single ledger outstanding bills"
+                                color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-outstanding-report",
+                                    "Ledger Outstanding",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Users size={24} />}
+                                title="Ledger Child Outstanding"
+                                desc="Outstanding with child breakdown"
+                                color="bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-child-outstanding-report",
+                                    "Ledger Child Outstanding",
                                   )
                                 }
                               />
@@ -1510,14 +1577,17 @@ const ReportSubItem = ({
   label,
   active = false,
   onClick,
+  onMouseEnter,
 }: {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
   onClick?: () => void;
+  onMouseEnter?: () => void;
 }) => (
   <button
     onClick={onClick}
+    onMouseEnter={onMouseEnter}
     className={`w-full flex items-center justify-between px-6 py-3 transition-colors group ${
       active
         ? "bg-slate-100 dark:bg-slate-800/50"

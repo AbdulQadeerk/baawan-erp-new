@@ -69,7 +69,10 @@ export type Page =
   | 'schedule-to-invoice'
   | 'multiple-ledger-outstanding'
   | 'pending-report'
-  | 'supplier-wise-pending';
+  | 'supplier-wise-pending'
+  | 'multiple-outstanding-report'
+  | 'ledger-outstanding-report'
+  | 'ledger-child-outstanding-report';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 
