@@ -72,7 +72,10 @@ export type Page =
   | 'supplier-wise-pending'
   | 'multiple-outstanding-report'
   | 'ledger-outstanding-report'
-  | 'ledger-child-outstanding-report';
+  | 'ledger-child-outstanding-report'
+  | 'outstanding-payments-report'
+  | 'outstanding-receipts-report'
+  | 'sales-person-outstanding-report';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 

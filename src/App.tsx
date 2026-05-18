@@ -13,10 +13,14 @@ import { OutstandingReport } from './components/OutstandingReport';
 import { MultipleOutstandingReport } from './components/reports/outstanding/multiple-outstanding/MultipleOutstandingReport';
 import { LedgerOutstandingReport } from './components/reports/outstanding/ledger-outstanding/LedgerOutstandingReport';
 import { LedgerChildOutstandingReport } from './components/reports/outstanding/ledger-child-outstanding/LedgerChildOutstandingReport';
+import { OutstandingPaymentsReport } from './components/reports/outstanding/outstanding-payments/OutstandingPaymentsReport';
+import { OutstandingReceiptsReport } from './components/reports/outstanding/outstanding-receipts/OutstandingReceiptsReport';
+import { SalesPersonOutstandingReport } from './components/reports/outstanding/sales-person-outstanding/SalesPersonOutstandingReport';
 import { BOMList } from './components/masters/BOMList';
 import { BOMCreate } from './components/masters/BOMCreate';
 import { CurrencyList } from './components/masters/currency/CurrencyList';
 import { CurrencyCreate } from './components/masters/currency/CurrencyCreate';
+import { LedgerOutstandingList } from './components/LedgerOutstandingList';
 import type { CurrencyRecord } from './services/currency.service';
 import { ExtraChargeList } from './components/masters/extra-charge/ExtraChargeList';
 import { ExtraChargeCreate } from './components/masters/extra-charge/ExtraChargeCreate';
@@ -247,6 +251,12 @@ function AppContent() {
         return <LedgerOutstandingReport />;
       case 'ledger-child-outstanding-report':
         return <LedgerChildOutstandingReport />;
+      case 'outstanding-payments-report':
+        return <OutstandingPaymentsReport />;
+      case 'outstanding-receipts-report':
+        return <OutstandingReceiptsReport />;
+      case 'sales-person-outstanding-report':
+        return <SalesPersonOutstandingReport />;
       case 'bom-list':
         return <BOMList onCreateNew={() => addTab('bom-create', 'Create BOM')} />;
       case 'bom-create':
@@ -722,6 +732,9 @@ function AppContent() {
             'multiple-outstanding-report': 'Multiple Outstanding',
             'ledger-outstanding-report': 'Ledger Outstanding',
             'ledger-child-outstanding-report': 'Ledger Child Outstanding',
+            'outstanding-payments-report': 'Outstanding Payments',
+            'outstanding-receipts-report': 'Outstanding Receipts',
+            'sales-person-outstanding-report': 'Sales Person Outstanding',
             'pending-report': 'Pending Report',
             'supplier-wise-pending': 'Purchase Invoice Adjustment Report'
           };

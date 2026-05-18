@@ -962,51 +962,29 @@ export const Header: React.FC<HeaderProps> = ({
                               }
                             />
                           </>
-                        ) : activeMenu === "reports_outstanding" ? (
-                          <>
-                            <ReportSubItem
-                              icon={<ListChecks size={18} />}
-                              label="Multiple Outstanding"
-                              onClick={() =>
-                                handleNavigate(
-                                  "multiple-outstanding-report",
-                                  "Multiple Outstanding",
-                                )
-                              }
-                            />
-                            <ReportSubItem
-                              icon={<Clock size={18} />}
-                              label="Ledger Outstanding"
-                              onClick={() =>
-                                handleNavigate(
-                                  "ledger-outstanding-report",
-                                  "Ledger Outstanding",
-                                )
-                              }
-                            />
-                            <ReportSubItem
-                              icon={<Users size={18} />}
-                              label="Ledger Child Outstanding"
-                              onClick={() =>
-                                handleNavigate(
-                                  "ledger-child-outstanding-report",
-                                  "Ledger Child Outstanding",
-                                )
-                              }
-                            />
-                          </>
                         ) : (
                           <>
                             <ReportSubItem
                               icon={<FileText size={18} />}
                               label="Final Acc"
-                              active
+                              active={activeMenu !== "reports_outstanding"}
+                              onMouseEnter={() =>
+                                setActiveMenu("reports_accounting")
+                              }
+                              onClick={() =>
+                                setActiveMenu("reports_accounting")
+                              }
                             />
                             <ReportSubItem
                               icon={<Clock size={18} />}
                               label="Outstanding"
-                              onMouseEnter={() => setActiveMenu("reports_outstanding")}
-                              onClick={() => setActiveMenu("reports_outstanding")}
+                              active={activeMenu === "reports_outstanding"}
+                              onMouseEnter={() =>
+                                setActiveMenu("reports_outstanding")
+                              }
+                              onClick={() =>
+                                setActiveMenu("reports_outstanding")
+                              }
                             />
                             <ReportSubItem
                               icon={<Receipt size={18} />}
@@ -1273,6 +1251,42 @@ export const Header: React.FC<HeaderProps> = ({
                                   handleNavigate(
                                     "ledger-child-outstanding-report",
                                     "Ledger Child Outstanding",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Banknote size={24} />}
+                                title="Outstanding Payments"
+                                desc="All pending payment outstanding"
+                                color="bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "outstanding-payments-report",
+                                    "Outstanding Payments",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Receipt size={24} />}
+                                title="Outstanding Receipts"
+                                desc="All pending receipt outstanding"
+                                color="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "outstanding-receipts-report",
+                                    "Outstanding Receipts",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<UserSearch size={24} />}
+                                title="Sales Person Outstanding"
+                                desc="Outstanding by sales person"
+                                color="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "sales-person-outstanding-report",
+                                    "Sales Person Outstanding",
                                   )
                                 }
                               />

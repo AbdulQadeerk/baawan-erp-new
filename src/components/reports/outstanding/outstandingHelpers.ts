@@ -39,6 +39,20 @@ export function getFilteredLedgers(groupIds: number[] = [16, 17, 18, 19]): any[]
   return filtered;
 }
 
+export function getFilteredGroups(groupIds: number[] = [16, 17]): any[] {
+  const grpList = storage.getItem<any[]>(STORAGE_KEYS.GROUP_LIST) || [];
+  if (!grpList.length) return [];
+
+  const childGroups: number[] = [];
+  groupIds.forEach(gid => {
+    childGroups.push(gid);
+    getChildGroupIds(gid, grpList, childGroups);
+  });
+
+  const filtered = grpList.filter((x: any) => childGroups.indexOf(x.id) !== -1);
+  return filtered.sort((a: any, b: any) => a.name.localeCompare(b.name));
+}
+
 function getChildGroupIds(parentId: number, grpList: any[], result: number[]) {
   const children = grpList.filter((g: any) => g.parentGroup === parentId);
   children.forEach((child: any) => {
