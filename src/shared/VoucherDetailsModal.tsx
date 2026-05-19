@@ -6,7 +6,7 @@
  * each voucher ledger entry, and displays debit/credit entries with navigation.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, Loader2, Printer, Receipt } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Loader2, Printer, Receipt, Pencil, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiClient } from '../lib/api-client';
 import { INVOICE_VOUCHER_TYPES_BY_ID } from '../lib/constants';
@@ -41,6 +41,7 @@ export const VoucherDetailsModal: React.FC<VoucherDetailsModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [record, setRecord] = useState<any>(null);
   const [index, setIndex] = useState(initialIndex);
+  const [activeTab, setActiveTab] = useState<'details'|'attachments'>('details');
   const invTypeText = VOUCHER_TYPES_BY_ID[String(invType)] || INVOICE_VOUCHER_TYPES_BY_ID[String(invType)] || 'Voucher';
 
   // ─── Fetch voucher data ─────────────────────────────────────────────────
@@ -104,7 +105,7 @@ export const VoucherDetailsModal: React.FC<VoucherDetailsModalProps> = ({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isOpen, index]);
+  }, [isOpen, index, navigate, onClose]);
 
   const fmt = (n: any) => {
     const v = parseFloat(n);
@@ -116,6 +117,9 @@ export const VoucherDetailsModal: React.FC<VoucherDetailsModalProps> = ({
     try { return new Date(val).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }); }
     catch { return val; }
   };
+
+  const totalDebit = record?.ledgerDetails?.filter((e: any) => !e.isCredit).reduce((sum: number, e: any) => sum + e.amount, 0) || 0;
+  const totalCredit = record?.ledgerDetails?.filter((e: any) => e.isCredit).reduce((sum: number, e: any) => sum + e.amount, 0) || 0;
 
   if (!isOpen) return null;
 
@@ -149,97 +153,136 @@ export const VoucherDetailsModal: React.FC<VoucherDetailsModalProps> = ({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700"
+          className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <Receipt size={18} className="text-blue-600" /> {invTypeText}
-            </h3>
+          <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center gap-6">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Receipt size={16} className="text-blue-500" /> {invTypeText}
+                {record && <span className="text-xs font-normal text-slate-500 ml-2">{record.billNo || record.bill_No} | {formatDate(record.date)}</span>}
+              </h3>
+            </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => window.print()} className="p-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 rounded-lg transition-colors text-blue-700 dark:text-blue-300" title="Print">
-                <Printer size={16} />
+              <button className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded transition-colors text-blue-600 dark:text-blue-400" title="Edit">
+                <Pencil size={14} />
               </button>
-              <button onClick={onClose} className="p-2 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 rounded-lg transition-colors text-rose-600 dark:text-rose-400">
-                <X size={16} />
+              <button onClick={() => window.print()} className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded transition-colors text-emerald-600 dark:text-emerald-400" title="Print">
+                <Printer size={14} />
+              </button>
+              <button onClick={onClose} className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded transition-colors text-slate-600 dark:text-slate-400">
+                <X size={14} />
               </button>
             </div>
           </div>
 
+          {/* Tabs */}
+          <div className="flex items-center gap-4 px-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pt-3">
+            <button
+              onClick={() => setActiveTab('details')}
+              className={`pb-2 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+                activeTab === 'details' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Receipt size={14} /> Voucher Details
+            </button>
+            <button
+              onClick={() => setActiveTab('attachments')}
+              className={`pb-2 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+                activeTab === 'attachments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Paperclip size={14} /> Attachments <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[10px]">0</span>
+            </button>
+          </div>
+
           {/* Body */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <Loader2 size={32} className="animate-spin text-blue-600" />
                 <span className="text-sm text-slate-500">Loading voucher details...</span>
               </div>
             ) : record ? (
-              <>
-                {/* Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
-                  <div>
-                    <span className="text-slate-500">Voucher No:</span>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{record.billNo || record.bill_No || '—'}</p>
+              activeTab === 'details' ? (
+                <>
+                  {/* Info Header */}
+                  <div className="flex justify-between items-end p-6 border-b-2 border-slate-200 dark:border-slate-700 pb-4 mb-4">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Voucher Date</span>
+                      <p className="text-lg font-black text-slate-800 dark:text-slate-100">{formatDate(record.date)}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Document No</span>
+                      <p className="text-lg font-black text-slate-800 dark:text-slate-100">{record.billNo || record.bill_No || '—'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-500">Date:</span>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{formatDate(record.date)}</p>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">Type:</span>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{invTypeText}</p>
-                  </div>
-                </div>
 
-                {/* Ledger Entries Table */}
-                <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mb-4">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                        <th className="px-4 py-2 text-left text-xs font-bold uppercase text-slate-500">Ledger</th>
-                        <th className="px-4 py-2 text-right text-xs font-bold uppercase text-slate-500">Debit</th>
-                        <th className="px-4 py-2 text-right text-xs font-bold uppercase text-slate-500">Credit</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {record.ledgerDetails?.map((entry: any, i: number) => (
-                        <tr key={i} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                          <td className="px-4 py-3">
-                            <p className="font-semibold text-slate-800 dark:text-slate-200">{entry.ledgerData?.name || `Ledger #${entry.ledger_ID}`}</p>
-                            {entry.subDetails?.length > 0 && (
-                              <div className="mt-1 space-y-0.5">
-                                {entry.subDetails.map((sub: any, j: number) => (
-                                  <p key={j} className="text-xs text-slate-500 pl-3 border-l-2 border-slate-200 dark:border-slate-700">
-                                    {sub.name || '—'} — {fmt(sub.amount)}
-                                  </p>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">
-                            {!entry.isCredit ? fmt(entry.amount) : ''}
-                          </td>
-                          <td className="px-4 py-3 text-right font-semibold text-slate-800 dark:text-slate-200">
-                            {entry.isCredit ? fmt(entry.amount) : ''}
-                          </td>
+                  {/* Ledger Entries Table */}
+                  <div className="px-6 mb-6">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-[#3498db] text-white">
+                          <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wider rounded-tl-sm">Party / Account</th>
+                          <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wider w-40">Debit</th>
+                          <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wider w-40 rounded-tr-sm">Credit</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {record.ledgerDetails?.map((entry: any, i: number) => (
+                          <tr key={i} className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                            <td className="px-4 py-3">
+                              <p className="font-semibold text-slate-800 dark:text-slate-200 uppercase text-xs">
+                                {entry.ledgerData?.name || `Ledger #${entry.ledger_ID}`}
+                              </p>
+                              <span className="text-[10px] text-slate-400 font-medium block mt-0.5">ID: {entry.ledger_ID}</span>
+                              {entry.subDetails?.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {entry.subDetails.map((sub: any, j: number) => (
+                                    <p key={j} className="text-xs text-slate-600 dark:text-slate-400 pl-3 border-l-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-1 rounded-r">
+                                      <span className="font-medium">{sub.name || '—'}</span> — <span className="font-bold">{fmt(sub.amount)}</span>
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 align-top">
+                              {!entry.isCredit ? `${fmt(entry.amount)} Dr` : ''}
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-rose-600 dark:text-rose-400 align-top">
+                              {entry.isCredit ? `${fmt(entry.amount)} Cr` : ''}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700">
+                          <td className="px-4 py-4 text-center font-bold uppercase text-xs text-slate-700 dark:text-slate-300">Total Balance</td>
+                          <td className="px-4 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400">{fmt(totalDebit)} Dr</td>
+                          <td className="px-4 py-4 text-right font-bold text-rose-600 dark:text-rose-400">{fmt(totalCredit)} Cr</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
 
-                {/* Footer */}
-                <div className="flex flex-wrap items-center justify-between text-sm gap-4">
-                  {record.note && (
-                    <p className="text-slate-600 dark:text-slate-400"><b>Note:</b> {record.note}</p>
-                  )}
-                  {record.preparedBy && (
-                    <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-semibold">
-                      Prepared By: {record.preparedBy}
-                    </span>
-                  )}
+                  {/* Footer Notes */}
+                  <div className="flex flex-wrap items-center justify-between text-xs px-6 pb-6 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                    {record.note && (
+                      <p className="text-slate-500"><b>Note:</b> {record.note}</p>
+                    )}
+                    {record.preparedBy && (
+                      <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded font-semibold ml-auto">
+                        Prepared By: {record.preparedBy}
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="p-6 text-center text-sm text-slate-500">
+                  <Paperclip size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-4" />
+                  <p>No attachments available for this voucher.</p>
                 </div>
-              </>
+              )
             ) : (
               <div className="text-center py-16 text-sm text-slate-400">No voucher data available</div>
             )}

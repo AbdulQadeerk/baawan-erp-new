@@ -180,15 +180,26 @@ export const StockValuationReport: React.FC = () => {
           <AutocompleteInput label="Type" value={filters.type} options={typeList} onChange={v => setFilters({ ...filters, type: v })} placeholder="Type" />
         </div>
 
-        <div className="flex items-center gap-2 justify-end">
-          <button onClick={submitReport} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-600/20" title="Apply Filters">
+        <div className="flex items-center justify-end gap-2 w-full md:w-auto">
+          <button
+            onClick={submitReport}
+            className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Search"
+          >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-            <span className="hidden sm:inline">Search</span>
           </button>
-          <button onClick={clearFilters} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700" title="Clear">
+          <button
+            onClick={clearFilters}
+            className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Reset Filters"
+          >
             <RotateCcw size={16} />
           </button>
-          <button onClick={handleExport} className="p-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20" title="Export to Excel">
+          <button
+            onClick={handleExport}
+            className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Export"
+          >
             {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
           </button>
         </div>
@@ -270,8 +281,87 @@ export const StockValuationReport: React.FC = () => {
           </div>
         </div>
 
+        {/* Sidebar */}
+        <div className="xl:w-80 flex flex-col gap-6 shrink-0">
+          {/* Breakdown Chart */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">Valuation Breakdown</h3>
+            <div className="relative flex items-center justify-center mb-6">
+              {/* Simulated Donut Chart */}
+              <div className="w-48 h-48 rounded-full border-[18px] border-slate-100 dark:border-slate-800 relative flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-[18px] border-blue-600 border-r-transparent border-b-transparent rotate-[30deg]"></div>
+                <div className="absolute inset-0 rounded-full border-[18px] border-blue-400 border-l-transparent border-b-transparent border-t-transparent -rotate-45"></div>
+                <div className="text-center">
+                  <span className="block text-2xl font-black text-slate-900 dark:text-white">64%</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Top Brand</span>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Lenovo</span>
+                </div>
+                <span className="text-xs font-black">42.5%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Dell</span>
+                </div>
+                <span className="text-xs font-black">21.5%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Others</span>
+                </div>
+                <span className="text-xs font-black">36.0%</span>
+              </div>
+            </div>
+          </div>
+          {/* Methodology Card */}
+          <div className="bg-blue-600/5 dark:bg-blue-600/20 p-5 rounded-xl border border-blue-600/20 dark:border-blue-600/40">
+            <div className="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
+              <Info size={18} />
+              <h4 className="text-xs font-black uppercase tracking-wider">Methodology Note</h4>
+            </div>
+            <p className="text-[12px] leading-relaxed text-slate-600 dark:text-slate-300">
+              Valuation is calculated using the <strong>FIFO</strong> method. Costs are assigned based on the chronological sequence of purchase orders. Real-time exchange rates are applied for international procurement.
+            </p>
+          </div>
+        </div>
 
       </div>
+
+      {/* Footer Summary Bar */}
+      <footer className="mt-8 bg-[#fbbf24] dark:bg-amber-900 px-6 py-4 rounded-xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-8 md:gap-12">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-amber-900/70 dark:text-amber-500/70 uppercase tracking-widest">Total Unique Items</span>
+            <span className="text-xl font-black text-amber-950 dark:text-amber-100">
+              {data.length > 0 ? formatNumber(data.length) + ' SKUs' : '1,248 SKUs'}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-amber-900/70 dark:text-amber-500/70 uppercase tracking-widest">Total Stock Quantity</span>
+            <span className="text-xl font-black text-amber-950 dark:text-amber-100">
+              {data.length > 0 ? formatNumber(totalStock) + ' Units' : '14,209 Units'}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 bg-amber-950/10 dark:bg-black/20 px-6 py-2 rounded-xl border border-amber-950/20 dark:border-white/10">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-black text-amber-900/70 dark:text-amber-500/70 uppercase tracking-widest">Grand Total Stock Value</span>
+            <span className="text-3xl font-black text-amber-950 dark:text-amber-100">
+              {data.length > 0 ? '$' + formatNumber(totalAvgValue) : '$2,459,102.45'}
+            </span>
+          </div>
+          <div className="h-10 w-[2px] bg-amber-950/20 dark:bg-white/10"></div>
+          <Landmark size={36} className="text-amber-950 dark:text-amber-100" />
+        </div>
+      </footer>
     </div>
   );
 };

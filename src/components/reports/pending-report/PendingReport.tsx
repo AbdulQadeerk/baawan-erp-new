@@ -393,14 +393,26 @@ export const PendingReport: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <button onClick={submitReport} className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-700/20">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />} Search
+        <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 w-full">
+          <button
+            onClick={submitReport}
+            className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Search"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
           </button>
-          <button onClick={clearFilters} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700">
+          <button
+            onClick={clearFilters}
+            className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Reset Filters"
+          >
             <RotateCcw size={16} />
           </button>
-          <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20">
+          <button
+            onClick={handleExport}
+            className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            title="Export"
+          >
             {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
           </button>
         </div>

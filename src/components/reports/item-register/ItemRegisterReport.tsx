@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, RotateCcw, FileSpreadsheet, FileText,
-  LayoutGrid, Loader2, Eye, CalendarRange
+  LayoutGrid, Loader2, Eye, CalendarRange, Package, CheckCircle2, MinusCircle, Clock
 } from 'lucide-react';
 import { reportApi } from '../../../services/report.service';
 import { commonApi } from '../../../lib/api-client';
@@ -343,40 +343,50 @@ export const ItemRegisterReport: React.FC = () => {
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <AutocompleteInput 
-            label="Single Item" 
-            value={filters.item} 
-            options={itemList} 
-            onChange={v => setFilters({ ...filters, item: v })} 
-            placeholder="Single Item" 
-            displayField="particular" 
-            templateType="item" 
-            required 
-            hasError={submitted && !filters.item} 
-          />
-          <AutocompleteInput 
-            label="Lot / Batch No" 
-            value={filters.mfrItemName} 
-            options={lotNoList} 
-            onChange={v => setFilters({ ...filters, mfrItemName: v })} 
-            placeholder="Lot / Batch No" 
-          />
+        <div className="flex flex-wrap xl:flex-nowrap items-start gap-4">
           
-          <div className="space-y-1">
+          {/* Single Item */}
+          <div className="w-full sm:w-64 xl:flex-1 xl:min-w-[280px] shrink-0">
+            <AutocompleteInput 
+              label="Single Item" 
+              value={filters.item} 
+              options={itemList} 
+              onChange={v => setFilters({ ...filters, item: v })} 
+              placeholder="Single Item" 
+              displayField="particular" 
+              templateType="item" 
+              required 
+              hasError={submitted && !filters.item} 
+            />
+          </div>
+          
+          {/* Lot / Batch No */}
+          <div className="w-full sm:w-40 shrink-0">
+            <AutocompleteInput 
+              label="Lot / Batch No" 
+              value={filters.mfrItemName} 
+              options={lotNoList} 
+              onChange={v => setFilters({ ...filters, mfrItemName: v })} 
+              placeholder="Lot / Batch No" 
+            />
+          </div>
+          
+          {/* From Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">From Date <span className="text-red-500">*</span></label>
             <input type="date" value={filters.fromDate} onChange={e => setFilters({ ...filters, fromDate: e.target.value })}
               className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${submitted && !filters.fromDate ? 'border-red-500 focus:border-red-500' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500'}`} />
           </div>
-          <div className="space-y-1">
+          
+          {/* To Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">To Date <span className="text-red-500">*</span></label>
             <input type="date" value={filters.toDate} onChange={e => setFilters({ ...filters, toDate: e.target.value })}
               className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${submitted && !filters.toDate ? 'border-red-500 focus:border-red-500' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500'}`} />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4 items-end">
-          <div className="space-y-1 lg:col-span-2">
+          {/* Stock Place */}
+          <div className="w-full sm:w-40 shrink-0 space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Stock Place</label>
             <select value={filters.spIds} onChange={e => setFilters({ ...filters, spIds: e.target.value })} disabled={filters.isOpeningStock}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none disabled:opacity-50">
@@ -384,22 +394,38 @@ export const ItemRegisterReport: React.FC = () => {
               {stockPlaceList.map(sp => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
             </select>
           </div>
+          
+          {/* Checkboxes (Stacked) */}
+          <div className="flex flex-col gap-2 shrink-0 pt-1 xl:ml-2">
+            <CheckboxInput id="isOpeningStock" label="All Stock Places" checked={filters.isOpeningStock} onChange={v => setFilters({ ...filters, isOpeningStock: v, spIds: v ? '' : filters.spIds })} />
+            <CheckboxInput id="stockDetail" label="Stock Balance In Details" checked={filters.stockDetail} onChange={v => setFilters({ ...filters, stockDetail: v })} />
+            <CheckboxInput id="monthWise" label="Month Wise" checked={filters.monthWise} onChange={v => setFilters({ ...filters, monthWise: v })} />
+          </div>
 
-          <CheckboxInput id="isOpeningStock" label="All Stock Places" checked={filters.isOpeningStock} onChange={v => setFilters({ ...filters, isOpeningStock: v, spIds: v ? '' : filters.spIds })} />
-          <CheckboxInput id="stockDetail" label="Stock Balance In Details" checked={filters.stockDetail} onChange={v => setFilters({ ...filters, stockDetail: v })} />
-          <CheckboxInput id="monthWise" label="Month Wise" checked={filters.monthWise} onChange={v => setFilters({ ...filters, monthWise: v })} />
-        </div>
-
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <button onClick={submitReport} className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-700/20">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />} Search
-          </button>
-          <button onClick={clearFilters} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700">
-            <RotateCcw size={16} />
-          </button>
-          <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20">
-            {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
-          </button>
+          {/* Buttons */}
+          <div className="flex items-center space-x-2 shrink-0 pt-4 xl:pt-1 xl:ml-auto">
+            <button
+              onClick={submitReport}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Search"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            </button>
+            <button
+              onClick={clearFilters}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Export"
+            >
+              {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -493,10 +519,56 @@ export const ItemRegisterReport: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500 font-medium">{filters.monthWise ? 'Total Months:' : 'Total Rows:'}</span>
-              <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded text-[10px] font-bold">
+              <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded text-[10px] font-bold">
                 {filters.monthWise ? monthlyTotals.length : data.length}
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-auto bg-[#FEF9C3] dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/30 py-3 px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40 rounded-b-xl -mx-0">
+        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-4 md:gap-8">
+            <div className="flex items-center gap-3">
+              <Package className="text-amber-600 bg-amber-200/50 p-1.5 rounded-lg w-8 h-8" />
+              <div>
+                <p className="text-[10px] font-bold text-amber-800 dark:text-amber-500 uppercase tracking-tight">
+                  Total Received
+                </p>
+                <p className="text-lg font-black text-amber-950 dark:text-amber-100 leading-none">
+                  {data.length > 0 ? formatNumber(data.reduce((sum, r) => sum + (Number(r.Received) || 0), 0)) : '-'}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block w-[1px] h-8 bg-amber-300/50"></div>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="text-green-600 bg-green-200/50 p-1.5 rounded-lg w-8 h-8" />
+              <div>
+                <p className="text-[10px] font-bold text-green-800 dark:text-green-500 uppercase tracking-tight">
+                  Total Issued
+                </p>
+                <p className="text-lg font-black text-green-900 dark:text-green-100 leading-none">
+                  {data.length > 0 ? formatNumber(data.reduce((sum, r) => sum + (Number(r.Issued) || 0), 0)) : '-'}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block w-[1px] h-8 bg-amber-300/50"></div>
+            <div className="flex items-center gap-3">
+              <MinusCircle className="text-slate-600 bg-slate-200/50 p-1.5 rounded-lg w-8 h-8" />
+              <div>
+                <p className="text-[10px] font-bold text-slate-800 dark:text-slate-500 uppercase tracking-tight">
+                  Closing Balance
+                </p>
+                <p className="text-lg font-black text-slate-900 dark:text-slate-100 leading-none">
+                  {data.length > 0 ? formatNumber(data[data.length - 1].Balance) : '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70 dark:text-amber-500/70 italic uppercase">
+            <Clock size={14} />
+            Last updated: Just now
           </div>
         </div>
       </div>

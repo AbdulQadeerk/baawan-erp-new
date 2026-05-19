@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, Layers, CheckCircle2 } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, Layers, CheckCircle2, LineChart, Info } from 'lucide-react';
 import { reportApi } from '../services/report.service';
 import { toast } from '../lib/toast';
 import * as H from './reports/trial-balance/trialBalanceHelpers';
@@ -102,6 +102,16 @@ export const BalanceSheet: React.FC = () => {
   const fmt = (val: number) => H.formatNumber(Math.abs(val), precision);
   const isBalanced = lst ? Math.abs(lst.totalLiabilities - lst.totalAssets) < 0.01 : false;
 
+  const currentAssets = lst?.assets.find(a => a.NAME === 'Current Assets')?.Amount || 0;
+  const currentLiabilities = lst?.liabilities.find(l => l.NAME === 'Current Liabilities')?.Amount || 0;
+  const currentRatio = currentLiabilities ? (currentAssets / currentLiabilities) : 0;
+
+  const totalDebt = lst?.liabilities.find(l => l.NAME === 'Loans (Liability)')?.Amount || 0;
+  const capital = lst?.liabilities.find(l => l.NAME === 'Capital Account')?.Amount || 0;
+  const pnl = lst?.liabilities.find(l => l.NAME === 'Profit & Loss A/c')?.Amount || 0;
+  const equity = capital + pnl;
+  const debtToEquity = equity ? (totalDebt / equity) : 0;
+
   return (
     <div className="font-sans text-slate-700 dark:text-slate-200">
       {/* Header */}
@@ -119,36 +129,59 @@ export const BalanceSheet: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[280px]">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">From Date <span className="text-red-500">*</span></label>
-                <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
-              </div>
-              <div className="flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-red-500">*</span></label>
-                <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
-              </div>
-            </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
+              From
+            </span>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handleSearch} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
+              To
+            </span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={e => setToDate(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2 mt-4">
+            <button
+              onClick={handleSearch}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Search"
+            >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              <span className="hidden sm:inline">Search</span>
             </button>
-            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"><RotateCcw size={16} /></button>
-            <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20">
+            <button
+              onClick={handleClear}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="PDF Export"
+            >
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      {/* Content & Sidebar */}
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
+        <div className="flex-1 w-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 size={28} className="animate-spin text-blue-500 mb-3" />
@@ -225,6 +258,68 @@ export const BalanceSheet: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+        </div>
+        
+        {/* Right Sidebar: Liquidity Insights */}
+        {lst && (
+          <aside className="w-full xl:w-[320px] shrink-0 flex flex-col gap-6">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm sticky top-6">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <LineChart size={18} />
+                </div>
+                <h3 className="font-extrabold text-lg">Liquidity Insights</h3>
+              </div>
+              <div className="flex flex-col gap-8">
+                {/* Ratio 1 */}
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    <svg className="w-full h-full -rotate-90">
+                      <circle className="text-slate-100 dark:text-slate-800" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeWidth="8"></circle>
+                      <circle className="text-[#2D9E75]" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeDasharray="364.4" strokeDashoffset={currentRatio > 2 ? 0 : 364.4 - (364.4 * (currentRatio / 2))} strokeLinecap="round" strokeWidth="10"></circle>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-black">{currentRatio.toFixed(2)}</span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400">Target: 1.2+</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm">Current Ratio</h4>
+                    <p className="text-xs text-slate-500 mt-1">Measuring ability to pay short-term obligations.</p>
+                  </div>
+                </div>
+                <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
+                {/* Ratio 2 */}
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    <svg className="w-full h-full -rotate-90">
+                      <circle className="text-slate-100 dark:text-slate-800" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeWidth="8"></circle>
+                      <circle className="text-amber-500" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeDasharray="364.4" strokeDashoffset={Math.abs(debtToEquity) > 2 ? 0 : 364.4 - (364.4 * (Math.abs(debtToEquity) / 2))} strokeLinecap="round" strokeWidth="10"></circle>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-black">{Math.abs(debtToEquity).toFixed(2)}</span>
+                      <span className="text-[10px] uppercase font-bold text-slate-400">Target: 1.0</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm">Debt-to-Equity</h4>
+                    <p className="text-xs text-slate-500 mt-1">Financial leverage assessment.</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Info size={16} className="text-amber-500" />
+                    <span className="text-xs font-bold uppercase tracking-wide">Analysis</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {currentRatio < 1.2 ? "Liquidity is below target. " : "Liquidity is strong. "}
+                    {Math.abs(debtToEquity) > 1 ? <span className="font-bold text-red-500">Debt leverage is high.</span> : "Debt leverage is manageable."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
         )}
       </div>
     </div>

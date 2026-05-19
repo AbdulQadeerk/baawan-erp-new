@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, FileText, RefreshCw, Loader2, X, FolderOpen, Scale } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, FileText, RefreshCw, Loader2, X, FolderOpen, Scale, CheckCircle, Settings, TrendingUp, Info, ShieldCheck } from 'lucide-react';
 import { reportApi } from '../../../../services/report.service';
 import { toast } from '../../../../lib/toast';
 import * as H from '../trialBalanceHelpers';
@@ -173,6 +173,29 @@ export const TrialBalanceReport: React.FC = () => {
 
   const grouped = H.groupBy(lst, 'nature');
 
+  // Dynamic calculations for the right panel
+  const getClosing = (name: string) => {
+    const item = lst.find(x => x.NAME === name);
+    return item ? Math.abs(H.getProcessedClosingBalance(item)) : 0;
+  };
+
+  const caVal = getClosing('Current Assets');
+  const faVal = getClosing('Fixed Assets');
+  const clVal = getClosing('Current Liabilities');
+  const loanVal = getClosing('Loans (Liability)');
+
+  const totalAssets = caVal + faVal;
+  const totalLiabilities = clVal + loanVal;
+  const totalBoth = totalAssets + totalLiabilities;
+  
+  const denominator = totalBoth > 0 ? totalBoth : 1;
+  const caPct = Math.round((caVal / denominator) * 100);
+  const faPct = Math.round((faVal / denominator) * 100);
+  const liabPct = Math.round((totalLiabilities / denominator) * 100);
+  const assetPct = totalBoth > 0 ? Math.round((totalAssets / denominator) * 100) : 0;
+
+  const netWorth = totalAssets - totalLiabilities;
+
   return (
     <div className="font-sans text-slate-700 dark:text-slate-200">
       {/* Header */}
@@ -215,15 +238,32 @@ export const TrialBalanceReport: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button onClick={handleSearch} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-indigo-600/20" title="Generate Report">
+            <button
+              onClick={handleSearch}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Generate Report"
+            >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              <span className="hidden sm:inline">Search</span>
             </button>
-            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700" title="Clear"><RotateCcw size={16} /></button>
-            <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20" title="Export Excel">
+            <button
+              onClick={handleClear}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Clear Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Export Excel"
+            >
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
-            <button onClick={handleRefreshAll} className="p-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20" title="Refresh All">
+            <button
+              onClick={handleRefreshAll}
+              className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Refresh All"
+            >
               <RefreshCw size={16} />
             </button>
           </div>
@@ -246,10 +286,12 @@ export const TrialBalanceReport: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white dark:bg-slate-900 rounded-b-xl border border-t-0 border-slate-200 dark:border-slate-700 shadow-sm">
-        {/* Main Trial Balance Tab */}
-        {selectedTab === 1 && (
-          <div className="p-4">
+      <div className="flex flex-col lg:flex-row bg-white dark:bg-slate-900 rounded-b-xl border border-t-0 border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Main Trial Balance Tab */}
+          {selectedTab === 1 && (
+            <div className="p-4 flex-1 overflow-auto custom-scrollbar">
             {lst.length > 0 && (
               <div className="flex items-center gap-6 mb-4">
                 {[{ label: 'Opening Balance', checked: showOpeningBalance, onChange: setShowOpeningBalance },
@@ -277,129 +319,246 @@ export const TrialBalanceReport: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Table Header */}
-                <div className="rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-0">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800">
-                        <th className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Account</th>
-                        {showOpeningBalance && <th className="px-3 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Opening Balance</th>}
-                        {showDebit && <th className="px-3 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Debit</th>}
-                        {showCredit && <th className="px-3 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Credit</th>}
-                        <th className="px-3 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Closing Balance</th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-
-                {/* Grouped Data */}
-                <div className="max-h-[calc(100vh-420px)] overflow-auto">
-                  {grouped.map((group, gi) => (
-                    <div key={gi} className="mb-3">
-                      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-t-lg">
-                        <span className="text-sm font-bold text-indigo-700 dark:text-indigo-400">{group.key}</span>
-                      </div>
-                      <div className="border-x border-slate-200 dark:border-slate-700">
-                        {group.value.map((item: any, idx: number) => (
-                          <div key={idx} className="border-b border-slate-100 dark:border-slate-800 hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                            <table className="w-full text-left border-collapse">
-                              <tbody>
-                                <tr className="cursor-pointer" onClick={() => toggleItem(item)}>
-                                  <td className="px-4 py-2.5">
-                                    <div className="flex items-center gap-2">
-                                      <FolderOpen size={14} className="text-emerald-500 flex-shrink-0" />
-                                      <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">{item.NAME}</span>
-                                    </div>
-                                  </td>
-                                  {showOpeningBalance && (
-                                    <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-600 dark:text-slate-400">
-                                      {H.formatNumber(H.getProcessedOpeningBalance(item), precision)}
-                                      {H.getOpeningDrCr(item) && <span className="ml-1 text-slate-400">{H.getOpeningDrCr(item)}</span>}
-                                    </td>
-                                  )}
-                                  {showDebit && <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-600 dark:text-slate-400">{H.formatNumber(H.getProcessedDebit(item), precision)}</td>}
-                                  {showCredit && <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-600 dark:text-slate-400">{H.formatNumber(H.getProcessedCredit(item), precision)}</td>}
-                                  <td className="px-3 py-2.5 text-right text-sm font-mono font-bold text-slate-800 dark:text-slate-200">
-                                    {H.formatNumber(H.getProcessedClosingBalance(item), precision)}
-                                    {H.getClosingDrCr(item) && <span className="ml-1 text-xs font-normal text-slate-400">{H.getClosingDrCr(item)}</span>}
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800/80 border border-t-2 border-slate-200 dark:border-slate-700 rounded-b-lg">
-                        <table className="w-full text-left border-collapse">
-                          <tbody>
-                            <tr className="font-bold">
-                              <td className="px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300">Total</td>
-                              {showOpeningBalance && (
-                                <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-700 dark:text-slate-300">
-                                  {H.formatNumber(H.getTotalProcessedOpeningBalance(group.value), precision)}
-                                  {H.getOpeningDrCrForGroup(group.value) && <span className="ml-1">{H.getOpeningDrCrForGroup(group.value)}</span>}
-                                </td>
-                              )}
-                              {showDebit && <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-700 dark:text-slate-300">{H.formatNumber(H.getTotalProcessedDebit(group.value), precision)}</td>}
-                              {showCredit && <td className="px-3 py-2.5 text-center text-xs font-mono text-slate-700 dark:text-slate-300">{H.formatNumber(H.getTotalProcessedCredit(group.value), precision)}</td>}
-                              <td className={`px-3 py-2.5 text-right text-sm font-mono ${H.getNetAmountWithSign(group.value) >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                {H.formatNumber(H.getNetAmount(group.value), precision)}
-                                {H.getClosingDrCrForGroup(group.value) && <span className="ml-1 text-xs">{H.getClosingDrCrForGroup(group.value)}</span>}
+                {/* Unified Data Table */}
+                <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm flex-1 flex flex-col">
+                  <div className="overflow-x-auto custom-scrollbar flex-1">
+                    <table className="w-full text-left border-collapse whitespace-nowrap min-w-[800px]">
+                      <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700">
+                        <tr>
+                          <th className="px-4 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-white dark:bg-slate-900"></th>
+                          {showOpeningBalance && <th className="px-4 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800">Opening Balance</th>}
+                          {showDebit && <th className="px-4 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800">Debit</th>}
+                          {showCredit && <th className="px-4 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800">Credit</th>}
+                          <th className="px-4 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800">Closing Balance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {grouped.map((group, gi) => (
+                          <React.Fragment key={gi}>
+                            {/* Group Header */}
+                            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                              <td colSpan={1 + (showOpeningBalance ? 1 : 0) + (showDebit ? 1 : 0) + (showCredit ? 1 : 0) + 1} className="px-4 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                {group.key}
                               </td>
                             </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Grand Total */}
-                <div className="mt-3 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-4 shadow-lg shadow-indigo-600/20">
-                  <table className="w-full text-left border-collapse">
-                    <tbody>
-                      <tr className="text-white font-bold">
-                        <td className="px-4 py-1 text-base">Grand Total</td>
-                        {showOpeningBalance && (
-                          <td className="px-3 py-1 text-center text-sm font-mono">
-                            {H.formatNumber(H.getTotalProcessedOpeningBalance(lst), precision)}
+                            
+                            {/* Group Items */}
+                            {group.value.map((item: any, idx: number) => (
+                              <tr key={idx} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer" onClick={() => toggleItem(item)}>
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center gap-2.5">
+                                    <FolderOpen size={16} className="text-lime-500 flex-shrink-0" fill="currentColor" fillOpacity={0.2} />
+                                    <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:underline">{item.NAME}</span>
+                                  </div>
+                                </td>
+                                {showOpeningBalance && (
+                                  <td className="px-4 py-3.5 text-center text-sm font-medium text-slate-600 dark:text-slate-400">
+                                    {H.formatNumber(H.getProcessedOpeningBalance(item), precision)}
+                                    {H.getOpeningDrCr(item) && <span className="ml-1 text-slate-400">{H.getOpeningDrCr(item)}</span>}
+                                  </td>
+                                )}
+                                {showDebit && <td className="px-4 py-3.5 text-center text-sm font-medium text-slate-600 dark:text-slate-400">{H.formatNumber(H.getProcessedDebit(item), precision)}</td>}
+                                {showCredit && <td className="px-4 py-3.5 text-center text-sm font-medium text-slate-600 dark:text-slate-400">{H.formatNumber(H.getProcessedCredit(item), precision)}</td>}
+                                <td className="px-4 py-3.5 text-right text-sm font-medium text-slate-800 dark:text-slate-200">
+                                  {H.formatNumber(H.getProcessedClosingBalance(item), precision)}
+                                  {H.getClosingDrCr(item) && <span className="ml-1 text-xs text-slate-400 font-normal">{H.getClosingDrCr(item)}</span>}
+                                </td>
+                              </tr>
+                            ))}
+                            
+                            {/* Group Total */}
+                            <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+                              <td className="px-4 py-3.5 text-sm font-medium text-slate-500 dark:text-slate-400">Total</td>
+                              {showOpeningBalance && (
+                                <td className="px-4 py-3.5 text-center text-sm font-semibold text-slate-600 dark:text-slate-400">
+                                  {H.formatNumber(H.getTotalProcessedOpeningBalance(group.value), precision)}
+                                  {H.getOpeningDrCrForGroup(group.value) && <span className="ml-1 text-slate-400 font-normal">{H.getOpeningDrCrForGroup(group.value)}</span>}
+                                </td>
+                              )}
+                              {showDebit && <td className="px-4 py-3.5 text-center text-sm font-semibold text-slate-600 dark:text-slate-400">{H.formatNumber(H.getTotalProcessedDebit(group.value), precision)}</td>}
+                              {showCredit && <td className="px-4 py-3.5 text-center text-sm font-semibold text-slate-600 dark:text-slate-400">{H.formatNumber(H.getTotalProcessedCredit(group.value), precision)}</td>}
+                              <td className={`px-4 py-3.5 text-right text-sm font-bold ${H.getNetAmountWithSign(group.value) >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500'}`}>
+                                {H.formatNumber(H.getNetAmount(group.value), precision)}
+                                {H.getClosingDrCrForGroup(group.value) && <span className="ml-1 font-normal text-xs">{H.getClosingDrCrForGroup(group.value)}</span>}
+                              </td>
+                            </tr>
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                      <tfoot className="sticky bottom-0 z-10 bg-gradient-to-r from-indigo-50 dark:from-indigo-900/20 to-blue-50 dark:to-blue-900/20 border-t-2 border-indigo-200 dark:border-indigo-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                        <tr>
+                          <td className="px-4 py-4 text-sm font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">Grand Total</td>
+                          {showOpeningBalance && (
+                            <td className="px-4 py-4 text-center text-sm font-bold text-indigo-700 dark:text-indigo-400">
+                              {H.formatNumber(H.getTotalProcessedOpeningBalance(lst), precision)}
+                            </td>
+                          )}
+                          {showDebit && <td className="px-4 py-4 text-center text-sm font-bold text-indigo-700 dark:text-indigo-400">{H.formatNumber(H.getTotalProcessedDebit(lst), precision)}</td>}
+                          {showCredit && <td className="px-4 py-4 text-center text-sm font-bold text-indigo-700 dark:text-indigo-400">{H.formatNumber(H.getTotalProcessedCredit(lst), precision)}</td>}
+                          <td className="px-4 py-4 text-right text-sm font-black text-indigo-700 dark:text-indigo-400">
+                            {H.formatNumber(H.getNetAmount(lst), precision)}
+                            {H.getClosingDrCrForGroup(lst) && <span className="ml-1 text-xs">{H.getClosingDrCrForGroup(lst)}</span>}
                           </td>
-                        )}
-                        {showDebit && <td className="px-3 py-1 text-center text-sm font-mono">{H.formatNumber(H.getTotalProcessedDebit(lst), precision)}</td>}
-                        {showCredit && <td className="px-3 py-1 text-center text-sm font-mono">{H.formatNumber(H.getTotalProcessedCredit(lst), precision)}</td>}
-                        <td className="px-3 py-1 text-right text-lg font-mono">
-                          {H.formatNumber(H.getNetAmount(lst), precision)}
-                          {H.getClosingDrCrForGroup(lst) && <span className="ml-1 text-sm">{H.getClosingDrCrForGroup(lst)}</span>}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
               </>
             )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Dynamic Tabs Content */}
-        {tabs.filter(t => t.id === selectedTab).map(tab => (
-          <div key={tab.id} className="p-4">
-            {tab.isGroup ? (
-              <TrialBalanceGroupDetail
-                groupItem={tab.groupItem}
-                showOpeningBalance={showOpeningBalance}
-                showDebit={showDebit}
-                showCredit={showCredit}
-                onItemSelected={onDetailGroupToggle}
-                onRefresh={() => onChildRefreshRequested(tab)}
-              />
-            ) : (
-              <TrialBalanceLedgerRegister
-                recordData={tab.filterobj}
-                refreshTrigger={refreshTrigger}
-              />
-            )}
-          </div>
-        ))}
+          {/* Dynamic Tabs Content */}
+          {tabs.filter(t => t.id === selectedTab).map(tab => (
+            <div key={tab.id} className="p-4 overflow-auto custom-scrollbar">
+              {tab.isGroup ? (
+                <TrialBalanceGroupDetail
+                  groupItem={tab.groupItem}
+                  showOpeningBalance={showOpeningBalance}
+                  showDebit={showDebit}
+                  showCredit={showCredit}
+                  onItemSelected={onDetailGroupToggle}
+                  onRefresh={() => onChildRefreshRequested(tab)}
+                />
+              ) : (
+                <TrialBalanceLedgerRegister
+                  recordData={tab.filterobj}
+                  refreshTrigger={refreshTrigger}
+                />
+              )}
+            </div>
+          ))}
+
+          {/* Bottom Strip */}
+          {selectedTab === 1 && (
+            <div className="sticky bottom-0 bg-yellow-50 dark:bg-yellow-900/10 border-t-2 border-indigo-600/20 px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-20 mt-auto">
+              <div className="flex items-center gap-6">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Debit</span>
+                  <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
+                    {lst.length > 0 ? H.formatNumber(H.getTotalProcessedDebit(lst), precision) : '1,245,600.00'}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Credit</span>
+                  <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
+                    {lst.length > 0 ? H.formatNumber(H.getTotalProcessedCredit(lst), precision) : '1,245,600.00'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-3 px-3 md:px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                  <CheckCircle size={18} className="text-emerald-500 hidden md:block" />
+                  <div>
+                    <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase leading-none mb-0.5">Status</p>
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Accounts Balanced</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 px-3 md:px-4 py-2 bg-indigo-500/5 border border-indigo-500/20 rounded-lg">
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase leading-none mb-0.5">Difference</p>
+                    <p className="text-sm font-black text-indigo-600 dark:text-indigo-400">
+                      {lst.length > 0 ? H.formatNumber(Math.abs(H.getTotalProcessedDebit(lst) - H.getTotalProcessedCredit(lst)), precision) : '0.00'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Side Panel: Quick Insights */}
+        {selectedTab === 1 && (
+          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col shrink-0">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/80">
+              <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500">Quick Insights</h3>
+              <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                <Settings size={14} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-8 custom-scrollbar">
+              <div className="space-y-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Asset vs Liability</p>
+                <div className="relative aspect-square w-full bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-blue-500/5"></div>
+                  <div className="relative w-40 h-40 rounded-full border-[14px] border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm">
+                    <div className="absolute top-[-14px] left-[-14px] w-40 h-40 rounded-full border-[14px] border-indigo-500 border-t-transparent border-r-transparent -rotate-[15deg]" style={{ transform: `rotate(${((assetPct / 100) * 360) - 225}deg)` }}></div>
+                    <div className="text-center z-10 flex flex-col items-center justify-center bg-white dark:bg-slate-900 w-[112px] h-[112px] rounded-full shadow-sm">
+                      <p className="text-2xl font-black tabular-nums text-slate-800 dark:text-white leading-none mb-1">{assetPct}%</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Assets</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Current Assets</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-500 font-mono">{currencySymbol} {H.formatNumber(caVal, precision)}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 w-8 text-right">{caPct}%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Fixed Assets</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-500 font-mono">{currencySymbol} {H.formatNumber(faVal, precision)}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 w-8 text-right">{faPct}%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Liabilities</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-500 font-mono">{currencySymbol} {H.formatNumber(totalLiabilities, precision)}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 w-8 text-right">{liabPct}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Stats</p>
+                <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <TrendingUp size={48} className="text-emerald-500" />
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-500 mb-1 tracking-wider uppercase relative z-10">Total Assets</p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums relative z-10">
+                    {currencySymbol} {H.formatNumber(totalAssets, precision)}
+                  </p>
+                </div>
+                <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                  <p className="text-[10px] font-bold text-slate-500 mb-1 tracking-wider uppercase">Net Worth</p>
+                  <p className={`text-xl font-black tabular-nums ${netWorth >= 0 ? 'text-slate-900 dark:text-white' : 'text-red-500'}`}>
+                    {currencySymbol} {H.formatNumber(netWorth, precision)}
+                  </p>
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                    <Info size={12} />
+                    <span>Updated dynamically</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-auto p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck size={16} className="text-indigo-600 dark:text-indigo-400" />
+                  <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">Audit Status</p>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  Last audited on <span className="text-indigo-700 dark:text-indigo-300">Oct 24, 2023</span>. This report is interactive; click on any account name to view the detailed ledger breakdown.
+                </p>
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

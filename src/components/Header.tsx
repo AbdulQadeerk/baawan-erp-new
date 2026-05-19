@@ -59,6 +59,7 @@ import {
   Calculator,
   LogOut,
   ListChecks,
+  Book,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -773,6 +774,14 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="flex h-[400px]">
                       <div className="w-64 border-r border-slate-100 dark:border-slate-800 py-4 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/50">
                         <ReportSidebarItem
+                          icon={<LayoutGrid size={18} />}
+                          label="All Reports"
+                          color="text-primary"
+                          active={false}
+                          onClick={() => handleNavigate("all-reports", "All Reports")}
+                        />
+                        <div className="mx-4 my-2 border-t border-slate-200 dark:border-slate-700/50"></div>
+                        <ReportSidebarItem
                           icon={<Package size={18} />}
                           label="Inventory"
                           color="text-brand-emerald"
@@ -987,6 +996,17 @@ export const Header: React.FC<HeaderProps> = ({
                               }
                             />
                             <ReportSubItem
+                              icon={<Book size={18} />}
+                              label="Register"
+                              active={activeMenu === "reports_register"}
+                              onMouseEnter={() =>
+                                setActiveMenu("reports_register")
+                              }
+                              onClick={() =>
+                                setActiveMenu("reports_register")
+                              }
+                            />
+                            <ReportSubItem
                               icon={<Receipt size={18} />}
                               label="Sales Register"
                               onClick={() =>
@@ -1023,7 +1043,7 @@ export const Header: React.FC<HeaderProps> = ({
                           </>
                         )}
                       </div>
-                      <div className="flex-1 p-8 bg-slate-50/30 dark:bg-slate-800/10">
+                      <div className="flex-1 p-8 bg-slate-50/30 dark:bg-slate-800/10 overflow-y-auto custom-scrollbar">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">
                           {activeMenu === "reports" ||
                           activeMenu === "reports_inventory"
@@ -1032,7 +1052,9 @@ export const Header: React.FC<HeaderProps> = ({
                               ? "Marketing & Performance"
                               : activeMenu === "reports_outstanding"
                                 ? "Outstanding Reports"
-                                : "Reports in Final Acc"}
+                                : activeMenu === "reports_register"
+                                  ? "Register Reports"
+                                  : "Reports in Final Acc"}
                         </h3>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                           {activeMenu === "reports" ||
@@ -1287,6 +1309,69 @@ export const Header: React.FC<HeaderProps> = ({
                                   handleNavigate(
                                     "sales-person-outstanding-report",
                                     "Sales Person Outstanding",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<FileText size={24} />}
+                                title="Ledger Wise Outstanding"
+                                desc="Outstanding per ledger with limits"
+                                color="bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-wise-outstanding-report",
+                                    "Ledger Wise Outstanding",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Calendar size={24} />}
+                                title="Ledger Ageing Report"
+                                desc="Ageing analysis per ledger"
+                                color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-ageing-report",
+                                    "Ledger Wise Ageing",
+                                  )
+                                }
+                              />
+                            </>
+                          ) : activeMenu === "reports_register" ? (
+                            <>
+                              <ReportCard
+                                icon={<Book size={24} />}
+                                title="Ledger Register"
+                                desc="Detailed ledger transaction register"
+                                color="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-register",
+                                    "Ledger Register",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Receipt size={24} />}
+                                title="Sales Register"
+                                desc="Sales transaction register"
+                                color="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "sales-register",
+                                    "Sales Register",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Package size={24} />}
+                                title="Purchase Register"
+                                desc="Purchase transaction register"
+                                color="bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "purchase-register",
+                                    "Purchase Register",
                                   )
                                 }
                               />

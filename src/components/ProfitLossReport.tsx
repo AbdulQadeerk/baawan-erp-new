@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, X, TrendingUp, Scale, ChevronRight } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, X, TrendingUp, Scale, ChevronRight, Activity, DollarSign, PieChart, ArrowUpRight, ArrowDownRight, Target } from 'lucide-react';
 import { reportApi } from '../services/report.service';
 import { toast } from '../lib/toast';
 import * as H from './reports/trial-balance/trialBalanceHelpers';
@@ -195,32 +195,56 @@ export const ProfitLossReport: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[320px]">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">From Date <span className="text-red-500">*</span></label>
-                <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
-              </div>
-              <div className="flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-red-500">*</span></label>
-                <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer select-none pb-2">
-                <input type="checkbox" checked={withStock} onChange={e => setWithStock(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">With Stock</span>
-              </label>
-            </div>
+        <div className="flex flex-wrap items-center gap-4 border-t border-slate-100 dark:border-slate-800 pt-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
+              From
+            </span>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handleSearch} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-600/20">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
+              To
+            </span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={e => setToDate(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
+            />
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer select-none mt-4 mr-2">
+            <input type="checkbox" checked={withStock} onChange={e => setWithStock(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-[#2D9E75] focus:ring-[#2D9E75]" />
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">With Stock</span>
+          </label>
+          
+          <div className="flex items-center space-x-2 mt-4">
+            <button
+              onClick={handleSearch}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Search"
+            >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              <span className="hidden sm:inline">Search</span>
             </button>
-            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"><RotateCcw size={16} /></button>
+            <button
+              onClick={handleClear}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="PDF Export"
+            >
+              <FileSpreadsheet size={16} />
+            </button>
           </div>
         </div>
       </div>
@@ -255,53 +279,148 @@ export const ProfitLossReport: React.FC = () => {
                 <p className="text-slate-500 text-sm">Select date range and click Search to generate the report.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* EXPENSE Side */}
-                <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-sm font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Expense</span>
-                    <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+              <div className="flex flex-col xl:flex-row gap-4">
+                {/* Main Tables */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* EXPENSE Side */}
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden flex flex-col">
+                    <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                      <span className="text-sm font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Expense</span>
+                      <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+                    </div>
+                    <table className="w-full text-left border-collapse flex-1">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <PnLRow label="Opening Stock" value={fmt(p!.OpenStock)} />
+                        <PnLRow label="Purchase Accounts" value={fmt(p!.Purchase)} clickable onClick={() => toggleDetails(10)} />
+                        <PnLRow label="Direct Expenses" value={fmt(p!.DirectExpense)} clickable onClick={() => toggleDetails(5)} />
+                        <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} highlight={p!.GrossProfit > 0} />
+                        <PnLRow label="" value={<span className="font-black">{fmt(expenseSubtotal)}</span>} subtotal />
+                        <PnLRow label="Gross Loss" value={fmt(s!.GrossLoss)} highlight={s!.GrossLoss > 0} />
+                        <PnLRow label="Indirect Expenses" value={fmt(p!.IndirectExp)} clickable onClick={() => toggleDetails(6)} />
+                        <PnLRow label="Net Profit" value={fmt(p!.NetProfit)} highlight={p!.NetProfit > 0} />
+                      </tbody>
+                    </table>
+                    <div className="bg-red-600 px-4 py-3 flex items-center justify-between text-white font-bold mt-auto">
+                      <span className="text-sm uppercase">Total of Expense</span>
+                      <span className="text-base font-mono">{fmt(totalExpense)}</span>
+                    </div>
                   </div>
-                  <table className="w-full text-left border-collapse">
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      <PnLRow label="Opening Stock" value={fmt(p!.OpenStock)} />
-                      <PnLRow label="Purchase Accounts" value={fmt(p!.Purchase)} clickable onClick={() => toggleDetails(10)} />
-                      <PnLRow label="Direct Expenses" value={fmt(p!.DirectExpense)} clickable onClick={() => toggleDetails(5)} />
-                      <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} highlight />
-                      <PnLRow label="" value={<span className="font-black">{fmt(expenseSubtotal)}</span>} subtotal />
-                      {p!.IndirectExp !== 0 && <PnLRow label="Indirect Expenses" value={fmt(p!.IndirectExp)} clickable onClick={() => toggleDetails(6)} />}
-                      {p!.NetProfit !== 0 && <PnLRow label="Net Profit" value={fmt(p!.NetProfit)} highlight />}
-                    </tbody>
-                  </table>
-                  <div className="bg-red-600 px-4 py-3 flex items-center justify-between text-white font-bold">
-                    <span className="text-sm uppercase">Total of Expense</span>
-                    <span className="text-base font-mono">{fmt(totalExpense)}</span>
+
+                  {/* INCOME Side */}
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden flex flex-col">
+                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Income</span>
+                      <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+                    </div>
+                    <table className="w-full text-left border-collapse flex-1">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <PnLRow label="Sales Accounts" value={fmt(s!.Sales)} clickable onClick={() => toggleDetails(9)} />
+                        <PnLRow label="Direct Incomes" value={fmt(s!.DirectIncome)} clickable onClick={() => toggleDetails(11)} />
+                        <PnLRow label="Closing Stock" value={fmt(s!.CloseStock)} />
+                        <PnLRow label="Gross Loss" value={fmt(s!.GrossLoss)} highlight={s!.GrossLoss > 0} />
+                        <PnLRow label="" value={<span className="font-black">{fmt(incomeSubtotal)}</span>} subtotal />
+                        <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} highlight={p!.GrossProfit > 0} />
+                        <PnLRow label="Indirect Incomes" value={fmt(s!.IndirectIncome)} clickable onClick={() => toggleDetails(12)} />
+                        <PnLRow label="Nett Loss" value={fmt(s!.NetLoss)} highlight={s!.NetLoss > 0} />
+                      </tbody>
+                    </table>
+                    <div className="bg-emerald-600 px-4 py-3 flex items-center justify-between text-white font-bold mt-auto">
+                      <span className="text-sm uppercase">Total of Income</span>
+                      <span className="text-base font-mono">{fmt(totalIncome)}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* INCOME Side */}
-                <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-slate-800 dark:to-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Income</span>
-                    <span className="text-xs text-slate-500 ml-2">Total ({currencySymbol})</span>
+                {/* Right Sidebar: Financial Health */}
+                <aside className="w-full xl:w-80 shrink-0 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-slate-900/50 flex flex-col">
+                  <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/80">
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500">Financial Health</h3>
+                    <Activity size={16} className="text-blue-500" />
                   </div>
-                  <table className="w-full text-left border-collapse">
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      <PnLRow label="Sales Accounts" value={fmt(s!.Sales)} clickable onClick={() => toggleDetails(9)} />
-                      <PnLRow label="Direct Incomes" value={fmt(s!.DirectIncome)} clickable onClick={() => toggleDetails(11)} />
-                      <PnLRow label="Closing Stock" value={fmt(s!.CloseStock)} />
-                      <PnLRow label="Gross Loss" value={fmt(s!.GrossLoss)} highlight />
-                      <PnLRow label="" value={<span className="font-black">{fmt(incomeSubtotal)}</span>} subtotal />
-                      {p!.GrossProfit !== 0 && <PnLRow label="Gross Profit" value={fmt(p!.GrossProfit)} />}
-                      {s!.IndirectIncome !== 0 && <PnLRow label="Indirect Incomes" value={fmt(s!.IndirectIncome)} clickable onClick={() => toggleDetails(12)} />}
-                      {s!.NetLoss !== 0 && <PnLRow label="Nett Loss" value={fmt(s!.NetLoss)} highlight />}
-                    </tbody>
-                  </table>
-                  <div className="bg-emerald-600 px-4 py-3 flex items-center justify-between text-white font-bold">
-                    <span className="text-sm uppercase">Total of Income</span>
-                    <span className="text-base font-mono">{fmt(totalIncome)}</span>
+                  <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-6 custom-scrollbar">
+                    
+                    {/* Performance Summary */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Target size={14} className="text-slate-400" />
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Key Metrics</span>
+                      </div>
+                      
+                      <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                          <DollarSign size={48} className="text-emerald-500" />
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-500 mb-1 tracking-wider uppercase relative z-10">Total Revenue</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums relative z-10">
+                          {currencySymbol} {fmt((s?.Sales || 0) + (s?.DirectIncome || 0) + (s?.IndirectIncome || 0))}
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                          <PieChart size={48} className="text-rose-500" />
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-500 mb-1 tracking-wider uppercase relative z-10">Total Expenses</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums relative z-10">
+                          {currencySymbol} {fmt((p?.Purchase || 0) + (p?.DirectExpense || 0) + (p?.IndirectExp || 0))}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Profitability */}
+                    <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp size={14} className="text-slate-400" />
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Profitability</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Gross Profit</span>
+                          <span className={`text-sm font-black tabular-nums ${p?.GrossProfit ? 'text-emerald-600' : s?.GrossLoss ? 'text-red-600' : 'text-slate-700 dark:text-slate-300'}`}>
+                            {p?.GrossProfit ? '+' : s?.GrossLoss ? '-' : ''}{currencySymbol} {fmt((p?.GrossProfit || 0) + (s?.GrossLoss || 0))}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Margin</span>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">
+                            {s?.Sales && s.Sales > 0 ? (((p?.GrossProfit || 0) / s.Sales) * 100).toFixed(1) + '%' : '0.0%'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Net Profit</span>
+                          <span className={`text-sm font-black tabular-nums ${p?.NetProfit ? 'text-emerald-600' : s?.NetLoss ? 'text-red-600' : 'text-slate-700 dark:text-slate-300'}`}>
+                            {p?.NetProfit ? '+' : s?.NetLoss ? '-' : ''}{currencySymbol} {fmt((p?.NetProfit || 0) + (s?.NetLoss || 0))}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Margin</span>
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">
+                            {s?.Sales && s.Sales > 0 ? (((p?.NetProfit || 0) / s.Sales) * 100).toFixed(1) + '%' : '0.0%'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Visual Indicator (Optional simple bar) */}
+                    {s?.Sales && s.Sales > 0 ? (
+                      <div className="mt-auto space-y-2 pt-4">
+                         <div className="flex items-center justify-between text-[10px] font-bold uppercase text-slate-500">
+                           <span>Cost Ratio</span>
+                           <span>{(((p?.Purchase || 0) + (p?.DirectExpense || 0) + (p?.IndirectExp || 0)) / s.Sales * 100).toFixed(1)}%</span>
+                         </div>
+                         <div className="h-2 w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full overflow-hidden flex">
+                           <div className="h-full bg-rose-500" style={{ width: `${Math.min((((p?.Purchase || 0) + (p?.DirectExpense || 0) + (p?.IndirectExp || 0)) / s.Sales) * 100, 100)}%` }}></div>
+                           <div className="h-full bg-emerald-500 flex-1"></div>
+                         </div>
+                      </div>
+                    ) : null}
+                    
                   </div>
-                </div>
+                </aside>
               </div>
             )}
           </div>

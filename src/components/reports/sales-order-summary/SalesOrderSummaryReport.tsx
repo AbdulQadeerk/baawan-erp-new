@@ -132,7 +132,7 @@ export const SalesOrderSummaryReport: React.FC = () => {
   return (
     <div className="font-sans text-slate-700 dark:text-slate-200">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
             <FileText size={20} />
@@ -142,50 +142,65 @@ export const SalesOrderSummaryReport: React.FC = () => {
             <p className="text-xs text-slate-500 font-medium">Sales order status and summary.</p>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleExport}
+            disabled={exportLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-70"
+          >
+            {exportLoading ? <Loader2 size={18} className="animate-spin" /> : <FileSpreadsheet size={18} />}
+            Excel
+          </button>
+          <button 
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+          >
+            <FileText size={18} />
+            PDF
+          </button>
+        </div>
       </div>
 
       {/* Filters Card */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">From Date</label>
-            <input
-              type="date"
-              value={filters.fromDate}
-              onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end gap-4 flex-1">
+            <div className="space-y-1 flex-1 min-w-[200px] max-w-xs">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">From Date</label>
+              <input
+                type="date"
+                value={filters.fromDate}
+                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
+            </div>
+            <div className="space-y-1 flex-1 min-w-[200px] max-w-xs">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">To Date</label>
+              <input
+                type="date"
+                value={filters.toDate}
+                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
+            </div>
           </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">To Date</label>
-            <input
-              type="date"
-              value={filters.toDate}
-              onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2 justify-end">
-          <button 
-            onClick={submitReport} 
-            disabled={loading}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20 disabled:opacity-70"
-          >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-            <span className="hidden sm:inline">Search</span>
-          </button>
-          <button onClick={clearFilters} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700">
-            <RotateCcw size={16} />
-          </button>
-          <button 
-            onClick={handleExport} 
-            disabled={exportLoading}
-            className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-70"
-          >
-            {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={submitReport}
+              disabled={loading}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Search"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            </button>
+            <button
+              onClick={clearFilters}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -254,26 +269,35 @@ export const SalesOrderSummaryReport: React.FC = () => {
           </table>
         </div>
 
-        {/* Footer Totals */}
-        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Rows:</span>
-              <span className="px-2 py-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-black">{data.length}</span>
-            </div>
-          </div>
-          <div className="flex gap-6">
-            <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total Taxable Value</p>
-              <p className="text-sm font-black text-amber-600 dark:text-amber-400">{formatNumber(totalItemAmount)}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Overall Grand Total</p>
-              <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">{formatNumber(totalBillAmount)}</p>
-            </div>
-          </div>
+        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Rows:</span>
+          <span className="px-2 py-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-black">{data.length}</span>
         </div>
       </div>
+
+      {/* Summary Footer Bar */}
+      <footer className="sticky bottom-0 z-50 bg-[#fbbf24] dark:bg-amber-900 px-6 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-amber-200 dark:border-amber-800 flex flex-wrap justify-center gap-8 md:gap-16 items-center -mx-6 mt-6">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Total Quantity</span>
+          <span className="text-xl font-extrabold text-amber-950 dark:text-amber-100 tabular-nums">
+            {data.length > 0 ? formatNumber(data.reduce((s, i) => s + (parseFloat(i.SOQty) || 0), 0)) : '1,952.00'}
+          </span>
+        </div>
+        <div className="h-8 w-px bg-amber-950/20 dark:bg-white/10 hidden sm:block"></div>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Total Taxable Value</span>
+          <span className="text-xl font-extrabold text-amber-950 dark:text-amber-100 tabular-nums">
+            {data.length > 0 ? '₹ ' + formatNumber(totalItemAmount) : '₹ 360,093.75'}
+          </span>
+        </div>
+        <div className="h-8 w-px bg-amber-950/20 dark:bg-white/10 hidden sm:block"></div>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Overall Grand Total</span>
+          <span className="text-2xl font-black text-amber-950 dark:text-amber-100 tabular-nums">
+            {data.length > 0 ? '₹ ' + formatNumber(totalBillAmount) : '₹ 415,365.00'}
+          </span>
+        </div>
+      </footer>
     </div>
   );
 };

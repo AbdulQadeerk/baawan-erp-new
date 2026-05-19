@@ -1,5 +1,6 @@
 export type Page = 
   | 'dashboard' 
+  | 'all-reports'
   | 'invoice-list' 
   | 'invoice-create' 
   | 'outstanding-report'
@@ -75,7 +76,12 @@ export type Page =
   | 'ledger-child-outstanding-report'
   | 'outstanding-payments-report'
   | 'outstanding-receipts-report'
-  | 'sales-person-outstanding-report';
+  | 'sales-person-outstanding-report'
+  | 'ledger-wise-outstanding-report'
+  | 'ledger-ageing-report'
+  | 'ledger-register'
+  | 'sales-register'
+  | 'purchase-register';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 

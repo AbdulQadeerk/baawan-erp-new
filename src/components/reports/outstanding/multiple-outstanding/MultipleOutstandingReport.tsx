@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, ListChecks, Plus, X, Trash2, FilePlus, ArrowRight } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, ListChecks, Plus, X, Trash2, FilePlus, ArrowRight, ArrowLeft, Eraser, FileDown } from 'lucide-react';
 import { reportApi } from '../../../../services/report.service';
 import { ledgerApi } from '../../../../services/ledger.service';
 import { groupApi } from '../../../../services/group.service';
@@ -100,7 +100,7 @@ export const MultipleOutstandingReport: React.FC = () => {
       const normalizedList = list.map((item: any) => ({
         ...item,
         id: item.ledger_id || item.id,
-      }));
+      })).sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''));
 
       setSearchResults(normalizedList);
       setSelectedInSearch(new Set());
@@ -236,9 +236,12 @@ export const MultipleOutstandingReport: React.FC = () => {
         ))}
       </div>
 
-      {/* Search Tab */}
-      {activeTab === 'search' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+      {/* Main Content Area with Optional Sidebar */}
+      <div className="flex gap-6">
+        <div className="flex-1 overflow-hidden">
+          {/* Search Tab */}
+          {activeTab === 'search' && (
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-[calc(100vh-230px)] flex flex-col">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mb-6" ref={searchRef}>
             <div className="md:col-span-3">
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Name</label>
@@ -273,16 +276,17 @@ export const MultipleOutstandingReport: React.FC = () => {
               <button 
                 onClick={handleSearch} 
                 disabled={isSearchLoading}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20 disabled:opacity-70"
+                title="Search"
+                className="w-10 h-10 flex items-center justify-center bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70"
               >
-                {isSearchLoading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-                <span className="hidden sm:inline">Search</span>
+                {isSearchLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search size={18} />}
               </button>
               <button 
                 onClick={handleResetSearch} 
-                className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"
+                title="Clear"
+                className="w-10 h-10 flex items-center justify-center bg-lime-600 hover:bg-lime-700 text-white rounded-lg transition-colors shadow-sm"
               >
-                <RotateCcw size={16} />
+                <Eraser size={18} />
               </button>
             </div>
           </div>
@@ -315,17 +319,17 @@ export const MultipleOutstandingReport: React.FC = () => {
               </table>
             </div>
 
-            <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-4 p-3 bg-[#e2f0f7] dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-4 p-3 bg-yellow-400 border-t-2 border-yellow-500/50 shadow-sm text-slate-900 rounded-b-lg">
               <div className="flex gap-10">
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Total Rows : {searchResults.length}</span>
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Filtered Rows : {searchResults.length}</span>
+                <span className="text-sm font-bold">Total Rows : {searchResults.length}</span>
+                <span className="text-sm font-bold">Filtered Rows : {searchResults.length}</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={addSelectedToList} disabled={selectedInSearch.size === 0} className="flex items-center gap-2 bg-[#4b4949] hover:bg-[#3a3a3a] text-white px-4 py-1.5 rounded-md text-xs font-bold transition-all disabled:opacity-50 shadow-sm">
-                  <FilePlus size={14} /> Add To List
+                <button onClick={addSelectedToList} disabled={selectedInSearch.size === 0} className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md">
+                  <FilePlus size={18} /> Add To List
                 </button>
-                <button onClick={() => setActiveTab('list')} className="flex items-center gap-2 bg-[#36a3f7] hover:bg-[#258edb] text-white px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm">
-                  Next <ArrowRight size={14} />
+                <button onClick={() => setActiveTab('list')} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-md">
+                  Next <ArrowRight size={18} />
                 </button>
               </div>
             </div>
@@ -387,13 +391,17 @@ export const MultipleOutstandingReport: React.FC = () => {
           <div className="sticky bottom-0 z-10 p-3 bg-[#e2f0f7] dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Total: {selectedLedgerList.length} ledgers</span>
             <div className="flex gap-2">
-              <button onClick={() => setActiveTab('search')} className="px-4 py-1.5 text-xs font-bold text-slate-600 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md hover:bg-slate-50 shadow-sm transition-all">← Back</button>
-              <button onClick={() => setSelectedLedgerList([])} className="px-4 py-1.5 text-xs font-bold text-slate-600 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md hover:bg-slate-50 shadow-sm transition-all"><RotateCcw size={12} className="inline mr-1" />Clear</button>
-              <button onClick={submitReport} className="flex items-center gap-2 bg-[#36a3f7] hover:bg-[#258edb] text-white px-5 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm">
-                {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />} Search
+              <button onClick={() => setActiveTab('search')} title="Back" className="w-10 h-10 flex items-center justify-center bg-slate-500 hover:bg-slate-600 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70">
+                <ArrowLeft size={18} />
               </button>
-              <button onClick={handleExport} className="flex items-center gap-1 bg-[#1dc9b7] hover:bg-[#17a899] text-white px-5 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm">
-                {exportLoading ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />} Export
+              <button onClick={() => setSelectedLedgerList([])} title="Clear" className="w-10 h-10 flex items-center justify-center bg-lime-600 hover:bg-lime-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70">
+                <Eraser size={18} />
+              </button>
+              <button onClick={submitReport} disabled={loading} title="Search" className="w-10 h-10 flex items-center justify-center bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70">
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search size={18} />}
+              </button>
+              <button onClick={handleExport} disabled={exportLoading || loading || !uniqueLedLst.length} title="Export" className="w-10 h-10 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70">
+                {exportLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FileDown size={18} />}
               </button>
             </div>
           </div>
@@ -472,7 +480,93 @@ export const MultipleOutstandingReport: React.FC = () => {
             </>
           )}
         </div>
-      )}
+        )}
+        </div>
+
+        {/* Right Sidebar (Aging Summary) - Only shown on Search/List/Result as requested */}
+        <aside className="w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col hidden xl:flex shadow-sm h-[calc(100vh-230px)]">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+            <h3 className="font-black text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-tighter">
+              <span className="material-symbols-outlined text-teal-500">assessment</span> Aging Summary
+            </h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Outstanding by age groups</p>
+          </div>
+          
+          <div className="flex-1 p-6 flex flex-col gap-8 overflow-y-auto">
+            {/* Bar Chart (CSS-based) */}
+            <div className="space-y-6">
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div><span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400">0-30 Days</span></div>
+                  <div className="text-right"><span className="text-xs font-bold inline-block text-green-600 dark:text-green-400">$45,200</span></div>
+                </div>
+                <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500" style={{ width: '75%' }}></div>
+                </div>
+              </div>
+              
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div><span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">31-60 Days</span></div>
+                  <div className="text-right"><span className="text-xs font-bold inline-block text-blue-600 dark:text-blue-400">$18,400</span></div>
+                </div>
+                <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500" style={{ width: '40%' }}></div>
+                </div>
+              </div>
+              
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div><span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">61-90 Days</span></div>
+                  <div className="text-right"><span className="text-xs font-bold inline-block text-amber-600 dark:text-amber-400">$9,200</span></div>
+                </div>
+                <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500" style={{ width: '25%' }}></div>
+                </div>
+              </div>
+              
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div><span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400">90+ Days</span></div>
+                  <div className="text-right"><span className="text-xs font-bold inline-block text-red-600 dark:text-red-400">$27,550</span></div>
+                </div>
+                <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500" style={{ width: '55%' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Widget */}
+            <div className="p-4 bg-teal-50 dark:bg-teal-900/10 rounded-xl border border-teal-100 dark:border-teal-900/30">
+              <h4 className="text-xs font-black text-slate-800 dark:text-slate-100 uppercase mb-3">Quick Analysis</h4>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-xs py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500">AVG Overdue</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-200">42 Days</span>
+                </div>
+                <div className="flex justify-between text-xs py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500">Risk Ratio</span>
+                  <span className="font-bold text-red-600">14.2% High</span>
+                </div>
+                <div className="flex justify-between text-xs py-1">
+                  <span className="text-slate-500">Pending Reminders</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-200">12 Customers</span>
+                </div>
+              </div>
+              <button className="w-full mt-4 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition-colors">Generate Statement</button>
+            </div>
+          </div>
+          
+          <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-3/4 h-full bg-teal-500"></div>
+              </div>
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">75% Target Recovery</span>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 };

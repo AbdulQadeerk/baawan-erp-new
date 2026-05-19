@@ -710,26 +710,25 @@ export const CurrentStockReport: React.FC = () => {
           <div className="flex items-center gap-2 pt-2 2xl:pt-0 2xl:justify-end">
             <button
               onClick={submitReport}
-              className="h-10 px-6 bg-blue-700 hover:bg-blue-800 text-white rounded-lg flex items-center justify-center transition-all shadow-md active:scale-95 font-semibold text-sm cursor-pointer"
-              title="Apply"
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Search"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin mr-2" />
+                <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Search size={16} className="mr-2" />
+                <Search size={16} />
               )}
-              Search
             </button>
             <button
               onClick={clearFilters}
-              className="w-10 h-10 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Clear Filters"
             >
               <RotateCcw size={16} />
             </button>
             <button
               onClick={handleExport}
-              className="w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg flex items-center justify-center transition-colors shadow-md cursor-pointer"
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Export to Excel"
             >
               {exportLoading ? (
@@ -740,7 +739,7 @@ export const CurrentStockReport: React.FC = () => {
             </button>
             <button
               onClick={handlePrint}
-              className="w-10 h-10 bg-rose-500 hover:bg-rose-600 text-white rounded-lg flex items-center justify-center transition-colors shadow-md cursor-pointer"
+              className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Export to PDF"
             >
               {printLoading ? (
@@ -890,21 +889,39 @@ export const CurrentStockReport: React.FC = () => {
             <div className="bg-amber-50 dark:bg-amber-900/20 border-t border-amber-100 dark:border-amber-900/50 px-6 py-3 flex justify-between items-center mt-auto">
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">Total Items:</span>
-                  <span className="bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded text-xs font-bold">{data.length}</span>
+                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+                    Total Items:
+                  </span>
+                  <span className="bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded text-xs font-bold">
+                    {data.length}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 border-l border-amber-200 dark:border-amber-800 pl-6">
-                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">Filtered Results:</span>
-                  <span className="bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">{data.length} Rows</span>
+                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+                    Filtered Results:
+                  </span>
+                  <span className="bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">
+                    {data.length} Rows
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer"><ChevronsLeft size={16} /></button>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer"><ChevronLeft size={16} /></button>
-                  <span className="text-xs font-semibold px-2 text-amber-900 dark:text-amber-100">Page 1 of 1</span>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer"><ChevronRight size={16} /></button>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer"><ChevronsRight size={16} /></button>
+                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                    <ChevronsLeft size={16} />
+                  </button>
+                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-xs font-semibold px-2 text-amber-900 dark:text-amber-100">
+                    Page 1 of 1
+                  </span>
+                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                    <ChevronRight size={16} />
+                  </button>
+                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                    <ChevronsRight size={16} />
+                  </button>
                 </div>
               </div>
             </div>

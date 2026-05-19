@@ -181,4 +181,58 @@ export const reportApi = {
     });
     return response.data;
   },
+
+  // ─── Register Report APIs ────────────────────────────────────────────────
+
+  /** POST /api/Report/LedgerRegister */
+  ledgerRegister(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/LedgerRegister', data);
+  },
+
+  /** POST /api/Report/LedgerRegisterExport */
+  async ledgerRegisterExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/LedgerRegisterExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/SalesRegisterSummaryReport */
+  salesRegisterSummaryReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/SalesRegisterSummaryReport', data);
+  },
+
+  /** POST /api/Report/SalesRegisterSummaryReportExport */
+  async salesRegisterSummaryReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/SalesRegisterSummaryReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/SalesRegisterDetailReport */
+  salesRegisterDetailReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/SalesRegisterDetailReport', data);
+  },
+
+  /** POST /api/Report/PurchaseRegisterSummaryReport */
+  purchaseRegisterSummaryReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/PurchaseRegisterSummaryReport', data);
+  },
+
+  /** POST /api/Report/PurchaseRegisterSummaryReportExport */
+  async purchaseRegisterSummaryReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/PurchaseRegisterSummaryReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/PurchaseRegisterDetailReport */
+  purchaseRegisterDetailReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/PurchaseRegisterDetailReport', data);
+  }
 };
