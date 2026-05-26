@@ -4,6 +4,7 @@ import { reportApi } from '../../../../services/report.service';
 import { ledgerApi } from '../../../../services/ledger.service';
 import { toast } from '../../../../lib/toast';
 import * as H from '../outstandingHelpers';
+import { InvoiceDetailsModal } from '../../InvoiceDetailsModal';
 
 export const LedgerChildOutstandingReport: React.FC = () => {
   const precision = H.getPrecision();
@@ -20,6 +21,7 @@ export const LedgerChildOutstandingReport: React.FC = () => {
   const [exportLoading, setExportLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [pendingAmount, setPendingAmount] = useState(0);
+  const [selectedInvoice, setSelectedInvoice] = useState<{ invCode: number | string; invType: number } | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const allLedgers = useRef<any[]>([]);
@@ -111,13 +113,9 @@ export const LedgerChildOutstandingReport: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="w-[170px]">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date</label>
-            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all" />
-          </div>
-          <div className="flex-1 min-w-[250px]" ref={searchRef}>
+        <div className="flex flex-wrap xl:flex-nowrap items-start xl:items-end gap-4">
+          {/* Ledger Typeahead */}
+          <div className="w-full sm:w-64 xl:w-80 shrink-0" ref={searchRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Select Ledger <span className="text-red-500">*</span></label>
             <div className="relative">
               <input type="text" value={ledgerSearch} onChange={e => handleLedgerSearch(e.target.value)} onFocus={() => suggestions.length && setShowSuggestions(true)}
@@ -138,16 +136,41 @@ export const LedgerChildOutstandingReport: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 pb-1">
-            <input type="checkbox" id="includeChild" checked={includeChild} onChange={e => setIncludeChild(e.target.checked)} className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" />
-            <label htmlFor="includeChild" className="text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">Include Child</label>
+          
+          {/* To Date */}
+          <div className="w-full sm:w-[170px] shrink-0">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date</label>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all" />
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={submitReport} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-violet-600/20">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />} <span className="hidden sm:inline">Search</span>
+
+          {/* Include Child Checkbox */}
+          <div className="flex items-center gap-2 shrink-0 py-2 xl:py-2.5">
+            <input type="checkbox" id="includeChild" checked={includeChild} onChange={e => setIncludeChild(e.target.checked)} className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" />
+            <label htmlFor="includeChild" className="text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">Include Child Ledger</label>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex items-center space-x-2 shrink-0 pt-4 xl:pt-1 xl:ml-auto">
+            <button
+              onClick={submitReport}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Search"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </button>
-            <button onClick={handleClear} className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"><RotateCcw size={16} /></button>
-            <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20">
+            <button
+              onClick={handleClear}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Export to Excel"
+            >
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
           </div>
@@ -213,7 +236,15 @@ export const LedgerChildOutstandingReport: React.FC = () => {
                             }`}>{row.overDue}</span>
                           </td>
                           <td className="px-3 py-2 text-center">
-                            {row.invCode !== -1 && <button className="p-1 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded"><Eye size={14} /></button>}
+                            {(row.invCode !== -1 && row.invcode !== -1) && (
+                              <button 
+                                onClick={() => setSelectedInvoice({ invCode: row.invCode || row.invcode, invType: row.type_ID || row.typeId || 1 })}
+                                className="p-1 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded cursor-pointer"
+                                title="View Details"
+                              >
+                                <Eye size={14} />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -251,6 +282,16 @@ export const LedgerChildOutstandingReport: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Invoice Detail Modal */}
+      <InvoiceDetailsModal 
+        isOpen={selectedInvoice !== null}
+        onClose={() => setSelectedInvoice(null)}
+        invCode={selectedInvoice?.invCode || 0} 
+        invType={selectedInvoice?.invType || 1} 
+        invoiceList={lst.filter(r => (r.invCode || r.invcode) && (r.type_ID || r.typeId)).map(r => ({ Invcode: r.invCode || r.invcode, TypeId: r.type_ID || r.typeId }))}
+        currentIndex={lst.filter(r => (r.invCode || r.invcode) && (r.type_ID || r.typeId)).findIndex(r => (r.invCode || r.invcode) === selectedInvoice?.invCode && (r.type_ID || r.typeId) === selectedInvoice?.invType)}
+      />
     </div>
   );
 };

@@ -184,11 +184,6 @@ export const reportApi = {
 
   // ─── Register Report APIs ────────────────────────────────────────────────
 
-  /** POST /api/Report/LedgerRegister */
-  ledgerRegister(data: any): Promise<any> {
-    return apiClient.post<any>('/api/Report/LedgerRegister', data);
-  },
-
   /** POST /api/Report/LedgerRegisterExport */
   async ledgerRegisterExport(data: any): Promise<Blob> {
     const response = await api.post('/api/Report/LedgerRegisterExport', data, {

@@ -269,7 +269,7 @@ export const LedgerWiseOutstandingReport: React.FC = () => {
                       <span className="bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-700">Sales Person: {group.ledger.salesperson}</span>
                       <span className="bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-700">Credit Limit: {group.ledger.credit_Limit}</span>
                       <span className="bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-sm border border-slate-200 dark:border-slate-700">Credit Days: {group.ledger.creditDays}</span>
-                      <span className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded shadow-sm border border-blue-200 dark:border-blue-800">Due As on: {H.formatDateForApi(toDate)}</span>
+                      <span className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded shadow-sm border border-blue-200 dark:border-blue-800">Due As on: {H.formatDisplayDate(toDate)}</span>
                     </p>
                   </div>
                   
@@ -293,7 +293,7 @@ export const LedgerWiseOutstandingReport: React.FC = () => {
                               {row.billNo || row.bill_No}
                             </td>
                             <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
-                              {H.formatDateForDisplay(row.date)}
+                              {H.formatDisplayDate(row.date)}
                             </td>
                             <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                               {typeof row.voucher === 'string' ? row.voucher : (

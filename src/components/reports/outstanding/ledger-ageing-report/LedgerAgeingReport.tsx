@@ -463,7 +463,7 @@ export const LedgerAgeingReport: React.FC = () => {
                                   {data.invoices.map((inv: any, j: number) => (
                                     <tr key={j} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
                                       <td className="px-3 py-2 font-medium">{inv.billNo || inv.bill_No}</td>
-                                      <td className="px-3 py-2">{H.formatDateForDisplay(inv.date)}</td>
+                                      <td className="px-3 py-2">{H.formatDisplayDate(inv.date)}</td>
                                       <td className="px-3 py-2 text-right font-medium">
                                         {H.formatNumber(inv.opening, precision)} {inv.openingDrCr}
                                       </td>
