@@ -345,7 +345,7 @@ export const MultipleOutstandingReport: React.FC = () => {
 
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -532,12 +532,12 @@ export const MultipleOutstandingReport: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-4 p-3 bg-yellow-400 border-t-2 border-yellow-500/50 shadow-sm text-slate-900 rounded-b-lg">
+                <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-4 p-3 bg-brand-yellow dark:bg-brand-yellow/10 border-t-2 border-brand-yellow/20 dark:border-brand-yellow/5 shadow-sm rounded-b-lg">
                   <div className="flex gap-10">
-                    <span className="text-sm font-bold">
+                    <span className="text-sm font-bold text-slate-950 dark:text-brand-yellow">
                       Total Rows : {searchResults.length}
                     </span>
-                    <span className="text-sm font-bold">
+                    <span className="text-sm font-bold text-slate-950 dark:text-brand-yellow">
                       Filtered Rows : {searchResults.length}
                     </span>
                   </div>

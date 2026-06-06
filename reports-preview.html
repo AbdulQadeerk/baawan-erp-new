@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics & Reporting Preview</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for dropdown interactivity -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <!-- Lucide Icons for vector SVGs -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#0ea5e9", // Base brand color
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-slate-50 min-h-screen"
+    x-data="{ order: false, finalAcc: false, outstanding: false, register: false }"
+  >
+    <div class="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <!-- Header Section -->
+      <div class="flex items-center mb-2">
+        <h1
+          class="text-2xl font-extrabold text-slate-900 flex items-center gap-3 tracking-tight"
+        >
+          <div
+            class="p-2 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-sm"
+          >
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          Analytics & Reporting
+        </h1>
+      </div>
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start"
+      >
+        <!-- Inventory Column -->
+        <div
+          class="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+          ></div>
+
+          <div
+            class="p-6 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-b from-slate-50/50 to-transparent"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner ring-1 ring-emerald-100"
+            >
+              <i data-lucide="package" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-800 text-xl tracking-tight">
+                Inventory
+              </h2>
+              <p class="text-sm text-slate-500 font-medium mt-0.5">
+                Stock & Valuation
+              </p>
+            </div>
+          </div>
+          <div class="p-4 flex-1">
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Current Stock</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Inventory Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Item Register</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Pending Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Stock Valuation</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Purchase Invoice Adjustment Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Sales Margin Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >SO Summary</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Batch Stock Summary</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Item Batch Register</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+
+              <li class="pt-3 mt-3 border-t border-slate-100">
+                <button
+                  @click="order = !order"
+                  class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-emerald-50 rounded-xl transition-colors group"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-100 text-emerald-600 group-hover:scale-110 transition-transform"
+                    >
+                      <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                    </span>
+                    Order Processing
+                  </span>
+                  <span
+                    class="text-slate-400 transition-transform duration-300"
+                    :class="order ? 'rotate-180' : ''"
+                  >
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </span>
+                </button>
+                <div
+                  class="grid transition-all duration-300 ease-in-out"
+                  :class="order ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'"
+                >
+                  <ul
+                    class="overflow-hidden pl-9 space-y-1 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-200"
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Process Order</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Schedule Report</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Accounting Column -->
+        <div
+          class="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+          ></div>
+
+          <div
+            class="p-6 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-b from-slate-50/50 to-transparent"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 shadow-inner ring-1 ring-blue-100"
+            >
+              <i data-lucide="calculator" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-800 text-xl tracking-tight">
+                Accounting
+              </h2>
+              <p class="text-sm text-slate-500 font-medium mt-0.5">
+                Finance & Ledgers
+              </p>
+            </div>
+          </div>
+          <div class="p-4 flex-1">
+            <ul class="space-y-1">
+              <li>
+                <button
+                  @click="finalAcc = !finalAcc"
+                  class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-blue-50 rounded-xl transition-colors group"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform"
+                    >
+                      <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i>
+                    </span>
+                    Final Accounts
+                  </span>
+                  <span
+                    class="text-slate-400 transition-transform duration-300"
+                    :class="finalAcc ? 'rotate-180' : ''"
+                  >
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </span>
+                </button>
+                <div
+                  class="grid transition-all duration-300 ease-in-out"
+                  :class="finalAcc ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'"
+                >
+                  <ul
+                    class="overflow-hidden pl-9 space-y-1 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-200"
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Trial Balance</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >P & L Account</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Balance Sheet</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="pt-1">
+                <button
+                  @click="outstanding = !outstanding"
+                  class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-blue-50 rounded-xl transition-colors group"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform"
+                    >
+                      <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    </span>
+                    Outstanding
+                  </span>
+                  <span
+                    class="text-slate-400 transition-transform duration-300"
+                    :class="outstanding ? 'rotate-180' : ''"
+                  >
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </span>
+                </button>
+                <div
+                  class="grid transition-all duration-300 ease-in-out"
+                  :class="outstanding ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'"
+                >
+                  <ul
+                    class="overflow-hidden pl-9 space-y-1 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-200"
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Multiple Outstanding</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Ledger Outstanding</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Ledger Child Outstanding</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Outstanding Payments</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Outstanding Receipts</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Sales Person Outstanding</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Ledger Wise Outstanding</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Ledger Wise Ageing</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="pt-1">
+                <button
+                  @click="register = !register"
+                  class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-blue-50 rounded-xl transition-colors group"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform"
+                    >
+                      <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                    </span>
+                    Register
+                  </span>
+                  <span
+                    class="text-slate-400 transition-transform duration-300"
+                    :class="register ? 'rotate-180' : ''"
+                  >
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </span>
+                </button>
+                <div
+                  class="grid transition-all duration-300 ease-in-out"
+                  :class="register ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'"
+                >
+                  <ul
+                    class="overflow-hidden pl-9 space-y-1 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-200"
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Ledger Register</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Sales Register</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Purchase Register</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Sales Register Columnar</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-600 hover:text-primary hover:bg-primary/5 relative before:absolute before:left-[-16px] before:top-1/2 before:w-4 before:h-[2px] before:bg-slate-200 hover:before:bg-primary"
+                      >
+                        <span class="flex items-center gap-3">
+                          <span
+                            class="transform group-hover:translate-x-1 transition-transform duration-200"
+                            >Purchase Regd Columnar</span
+                          >
+                        </span>
+                        <i
+                          data-lucide="chevron-right"
+                          class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                        ></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <div class="pt-3 mt-3 border-t border-slate-100 space-y-1">
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Ageing Report</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Bank Reconciliation</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Process Discount</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Group Summary</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Dealer Analysis</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Day Book</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+              </div>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Statutory & Marketing Column -->
+        <div class="flex flex-col gap-6">
+          <div
+            class="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
+          >
+            <div
+              class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-amber-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+            ></div>
+
+            <div
+              class="p-6 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-b from-slate-50/50 to-transparent"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center text-amber-600 shadow-inner ring-1 ring-amber-100"
+              >
+                <i data-lucide="file-text" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-slate-800 text-xl tracking-tight">
+                  Statutory
+                </h2>
+                <p class="text-sm text-slate-500 font-medium mt-0.5">
+                  Tax & Compliance
+                </p>
+              </div>
+            </div>
+            <div class="p-4 flex-1">
+              <ul class="space-y-1">
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >GSTR 1</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >GSTR 2</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >GSTR3B</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >VAT Report</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Process TCS</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Process TDS</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div
+            class="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
+          >
+            <div
+              class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-pink-400 to-pink-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+            ></div>
+
+            <div
+              class="p-6 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-b from-slate-50/50 to-transparent"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-100 to-pink-50 flex items-center justify-center text-pink-600 shadow-inner ring-1 ring-pink-100"
+              >
+                <i data-lucide="bar-chart" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-slate-800 text-xl tracking-tight">
+                  Marketing
+                </h2>
+                <p class="text-sm text-slate-500 font-medium mt-0.5">
+                  Targets & KPIs
+                </p>
+              </div>
+            </div>
+            <div class="p-4 flex-1">
+              <ul class="space-y-1">
+                <li>
+                  <a
+                    href="#"
+                    class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                  >
+                    <span class="flex items-center gap-3">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                      ></span>
+                      <span
+                        class="transform group-hover:translate-x-1 transition-transform duration-200"
+                        >Ledger Target</span
+                      >
+                    </span>
+                    <i
+                      data-lucide="chevron-right"
+                      class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                    ></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Reports Column -->
+        <div
+          class="group bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-purple-400 to-purple-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+          ></div>
+
+          <div
+            class="p-6 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-b from-slate-50/50 to-transparent"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center text-purple-600 shadow-inner ring-1 ring-purple-100"
+            >
+              <i data-lucide="layers" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-800 text-xl tracking-tight">
+                Other Reports
+              </h2>
+              <p class="text-sm text-slate-500 font-medium mt-0.5">
+                Misc & Analysis
+              </p>
+            </div>
+          </div>
+          <div class="p-4 flex-1">
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >MSL Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Sales Person Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Sales Data By Sales Person Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Counter Sale Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Rate Comparision</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Item Register Group Wise</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Invoice Item Pending PO</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 text-slate-700 hover:text-primary hover:bg-slate-50"
+                >
+                  <span class="flex items-center gap-3">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-primary transition-all duration-300 group-hover:scale-150"
+                    ></span>
+                    <span
+                      class="transform group-hover:translate-x-1 transition-transform duration-200"
+                      >Documents Report</span
+                    >
+                  </span>
+                  <i
+                    data-lucide="chevron-right"
+                    class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                  ></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize the vector SVG icons
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

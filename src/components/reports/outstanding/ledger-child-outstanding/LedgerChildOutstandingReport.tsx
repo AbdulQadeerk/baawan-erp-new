@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, Users, Eye } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, Users, Eye, X, Printer } from 'lucide-react';
 import { reportApi } from '../../../../services/report.service';
 import { ledgerApi } from '../../../../services/ledger.service';
 import { toast } from '../../../../lib/toast';
@@ -99,7 +99,7 @@ export const LedgerChildOutstandingReport: React.FC = () => {
   };
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -112,65 +112,72 @@ export const LedgerChildOutstandingReport: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap xl:flex-nowrap items-start xl:items-end gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
+        <div className="flex flex-wrap items-end gap-3">
           {/* Ledger Typeahead */}
-          <div className="w-full sm:w-64 xl:w-80 shrink-0" ref={searchRef}>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Select Ledger <span className="text-red-500">*</span></label>
-            <div className="relative">
-              <input type="text" value={ledgerSearch} onChange={e => handleLedgerSearch(e.target.value)} onFocus={() => suggestions.length && setShowSuggestions(true)}
-                placeholder="Type to search ledger..."
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all" />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                  {suggestions.map((l, i) => (
-                    <div key={i} onClick={() => selectLedger(l)} className="px-3 py-2 hover:bg-violet-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{l.name}</span>
-                        <span className="text-[10px] text-slate-400">{l.group}</span>
-                      </div>
-                      {(l.area || l.city || l.mobile) && <span className="text-[10px] text-slate-400">{[l.area, l.city, l.mobile].filter(Boolean).join(' | ')}</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
+          <div className="flex-1 min-w-[250px] md:max-w-[350px] relative" ref={searchRef}>
+            <div className={`w-full px-3 py-1 bg-white dark:bg-slate-900 border rounded-lg transition-all focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-500/20 ${showSuggestions ? "border-yellow-500 ring-2 ring-yellow-500/20" : "border-slate-200 dark:border-slate-700"}`}>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block select-none mb-0.5 uppercase tracking-wider">
+                Select Ledger <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <input type="text" value={ledgerSearch} onChange={e => handleLedgerSearch(e.target.value)} onFocus={() => suggestions.length && setShowSuggestions(true)}
+                  placeholder="Select Ledger"
+                  className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-0 pr-6" />
+                {ledgerSearch && (
+                  <button type="button" onClick={() => { setLedgerSearch(''); setSelectedLedger(null); setShowSuggestions(false); }} className="absolute right-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 font-extrabold select-none cursor-pointer">
+                    <X size={16} className="stroke-[3]" />
+                  </button>
+                )}
+              </div>
             </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 top-full mt-1 w-full sm:min-w-[950px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                {suggestions.map((l, i) => (
+                  <button key={i} onClick={() => selectLedger(l)} className="w-full text-left transition-colors border-b border-slate-100 dark:border-slate-700 last:border-0 p-0 flex hover:brightness-95 dark:hover:brightness-110 focus:outline-none">
+                    <div className="flex w-full text-sm font-medium">
+                      <div className="w-[32%] bg-[#fcf8e3] dark:bg-amber-950/40 px-3 py-2 text-slate-800 dark:text-amber-200 font-semibold truncate text-left" title={l.name}>{l.name}</div>
+                      <div className="w-[68%] bg-[#d9edf7] dark:bg-blue-950/40 px-3 py-2 flex items-center text-xs text-slate-700 dark:text-blue-200 font-semibold gap-2">
+                        <div className="w-[22%] truncate text-left" title={l.group}>{l.group || ''}</div>
+                        <div className="w-[24%] truncate text-left" title={l.area}>{l.area || '-'}</div>
+                        <div className="w-[16%] truncate text-left" title={l.city}>{l.city || '-'}</div>
+                        <div className="w-[20%] truncate text-left" title={l.mobile || l.phone_1 || l.phone_2}>{l.mobile || l.phone_1 || l.phone_2 || '-'}</div>
+                        <div className="w-[18%] truncate text-left" title={l.gstNo || l.gstin}>{l.gstNo || l.gstin || '-'}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* To Date */}
-          <div className="w-full sm:w-[170px] shrink-0">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date</label>
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              To Date
+            </label>
             <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all" />
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer" />
           </div>
 
           {/* Include Child Checkbox */}
           <div className="flex items-center gap-2 shrink-0 py-2 xl:py-2.5">
-            <input type="checkbox" id="includeChild" checked={includeChild} onChange={e => setIncludeChild(e.target.checked)} className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" />
-            <label htmlFor="includeChild" className="text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">Include Child Ledger</label>
+            <input type="checkbox" id="includeChild" checked={includeChild} onChange={e => setIncludeChild(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer" />
+            <label htmlFor="includeChild" className="text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap cursor-pointer">Include Child Ledger</label>
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center space-x-2 shrink-0 pt-4 xl:pt-1 xl:ml-auto">
-            <button
-              onClick={submitReport}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Search"
-            >
+          <div className="flex items-center space-x-2 shrink-0 pb-0.5 ml-auto">
+            <button onClick={submitReport} disabled={loading} className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Search">
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </button>
-            <button
-              onClick={handleClear}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Reset Filters"
-            >
+            <button onClick={handleClear} className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer" title="Reset Filters">
               <RotateCcw size={16} />
             </button>
-            <button
-              onClick={handleExport}
-              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Export to Excel"
-            >
+            <button disabled className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="PDF Export">
+              <Printer size={16} />
+            </button>
+            <button onClick={handleExport} disabled={exportLoading} className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Export Excel">
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
           </div>
@@ -253,28 +260,28 @@ export const LedgerChildOutstandingReport: React.FC = () => {
                 </div>
 
                 {/* Per-ledger totals */}
-                <div className="p-3 bg-violet-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-slate-500">Total Rows: {item.data.length}</span>
+                <div className="p-3 bg-brand-yellow dark:bg-brand-yellow/10 border-t border-brand-yellow/20 dark:border-brand-yellow/5 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Total Rows: {item.data.length}</span>
                   <div className="flex gap-6">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Total Amount: <span className="font-mono">{H.formatNumber(H.getLedgerTotals(item.data, precision), precision)}</span></span>
-                    <span className="text-xs font-bold text-violet-700 dark:text-violet-400">Pending: <span className="font-mono">{H.formatNumber(H.getLedgerPending(item.data, precision), precision)}</span></span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Total Amount: <span className="font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(H.getLedgerTotals(item.data, precision), precision)}</span></span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Pending: <span className="font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(H.getLedgerPending(item.data, precision), precision)}</span></span>
                   </div>
                 </div>
               </div>
             ))}
-
+ 
             {/* Grand totals */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+            <div className="bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-sm p-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="text-xs font-bold text-slate-500 uppercase">Grand Total — {lst.length} rows</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90 uppercase">Grand Total — {lst.length} rows</span>
                 <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Total Amount</span>
-                    <span className="text-sm font-bold font-mono">{H.formatNumber(totalAmount, precision)}</span>
+                    <span className="text-[10px] text-slate-800/80 dark:text-brand-yellow/70 font-bold uppercase block">Total Amount</span>
+                    <span className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(totalAmount, precision)}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Pending Amount</span>
-                    <span className="text-base font-black font-mono text-violet-600 dark:text-violet-400">{H.formatNumber(pendingAmount, precision)}</span>
+                    <span className="text-[10px] text-slate-800/80 dark:text-brand-yellow/70 font-bold uppercase block">Pending Amount</span>
+                    <span className="text-base font-black font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(pendingAmount, precision)}</span>
                   </div>
                 </div>
               </div>

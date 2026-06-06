@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, Clock, Eye, ChevronDown } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, Clock, Eye, ChevronDown, X, Printer, CheckCircle, Send } from 'lucide-react';
 import { reportApi } from '../../../../services/report.service';
 import { ledgerApi } from '../../../../services/ledger.service';
 import { toast } from '../../../../lib/toast';
@@ -119,7 +119,7 @@ export const LedgerOutstandingReport: React.FC = () => {
   };
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -134,53 +134,68 @@ export const LedgerOutstandingReport: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap xl:flex-nowrap items-start xl:items-end gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
+        <div className="flex flex-wrap items-end gap-3">
           {/* Ledger Typeahead */}
-          <div className="w-full sm:w-64 xl:w-80 shrink-0" ref={searchRef}>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Select Ledger <span className="text-red-500">*</span></label>
-            <div className="relative">
-              <input type="text" value={ledgerSearch} onChange={e => handleLedgerSearch(e.target.value)} onFocus={() => suggestions.length && setShowSuggestions(true)}
-                placeholder="Type to search ledger..."
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                  {suggestions.map((l, i) => (
-                    <div key={i} onClick={() => selectLedger(l)}
-                      className="px-3 py-2 hover:bg-indigo-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{l.name}</span>
-                        <span className="text-[10px] text-slate-400">{l.group}</span>
-                      </div>
-                      {(l.area || l.city) && <span className="text-[10px] text-slate-400">{[l.area, l.city].filter(Boolean).join(', ')}</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
+          <div className="flex-1 min-w-[250px] md:max-w-[350px] relative" ref={searchRef}>
+            <div className={`w-full px-3 py-1 bg-white dark:bg-slate-900 border rounded-lg transition-all focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-500/20 ${showSuggestions ? "border-yellow-500 ring-2 ring-yellow-500/20" : "border-slate-200 dark:border-slate-700"}`}>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block select-none mb-0.5 uppercase tracking-wider">
+                Select Ledger <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <input type="text" value={ledgerSearch} onChange={e => handleLedgerSearch(e.target.value)} onFocus={() => suggestions.length && setShowSuggestions(true)}
+                  placeholder="Select Ledger"
+                  className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-0 pr-6" />
+                {ledgerSearch && (
+                  <button type="button" onClick={() => { setLedgerSearch(''); setSelectedLedger(null); setShowSuggestions(false); }} className="absolute right-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 font-extrabold select-none cursor-pointer">
+                    <X size={16} className="stroke-[3]" />
+                  </button>
+                )}
+              </div>
             </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 top-full mt-1 w-full sm:min-w-[950px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                {suggestions.map((l, i) => (
+                  <button key={i} onClick={() => selectLedger(l)} className="w-full text-left transition-colors border-b border-slate-100 dark:border-slate-700 last:border-0 p-0 flex hover:brightness-95 dark:hover:brightness-110 focus:outline-none">
+                    <div className="flex w-full text-sm font-medium">
+                      <div className="w-[32%] bg-[#fcf8e3] dark:bg-amber-950/40 px-3 py-2 text-slate-800 dark:text-amber-200 font-semibold truncate text-left" title={l.name}>{l.name}</div>
+                      <div className="w-[68%] bg-[#d9edf7] dark:bg-blue-950/40 px-3 py-2 flex items-center text-xs text-slate-700 dark:text-blue-200 font-semibold gap-2">
+                        <div className="w-[22%] truncate text-left" title={l.group}>{l.group || ''}</div>
+                        <div className="w-[24%] truncate text-left" title={l.area}>{l.area || '-'}</div>
+                        <div className="w-[16%] truncate text-left" title={l.city}>{l.city || '-'}</div>
+                        <div className="w-[20%] truncate text-left" title={l.mobile || l.phone_1 || l.phone_2}>{l.mobile || l.phone_1 || l.phone_2 || '-'}</div>
+                        <div className="w-[18%] truncate text-left" title={l.gstNo || l.gstin}>{l.gstNo || l.gstin || '-'}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* To Date */}
-          <div className="w-full sm:w-[170px] shrink-0">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-red-500">*</span></label>
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              To Date <span className="text-rose-500">*</span>
+            </label>
             <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer" />
           </div>
 
           {/* Detailed checkbox */}
           <div className="flex items-center gap-2 shrink-0 py-2 xl:py-2.5">
             <input type="checkbox" id="detailed" checked={detailed} onChange={e => setDetailed(e.target.checked)}
-              className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
+              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
             <label htmlFor="detailed" className="text-xs font-semibold text-slate-600 dark:text-slate-300">Detailed</label>
           </div>
 
           {/* Age Type Dropdown */}
-          <div className="w-full sm:w-[150px] shrink-0">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Age Type</label>
+          <div className="w-full sm:w-[150px] shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5 block">Age Type</label>
             <select
               value={ageType}
               onChange={e => setAgeType(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
               <option value="1">Weekly</option>
               <option value="2">Monthly</option>
@@ -189,26 +204,17 @@ export const LedgerOutstandingReport: React.FC = () => {
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center space-x-2 shrink-0 pt-4 xl:pt-1 xl:ml-auto">
-            <button
-              onClick={submitReport}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Search"
-            >
+          <div className="flex items-center space-x-2 shrink-0 pb-0.5 ml-auto">
+            <button onClick={submitReport} disabled={loading} className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Search">
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </button>
-            <button
-              onClick={handleClear}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Reset Filters"
-            >
+            <button onClick={handleClear} className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer" title="Reset Filters">
               <RotateCcw size={16} />
             </button>
-            <button
-              onClick={handleExport}
-              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Export"
-            >
+            <button disabled className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="PDF Export">
+              <Printer size={16} />
+            </button>
+            <button onClick={handleExport} disabled={exportLoading} className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Export Excel">
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
           </div>
@@ -216,7 +222,7 @@ export const LedgerOutstandingReport: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col overflow-hidden min-h-[500px]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 size={28} className="animate-spin text-indigo-500 mb-3" />
@@ -232,17 +238,24 @@ export const LedgerOutstandingReport: React.FC = () => {
             {uniqueLedLst.map((item, idx) => (
               <div key={idx} className="mb-4">
                 {/* Ledger Info Header */}
-                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-800 dark:to-slate-800/80 p-4 border-b border-slate-200 dark:border-slate-700">
-                  <div className="text-center space-y-0.5">
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-800 dark:to-slate-800/80 p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex-1 hidden md:block"></div>
+                  <div className="text-center space-y-0.5 flex-1">
                     <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">{item.ledger.name || selectedLedger?.name}</h3>
                     {item.ledger.address && <p className="text-xs text-slate-500">{H.formatAddress(item.ledger)}</p>}
                     {item.ledger.mobile && <p className="text-xs text-slate-500">Mobile: {item.ledger.mobile}</p>}
                     <p className="text-xs text-slate-500 font-semibold">Due As on: {H.formatDisplayDate(toDate)}</p>
                   </div>
+                  <div className="flex-1 flex justify-center md:justify-end">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 p-3 rounded-xl flex flex-col items-end">
+                      <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-0.5">Total Net Outstanding</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white leading-tight">{currencySymbol} {H.formatNumber(pendingAmount, precision)}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Data Table */}
-                <div className="overflow-auto max-h-[calc(100vh-420px)]">
+                <div className="overflow-auto max-h-[calc(100vh-450px)]">
                   <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
@@ -299,19 +312,27 @@ export const LedgerOutstandingReport: React.FC = () => {
               </div>
             ))}
 
-            {/* Totals Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="text-xs font-bold text-slate-500 uppercase">Total Rows: {lst.length}</span>
-                <div className="flex items-center gap-6">
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Total Amount</span>
-                    <span className="text-sm font-bold font-mono text-slate-800 dark:text-slate-200">{H.formatNumber(totalAmount, precision)}</span>
+            {/* Sticky Footer */}
+            <div className="sticky bottom-0 mt-auto z-40 bg-brand-yellow dark:bg-brand-yellow/10 border-t border-brand-yellow/20 dark:border-brand-yellow/5 py-4 px-6 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-md">
+              <div className="flex flex-wrap items-center justify-between gap-6">
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-yellow-400/20 rounded-lg text-slate-800 dark:text-brand-yellow">
+                      <Clock size={22} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest">Balance Outstanding</p>
+                      <p className="text-xl font-black text-slate-950 dark:text-brand-yellow leading-tight tracking-tight">{currencySymbol} {H.formatNumber(pendingAmount, precision)}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Pending Amount</span>
-                    <span className="text-base font-black font-mono text-indigo-600 dark:text-indigo-400">{H.formatNumber(pendingAmount, precision)}</span>
-                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button type="button" className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-lg text-sm font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 cursor-pointer">
+                    <Send size={18} />
+                    Send Reminder
+                  </button>
+                  <div className="hidden sm:block w-px h-8 bg-yellow-400/50 dark:bg-brand-yellow/20 mx-2"></div>
+                  <span className="hidden sm:block text-xs font-bold text-slate-800 dark:text-brand-yellow/90 uppercase">Total Rows: {lst.length}</span>
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@
   --color-brand-red: #ef4444;
   --color-brand-emerald: #22c55e;
   --color-brand-amber: #f59e0b;
+  --color-brand-yellow: #ecc813;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

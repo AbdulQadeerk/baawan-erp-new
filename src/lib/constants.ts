@@ -45,7 +45,7 @@ export const API_CONFIG = {
 } as const;
 
 // Use the proxy path for client-side requests (avoids CORS)
-export const API_BASE_URL = '/api-proxy';
+export const API_BASE_URL = 'https://stageapi.baawanerp.com';
 
 // ─── Invoice/Voucher Type Mappings ──────────────────────────────────────────
 // Angular: InvoiceVoucherTypesObj, InvoiceVoucherTypesObjByte

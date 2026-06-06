@@ -74,6 +74,7 @@ export type Page =
   | 'multiple-outstanding-report'
   | 'ledger-outstanding-report'
   | 'ledger-child-outstanding-report'
+  | 'item-register-group-wise'
   | 'outstanding-payments-report'
   | 'outstanding-receipts-report'
   | 'sales-person-outstanding-report'
@@ -81,7 +82,27 @@ export type Page =
   | 'ledger-ageing-report'
   | 'ledger-register'
   | 'sales-register'
-  | 'purchase-register';
+  | 'purchase-register'
+  | 'sales-columnar'
+  | 'purchase-columnar'
+  | 'bank-reconciliation'
+  | 'process-discount'
+  | 'group-summary'
+  | 'dealer-analysis'
+  | 'day-book'
+  | 'gstr1-report'
+  | 'gstr2-report'
+  | 'gstr3b-report'
+  | 'process-tcs'
+  | 'process-tds'
+  | 'ledger-target-report'
+  | 'msl-report'
+  | 'sales-person-report'
+  | 'sales-data-by-sales-person-report'
+  | 'counter-sale-report'
+  | 'rate-comparision-report'
+  | 'invoice-item-pending-po'
+  | 'documents-report';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 

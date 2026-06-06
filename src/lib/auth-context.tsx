@@ -123,7 +123,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // ─── Login ──────────────────────────────────────────────────────────────
   // Mirrors Angular login.component.ts onSubmit()
   const login = useCallback(async (payload: LoginPayload) => {
-    setIsLoading(true);
     try {
       const data = await authApi.login(payload);
 
@@ -162,7 +161,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Trigger sync of master data after login
       masterSyncService.syncAll();
     } finally {
-      setIsLoading(false);
+      // Intentionally empty or remove finally block.
     }
     // errors are not caught here; they propagate to the caller (Login component) for UI handling
   }, []);

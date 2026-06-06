@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, Eraser, FileDown, Printer, Eye } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, BookOpen, Printer, Eye } from 'lucide-react';
 import { reportApi } from '../../../../services/report.service';
 import { commonApi } from '../../../../services/common.service';
 import { ledgerApi } from '../../../../services/ledger.service';
@@ -160,102 +160,78 @@ export const LedgerWiseOutstandingReport: React.FC = () => {
     `${H.formatNumber(row.pending, precision)} ${row.pendingDrCr}`;
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/50">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Ledger Wise Outstanding</h1>
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-2.5 rounded-xl text-blue-600 dark:text-blue-400"><BookOpen size={22} /></div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Ledger Wise Outstanding</h1>
+            <p className="text-xs text-slate-500 font-medium">Ledger outstanding with age filtering</p>
+          </div>
         </div>
       </div>
 
-      <div className="p-6">
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">To Date</label>
-              <input
-                type="date"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-              />
-            </div>
-            
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Limits</label>
-              <input
-                type="number"
-                placeholder="Limits"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                value={limits}
-                onChange={(e) => setLimits(e.target.value ? Number(e.target.value) : '')}
-              />
-            </div>
-            
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Min Days</label>
-              <input
-                type="number"
-                placeholder="Min Days"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                value={minDays}
-                onChange={(e) => setMinDays(e.target.value ? Number(e.target.value) : '')}
-              />
-            </div>
-            
-            <div className="md:col-span-2">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Max Days</label>
-              <input
-                type="number"
-                placeholder="Max Days"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                value={maxDays}
-                onChange={(e) => setMaxDays(e.target.value ? Number(e.target.value) : '')}
-              />
-            </div>
+      {/* Controls */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date</label>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-36" />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Limits</label>
+            <input type="number" placeholder="Limits" value={limits} onChange={(e) => setLimits(e.target.value ? Number(e.target.value) : '')}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-24" />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Min Days</label>
+            <input type="number" placeholder="Min Days" value={minDays} onChange={(e) => setMinDays(e.target.value ? Number(e.target.value) : '')}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-24" />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Max Days</label>
+            <input type="number" placeholder="Max Days" value={maxDays} onChange={(e) => setMaxDays(e.target.value ? Number(e.target.value) : '')}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-24" />
+          </div>
 
-            <div className="md:col-span-4 flex items-center justify-end gap-2">
-              <button
-                onClick={submitReport}
-                disabled={loading}
-                title="Search"
-                className="w-10 h-10 flex items-center justify-center bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70"
-              >
-                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search size={18} />}
-              </button>
-              
-              <button
-                onClick={handleClear}
-                title="Clear"
-                className="w-10 h-10 flex items-center justify-center bg-lime-600 hover:bg-lime-700 text-white rounded-lg transition-colors shadow-sm"
-              >
-                <Eraser size={18} />
-              </button>
-              
-              <button
-                onClick={handleExport}
-                disabled={exportLoading || loading || !lst.length}
-                title="Export"
-                className="w-10 h-10 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70"
-              >
-                {exportLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FileDown size={18} />}
-              </button>
-              
-              <button
-                onClick={handlePrint}
-                disabled={printLoading || loading || !lst.length}
-                title="Print"
-                className="w-10 h-10 flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-70"
-              >
-                {printLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Printer size={18} />}
-              </button>
-            </div>
+          <div className="flex items-center space-x-2 mt-4 md:mt-0 ml-auto">
+            <button
+              onClick={submitReport} disabled={loading}
+              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Search"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            </button>
+            <button
+              onClick={handleClear}
+              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={handlePrint} disabled={printLoading || loading || !lst.length}
+              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Print / PDF"
+            >
+              {printLoading ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
+            </button>
+            <button
+              onClick={handleExport} disabled={exportLoading || loading || !lst.length}
+              className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Excel Export"
+            >
+              {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+            </button>
           </div>
         </div>
       </div>
 
       {lst.length > 0 && (
-        <div className="px-6 pb-6 flex-1 flex flex-col min-h-0">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden">
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-full overflow-hidden">
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
               {uniqueLedLst.map((group, idx) => (
                 <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -344,20 +320,20 @@ export const LedgerWiseOutstandingReport: React.FC = () => {
               ))}
             </div>
             
-            <div className="bg-slate-50 dark:bg-slate-800/80 p-4 border-t border-slate-200 dark:border-slate-700 shrink-0">
+            <div className="bg-brand-yellow dark:bg-brand-yellow/10 p-4 border-t border-brand-yellow/20 dark:border-brand-yellow/5 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 font-medium">Total Rows:</span>
-                  <span className="font-black text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">{lst.length}</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90 uppercase">Total Rows:</span>
+                  <span className="font-bold font-mono text-slate-950 dark:text-brand-yellow">{lst.length}</span>
                 </div>
-                <div className="flex gap-6">
+                <div className="flex gap-6 text-slate-800 dark:text-brand-yellow/90">
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-500 font-medium uppercase tracking-wider text-xs">Total Amount:</span>
-                    <span className="font-black text-lg text-emerald-600 dark:text-emerald-400">{H.formatNumber(totalAmount, precision)}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Amount:</span>
+                    <span className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(totalAmount, precision)}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-500 font-medium uppercase tracking-wider text-xs">Pending Amount:</span>
-                    <span className="font-black text-lg text-rose-600 dark:text-rose-400">{H.formatNumber(pendingAmount, precision)}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Pending Amount:</span>
+                    <span className="text-base font-black font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(pendingAmount, precision)}</span>
                   </div>
                 </div>
               </div>

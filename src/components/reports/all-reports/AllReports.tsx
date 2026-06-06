@@ -61,10 +61,10 @@ export const AllReports: React.FC<AllReportsProps> = ({ onModuleClick }) => {
               <ReportLink onClick={(e) => handleLinkClick(e, 'item-register-report', 'Item Register')} title="Item Register" />
               <ReportLink onClick={(e) => handleLinkClick(e, 'pending-report', 'Pending Report')} title="Pending Report" />
               <ReportLink onClick={(e) => handleLinkClick(e, 'stock-valuation-report', 'Stock Valuation')} title="Stock Valuation" />
-              <ReportLink title="Purchase Invoice Adjustment Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'supplier-wise-pending', 'Purchase Invoice Adjustment Report')} title="Purchase Invoice Adjustment Report" />
               <ReportLink onClick={(e) => handleLinkClick(e, 'sales-margin-report', 'Sales Margin Report')} title="Sales Margin Report" />
               <ReportLink onClick={(e) => handleLinkClick(e, 'sales-order-summary', 'SO Summary')} title="SO Summary" />
-              <ReportLink title="Batch Stock Summary" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'lot-batch-summary', 'Lot / Batch Stock Summary')} title="Lot / Batch Stock Summary" />
               <ReportLink onClick={(e) => handleLinkClick(e, 'item-batch-register', 'Item Batch Register')} title="Item Batch Register" />
 
               {/* Order Collapsible */}
@@ -185,19 +185,19 @@ export const AllReports: React.FC<AllReportsProps> = ({ onModuleClick }) => {
                     <ReportLink isSub onClick={(e) => handleLinkClick(e, 'ledger-register', 'Ledger Register')} title="Ledger Register" />
                     <ReportLink isSub onClick={(e) => handleLinkClick(e, 'sales-register', 'Sales Register')} title="Sales Register" />
                     <ReportLink isSub onClick={(e) => handleLinkClick(e, 'purchase-register', 'Purchase Register')} title="Purchase Register" />
-                    <ReportLink isSub title="Sales Register Columnar" />
-                    <ReportLink isSub title="Purchase Regd Columnar" />
+                    <ReportLink isSub onClick={(e) => handleLinkClick(e, 'sales-columnar', 'Sales Columnar')} title="Sales Columnar" />
+                    <ReportLink isSub onClick={(e) => handleLinkClick(e, 'purchase-columnar', 'Purchase Columnar')} title="Purchase Columnar" />
                   </ul>
                 </div>
               </li>
 
               <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
                 <ReportLink onClick={(e) => handleLinkClick(e, 'aging-analysis', 'Ageing Report')} title="Ageing Report" />
-                <ReportLink title="Bank Reconciliation" />
-                <ReportLink title="Process Discount" />
-                <ReportLink title="Group Summary" />
-                <ReportLink title="Dealer Analysis" />
-                <ReportLink title="Day Book" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'bank-reconciliation', 'Bank Reconciliation')} title="Bank Reconciliation" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'process-discount', 'Process Discount')} title="Process Discount" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'group-summary', 'Group Summary')} title="Group Summary" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'dealer-analysis', 'Dealer Analysis')} title="Dealer Analysis" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'day-book', 'Day Book')} title="Day Book" />
               </div>
             </ul>
           </div>
@@ -219,12 +219,12 @@ export const AllReports: React.FC<AllReportsProps> = ({ onModuleClick }) => {
             </div>
             <div className="p-4 flex-1">
               <ul className="space-y-1">
-                <ReportLink title="GSTR 1" />
-                <ReportLink title="GSTR 2" />
-                <ReportLink title="GSTR3B" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'gstr1-report', 'GSTR1 Report')} title="GSTR 1" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'gstr2-report', 'GSTR2 Report')} title="GSTR 2" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'gstr3b-report', 'GSTR3B Report')} title="GSTR3B" />
                 <ReportLink title="VAT Report" />
-                <ReportLink title="Process TCS" />
-                <ReportLink title="Process TDS" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'process-tcs', 'Process TCS')} title="Process TCS" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'process-tds', 'Process TDS')} title="Process TDS" />
               </ul>
             </div>
           </div>
@@ -243,7 +243,7 @@ export const AllReports: React.FC<AllReportsProps> = ({ onModuleClick }) => {
             </div>
             <div className="p-4 flex-1">
               <ul className="space-y-1">
-                <ReportLink title="Ledger Target" />
+                <ReportLink onClick={(e) => handleLinkClick(e, 'ledger-target-report', 'Ledger Target Report')} title="Ledger Target" />
               </ul>
             </div>
           </div>
@@ -264,14 +264,14 @@ export const AllReports: React.FC<AllReportsProps> = ({ onModuleClick }) => {
           </div>
           <div className="p-4 flex-1">
             <ul className="space-y-1">
-              <ReportLink title="MSL Report" />
-              <ReportLink title="Sales Person Report" />
-              <ReportLink title="Sales Data By Sales Person Report" />
-              <ReportLink title="Counter Sale Report" />
-              <ReportLink title="Rate Comparision" />
-              <ReportLink title="Item Register Group Wise" />
-              <ReportLink title="Invoice Item Pending PO" />
-              <ReportLink title="Documents Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'msl-report', 'MSL Report')} title="MSL Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'sales-person-report', 'Sales Person Report')} title="Sales Person Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'sales-data-by-sales-person-report', 'Sales Data By Sales Person Report')} title="Sales Data By Sales Person Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'counter-sale-report', 'Counter Sale Report')} title="Counter Sale Report" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'rate-comparision-report', 'Rate Comparision')} title="Rate Comparision" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'item-register-group-wise', 'Item Register Group Wise')} title="Item Register Group Wise" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'invoice-item-pending-po', 'Invoice Item Pending PO')} title="Invoice Item Pending PO" />
+              <ReportLink onClick={(e) => handleLinkClick(e, 'documents-report', 'Documents Report')} title="Documents Report" />
             </ul>
           </div>
         </div>

@@ -16,5 +16,9 @@ export const commonApi = {
   
   getDropdown(data: { table: number }): Promise<any[]> {
     return apiClient.post('/api/Common/Dropdown', data);
+  },
+
+  salesTargetRange(data: { id: number }): Promise<any[]> {
+    return apiClient.post('/api/Common/SalesTargetRange', data);
   }
 };

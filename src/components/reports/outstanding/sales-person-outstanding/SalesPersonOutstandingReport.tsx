@@ -230,7 +230,7 @@ export const SalesPersonOutstandingReport: React.FC = () => {
     `${H.formatNumber(row.pending, precision)} ${row.pendingDrCr}`;
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -383,12 +383,12 @@ export const SalesPersonOutstandingReport: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
+              <div className="p-3 bg-brand-yellow dark:bg-brand-yellow/10 border-t border-brand-yellow/20 dark:border-brand-yellow/5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
-                  <span className="text-xs font-bold text-slate-500">Total Rows: {item.data.length}</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Total Rows: {item.data.length}</span>
                   <div className="flex gap-6">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Total: {H.formatNumber(H.getLedgerTotals(item.data, precision), precision)}</span>
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Pending: {H.formatNumber(H.getLedgerPending(item.data, precision), precision)}</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Total: <span className="font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(H.getLedgerTotals(item.data, precision), precision)}</span></span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90">Pending: <span className="font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(H.getLedgerPending(item.data, precision), precision)}</span></span>
                   </div>
                 </div>
               </div>
@@ -396,17 +396,17 @@ export const SalesPersonOutstandingReport: React.FC = () => {
           ))}
 
           {/* Grand totals */}
-          <div className="sticky bottom-0 z-10 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.05)] p-4">
+          <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-sm p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Grand Total — {lst.length} rows across {uniqueLedLst.length} ledgers</span>
-              <div className="flex items-center gap-8">
+              <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90 uppercase">Grand Total — {lst.length} rows across {uniqueLedLst.length} ledgers</span>
+              <div className="flex items-center gap-6">
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Amount</span>
-                  <span className="text-sm font-black text-slate-700 dark:text-slate-200">{H.formatNumber(totalAmount, precision)}</span>
+                  <span className="text-[10px] text-slate-800/80 dark:text-brand-yellow/70 font-bold uppercase block">Total Amount</span>
+                  <span className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(totalAmount, precision)}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider block mb-1">Pending Amount</span>
-                  <span className="text-lg font-black text-amber-600 dark:text-amber-400">{H.formatNumber(pendingAmount, precision)}</span>
+                  <span className="text-[10px] text-slate-800/80 dark:text-brand-yellow/70 font-bold uppercase block">Pending Amount</span>
+                  <span className="text-base font-black font-mono text-slate-950 dark:text-brand-yellow">{H.formatNumber(pendingAmount, precision)}</span>
                 </div>
               </div>
             </div>

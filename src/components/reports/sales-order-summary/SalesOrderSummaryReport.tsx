@@ -5,7 +5,8 @@ import {
   Loader2, 
   FileText,
   AlertCircle,
-  RotateCcw
+  RotateCcw,
+  Printer
 } from 'lucide-react';
 import { reportApi } from '../../../services/report.service';
 
@@ -130,7 +131,7 @@ export const SalesOrderSummaryReport: React.FC = () => {
   const totalBillAmount = data.reduce((s, i) => s + (parseFloat(i.GrandTotal) || 0), 0);
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -142,63 +143,80 @@ export const SalesOrderSummaryReport: React.FC = () => {
             <p className="text-xs text-slate-500 font-medium">Sales order status and summary.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={handleExport}
-            disabled={exportLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-70"
-          >
-            {exportLoading ? <Loader2 size={18} className="animate-spin" /> : <FileSpreadsheet size={18} />}
-            Excel
-          </button>
-          <button 
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
-          >
-            <FileText size={18} />
-            PDF
-          </button>
-        </div>
       </div>
 
       {/* Filters Card */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-wrap items-end gap-4 flex-1">
-            <div className="space-y-1 flex-1 min-w-[200px] max-w-xs">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">From Date</label>
-              <input
-                type="date"
-                value={filters.fromDate}
-                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              />
-            </div>
-            <div className="space-y-1 flex-1 min-w-[200px] max-w-xs">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">To Date</label>
-              <input
-                type="date"
-                value={filters.toDate}
-                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              />
-            </div>
+        <div className="flex flex-wrap xl:flex-nowrap items-end gap-4">
+          {/* From Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              From Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={filters.fromDate}
+              onChange={(e) =>
+                setFilters({ ...filters, fromDate: e.target.value })
+              }
+              className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${!filters.fromDate ? "border-red-500 focus:border-red-500" : "border-slate-200 dark:border-slate-700 focus:border-blue-500"}`}
+            />
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* To Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              To Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={filters.toDate}
+              onChange={(e) =>
+                setFilters({ ...filters, toDate: e.target.value })
+              }
+              className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${!filters.toDate ? "border-red-500 focus:border-red-500" : "border-slate-200 dark:border-slate-700 focus:border-blue-500"}`}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex items-center space-x-2 shrink-0 pb-0.5">
             <button
               onClick={submitReport}
               disabled={loading}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              className="w-10 h-10 flex items-center justify-center bg-[#2D9E75] text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="Search"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              {loading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Search size={16} />
+              )}
             </button>
             <button
               onClick={clearFilters}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center bg-lime-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Reset Filters"
             >
               <RotateCcw size={16} />
+            </button>
+            <button
+              disabled={loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="PDF Export"
+            >
+              <Printer size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={exportLoading || loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Excel Export"
+            >
+              {exportLoading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <FileSpreadsheet size={16} />
+              )}
             </button>
           </div>
         </div>
@@ -276,24 +294,24 @@ export const SalesOrderSummaryReport: React.FC = () => {
       </div>
 
       {/* Summary Footer Bar */}
-      <footer className="sticky bottom-0 z-50 bg-[#fbbf24] dark:bg-amber-900 px-6 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-amber-200 dark:border-amber-800 flex flex-wrap justify-center gap-8 md:gap-16 items-center -mx-6 mt-6">
+      <footer className="sticky bottom-0 z-50 bg-brand-yellow dark:bg-brand-yellow/10 px-6 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-brand-yellow/20 dark:border-brand-yellow/5 flex flex-wrap justify-center gap-8 md:gap-16 items-center -mx-6 mt-6">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Total Quantity</span>
-          <span className="text-xl font-extrabold text-amber-950 dark:text-amber-100 tabular-nums">
+          <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Quantity</span>
+          <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
             {data.length > 0 ? formatNumber(data.reduce((s, i) => s + (parseFloat(i.SOQty) || 0), 0)) : '1,952.00'}
           </span>
         </div>
-        <div className="h-8 w-px bg-amber-950/20 dark:bg-white/10 hidden sm:block"></div>
+        <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Total Taxable Value</span>
-          <span className="text-xl font-extrabold text-amber-950 dark:text-amber-100 tabular-nums">
+          <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Taxable Value</span>
+          <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
             {data.length > 0 ? '₹ ' + formatNumber(totalItemAmount) : '₹ 360,093.75'}
           </span>
         </div>
-        <div className="h-8 w-px bg-amber-950/20 dark:bg-white/10 hidden sm:block"></div>
+        <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-amber-900/80 dark:text-amber-500/80 uppercase tracking-tighter">Overall Grand Total</span>
-          <span className="text-2xl font-black text-amber-950 dark:text-amber-100 tabular-nums">
+          <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Overall Grand Total</span>
+          <span className="text-2xl font-black text-slate-950 dark:text-brand-yellow tabular-nums">
             {data.length > 0 ? '₹ ' + formatNumber(totalBillAmount) : '₹ 415,365.00'}
           </span>
         </div>

@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  Printer,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { reportApi } from "../../../services/report.service";
@@ -604,7 +605,7 @@ export const CurrentStockReport: React.FC = () => {
   };
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -707,10 +708,11 @@ export const CurrentStockReport: React.FC = () => {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 pt-2 2xl:pt-0 2xl:justify-end">
+          <div className="flex items-center gap-2 pt-2 2xl:pt-0 2xl:justify-end pb-0.5">
             <button
               onClick={submitReport}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              disabled={loading}
+              className="w-10 h-10 flex items-center justify-center bg-[#2D9E75] text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="Search"
             >
               {loading ? (
@@ -721,31 +723,33 @@ export const CurrentStockReport: React.FC = () => {
             </button>
             <button
               onClick={clearFilters}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center bg-lime-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Clear Filters"
             >
               <RotateCcw size={16} />
             </button>
             <button
+              onClick={handlePrint}
+              disabled={printLoading || loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Print PDF"
+            >
+              {printLoading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Printer size={16} />
+              )}
+            </button>
+            <button
               onClick={handleExport}
-              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              disabled={exportLoading || loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="Export to Excel"
             >
               {exportLoading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <FileSpreadsheet size={16} />
-              )}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Export to PDF"
-            >
-              {printLoading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <FileText size={16} />
               )}
             </button>
           </div>
@@ -793,8 +797,8 @@ export const CurrentStockReport: React.FC = () => {
           </AnimatePresence>
 
           {/* Data Table */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-420px)]">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col mb-4">
+            <div className="overflow-auto custom-scrollbar max-h-[calc(100vh-320px)]">
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
@@ -884,42 +888,44 @@ export const CurrentStockReport: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          </div>
 
-            {/* Footer */}
-            <div className="bg-amber-50 dark:bg-amber-900/20 border-t border-amber-100 dark:border-amber-900/50 px-6 py-3 flex justify-between items-center mt-auto">
+          {/* Sticky yellow summary bar */}
+          <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 select-none">
+            <div className="flex justify-between items-center">
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+                  <span className="text-slate-800 dark:text-brand-yellow/90 text-sm font-medium">
                     Total Items:
                   </span>
-                  <span className="bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded text-xs font-bold">
+                  <span className="bg-slate-900/10 dark:bg-brand-yellow/20 text-slate-900 dark:text-brand-yellow px-2 py-0.5 rounded text-xs font-bold">
                     {data.length}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 border-l border-amber-200 dark:border-amber-800 pl-6">
-                  <span className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+                <div className="flex items-center gap-2 border-l border-slate-900/10 dark:border-brand-yellow/20 pl-6">
+                  <span className="text-slate-800 dark:text-brand-yellow/90 text-sm font-medium">
                     Filtered Results:
                   </span>
-                  <span className="bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">
+                  <span className="bg-white/80 dark:bg-slate-800 text-slate-950 dark:text-brand-yellow px-2 py-0.5 rounded text-xs font-bold border border-slate-900/10 dark:border-brand-yellow/20">
                     {data.length} Rows
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                  <button className="p-1.5 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 transition-colors text-slate-900 dark:text-brand-yellow cursor-pointer">
                     <ChevronsLeft size={16} />
                   </button>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                  <button className="p-1.5 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 transition-colors text-slate-900 dark:text-brand-yellow cursor-pointer">
                     <ChevronLeft size={16} />
                   </button>
-                  <span className="text-xs font-semibold px-2 text-amber-900 dark:text-amber-100">
+                  <span className="text-xs font-semibold px-2 text-slate-900 dark:text-brand-yellow">
                     Page 1 of 1
                   </span>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                  <button className="p-1.5 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 transition-colors text-slate-900 dark:text-brand-yellow cursor-pointer">
                     <ChevronRight size={16} />
                   </button>
-                  <button className="p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors text-amber-900 dark:text-amber-100 cursor-pointer">
+                  <button className="p-1.5 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 transition-colors text-slate-900 dark:text-brand-yellow cursor-pointer">
                     <ChevronsRight size={16} />
                   </button>
                 </div>

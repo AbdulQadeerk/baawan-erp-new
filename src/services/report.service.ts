@@ -36,6 +36,11 @@ export const reportApi = {
     return response.data;
   },
 
+  /** POST /api/Report/ItemRegisterWithGroups */
+  itemRegisterWithGroups(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/ItemRegisterWithGroups', data);
+  },
+
   /** POST /api/Report/InventoryReport — Angular: ReportServiceService.InventoryReport() */
   inventoryReport(data: any): Promise<any[]> {
     return apiClient.post<any[]>('/api/Report/InventoryReport', data);
@@ -212,6 +217,15 @@ export const reportApi = {
     return apiClient.post<any[]>('/api/Report/SalesRegisterDetailReport', data);
   },
 
+  /** POST /api/Report/SalesRegisterDetailReportExport */
+  async salesRegisterDetailReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/SalesRegisterDetailReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
   /** POST /api/Report/PurchaseRegisterSummaryReport */
   purchaseRegisterSummaryReport(data: any): Promise<any[]> {
     return apiClient.post<any[]>('/api/Report/PurchaseRegisterSummaryReport', data);
@@ -229,5 +243,263 @@ export const reportApi = {
   /** POST /api/Report/PurchaseRegisterDetailReport */
   purchaseRegisterDetailReport(data: any): Promise<any[]> {
     return apiClient.post<any[]>('/api/Report/PurchaseRegisterDetailReport', data);
+  },
+
+  /** POST /api/Report/SalesColumnarReport */
+  salesColumnarReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/SalesColumnarReport', data);
+  },
+
+  /** POST /api/Report/SalesColumnarReportExport */
+  async salesColumnarReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/SalesColumnarReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/PurchaseColumnarReport */
+  purchaseColumnarReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/PurchaseColumnarReport', data);
+  },
+
+  /** POST /api/Report/PurchaseColumnarReportExport */
+  async purchaseColumnarReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/PurchaseColumnarReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/AgeingReport */
+  ageingReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/AgeingReport', data);
+  },
+
+  /** POST /api/Report/AgeingReportExport */
+  async ageingReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/AgeingReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/BankReconcile */
+  bankReconcile(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/BankReconcile', data);
+  },
+
+  /** POST /api/Report/BankReconcileExport */
+  async bankReconcileExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/BankReconcileExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/BankReconcileUpdate */
+  bankReconcileUpdate(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/BankReconcileUpdate', data);
+  },
+
+  /** POST /api/Report/ReportProcessDiscount */
+  reportProcessDiscount(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/ReportProcessDiscount', data);
+  },
+
+  /** POST /api/Report/ReportProcessDiscountExport */
+  async reportProcessDiscountExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/ReportProcessDiscountExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/GroupSummaryReport */
+  groupSummaryReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/GroupSummaryReport', data);
+  },
+
+  /** POST /api/Report/GroupSummaryReportExport */
+  async groupSummaryReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/GroupSummaryReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/DealerSales */
+  dealerSales(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/DealerSales', data);
+  },
+
+  /** POST /api/Report/DealerSalesExport */
+  async dealerSalesExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/DealerSalesExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/DayBook */
+  dayBook(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/DayBook', data);
+  },
+
+  /** POST /api/Report/GstrReport */
+  gstrReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/GstrReport', data);
+  },
+
+  /** POST /api/Report/GstrReportExport */
+  async gstrReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/GstrReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/Gstr3BDetailsReport */
+  gstr3BDetailsReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/Gstr3BDetailsReport', data);
+  },
+
+  /** POST /api/Report/Gstr3BDetailsReportExport */
+  async gstr3BDetailsReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/Gstr3BDetailsReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/ReportProcessTCS */
+  reportProcessTCS(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/ReportProcessTCS', data);
+  },
+
+  /** POST /api/Report/ReportProcessTCSExport */
+  async reportProcessTCSExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/ReportProcessTCSExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/ReportProcessTDS */
+  reportProcessTDS(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/ReportProcessTDS', data);
+  },
+
+  /** POST /api/Report/ReportProcessTDSExport */
+  async reportProcessTDSExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/ReportProcessTDSExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/ReportTOD */
+  reportTOD(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/ReportTOD', data);
+  },
+
+  /** POST /api/Report/ReportTODExport */
+  async reportTODExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/ReportTODExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/MSLReport — Angular: ReportServiceService.MSLReport() */
+  mslReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/MSLReport', data);
+  },
+
+  /** POST /api/Report/MSLReportExport — returns Excel blob */
+  async mslReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/MSLReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/SalesPersonReport */
+  salesPersonReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/SalesPersonReport', data);
+  },
+
+  /** POST /api/Report/SalesPersonReportExport — returns Excel blob */
+  async salesPersonReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/SalesPersonReportExport', data, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/SalesDataBySalesPersonReport */
+  salesDataBySalesPersonReport(data: any): Promise<any> {
+    return apiClient.post<any>('/api/Report/SalesDataBySalesPersonReport', data);
+  },
+
+  /** POST /api/Report/SalesDataBySalesPersonReportExport */
+  async salesDataBySalesPersonReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/SalesDataBySalesPersonReportExport', data, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  /** POST /api/Report/DocumentsReport */
+  documentsReport(data: any): Promise<any[]> {
+    return apiClient.post<any[]>('/api/Report/DocumentsReport', data);
+  },
+
+  /** POST /api/Report/DocumentsReportExport — returns Excel blob */
+  async documentsReportExport(data: any): Promise<Blob> {
+    const response = await api.post('/api/Report/DocumentsReportExport', data, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  async counterSalesReport(payload: any): Promise<any[]> {
+    const response = await apiClient.post<any[]>('/api/Report/CounterSalesReport', payload);
+    return response;
+  },
+
+  async counterSalesReportExport(payload: any): Promise<Blob> {
+    const response = await api.post('/api/Report/CounterSalesReportExport', payload, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  async rateComparisionReport(payload: any): Promise<any[]> {
+    const response = await apiClient.post<any[]>('/api/Report/RateComparisionReport', payload);
+    return response;
+  },
+
+  async rateComparisionReportExport(payload: any): Promise<Blob> {
+    const response = await api.post('/api/Report/RateComparisionReportExport', payload, {
+      headers: { Accept: 'application/octet-stream' },
+      responseType: 'blob',
+    });
+    return response.data;
   }
 };

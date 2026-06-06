@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, Loader2, Layers, CheckCircle2, LineChart, Info } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Loader2, Layers, CheckCircle2, LineChart, Info, Printer } from 'lucide-react';
 import { reportApi } from '../services/report.service';
 import { toast } from '../lib/toast';
 import * as H from './reports/trial-balance/trialBalanceHelpers';
@@ -113,7 +113,7 @@ export const BalanceSheet: React.FC = () => {
   const debtToEquity = equity ? (totalDebt / equity) : 0;
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -128,51 +128,34 @@ export const BalanceSheet: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
-              From
-            </span>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={e => setFromDate(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
-            />
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
+        <div className="flex flex-wrap xl:flex-nowrap items-end gap-4">
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              From Date <span className="text-red-500">*</span>
+            </label>
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase mt-4">
-              To
-            </span>
-            <input
-              type="date"
-              value={toDate}
-              onChange={e => setToDate(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-[#2D9E75]/20 focus:border-[#2D9E75] transition-all mt-4"
-            />
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              To Date <span className="text-red-500">*</span>
+            </label>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
           </div>
           
-          <div className="flex items-center space-x-2 mt-4">
-            <button
-              onClick={handleSearch}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Search"
-            >
+          <div className="flex items-center space-x-2 shrink-0 pb-0.5 ml-auto">
+            <button onClick={handleSearch} disabled={loading} className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Search">
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </button>
-            <button
-              onClick={handleClear}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="Reset Filters"
-            >
+            <button onClick={handleClear} className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer" title="Reset Filters">
               <RotateCcw size={16} />
             </button>
-            <button
-              onClick={handleExport}
-              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
-              title="PDF Export"
-            >
+            <button disabled className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="PDF Export">
+              <Printer size={16} />
+            </button>
+            <button onClick={handleExport} disabled={exportLoading} className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm disabled:opacity-70 cursor-pointer" title="Export Excel">
               {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
             </button>
           </div>

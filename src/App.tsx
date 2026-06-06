@@ -66,7 +66,7 @@ import { PaymentVoucherList } from "./components/masters/PaymentVoucherList";
 import { PaymentVoucherCreate } from "./components/masters/PaymentVoucherCreate";
 import { PurchaseInvoiceList } from "./components/PurchaseInvoiceList";
 import { PurchaseInvoiceForm } from "./components/PurchaseInvoiceForm";
-import { AgingAnalysisReport } from "./components/AgingAnalysisReport";
+import { AgeingReport } from "./components/reports/outstanding/ageing-report/AgeingReport";
 import { ProfitLossReport } from "./components/ProfitLossReport";
 import { BillWiseDrilldownScreen } from "./components/BillWiseDrilldown";
 import { LotBatchSummary } from "./components/reports/lot-batch-summary/LotBatchSummary";
@@ -94,6 +94,27 @@ import { ScheduleToInvoice } from "./components/ScheduleToInvoice";
 import { PendingReport } from "./components/reports/pending-report/PendingReport";
 import { SupplierWisePendingReport } from "./components/reports/supplier-wise-pending/SupplierWisePendingReport";
 import { AllReports } from "./components/reports/all-reports/AllReports";
+import { SalesColumnarReport } from "./components/reports/register/SalesColumnarReport";
+import { PurchaseColumnarReport } from "./components/reports/register/PurchaseColumnarReport";
+import { BankReconciliationReport } from "./components/reports/bank-reconciliation/BankReconciliationReport";
+import { ProcessDiscountReport } from "./components/reports/process-discount/ProcessDiscountReport";
+import { GroupSummaryReport } from "./components/reports/group-summary/GroupSummaryReport";
+import { DealerAnalysisReport } from "./components/reports/dealer-analysis/DealerAnalysisReport";
+import { DayBookReport } from "./components/reports/day-book/DayBookReport";
+import { Gstr1Report } from "./components/reports/gstr1/Gstr1Report";
+import { Gstr2Report } from "./components/reports/gstr2/Gstr2Report";
+import { Gstr3bReport } from "./components/reports/gstr3b/Gstr3bReport";
+import { ProcessTcsReport } from "./components/reports/process-tcs/ProcessTcsReport";
+import { ProcessTdsReport } from "./components/reports/process-tds/ProcessTdsReport";
+import { LedgerTargetReport } from "./components/reports/ledger-target-report/LedgerTargetReport";
+import { MslReport } from "./components/reports/msl-report/MslReport";
+import { SalesPersonReport } from "./components/reports/sales-person-report/SalesPersonReport";
+import { SalesDataBySalesPersonReport } from "./components/reports/sales-data-by-sales-person-report/SalesDataBySalesPersonReport";
+import { CounterSaleReport } from "./components/reports/counter-sale-report/CounterSaleReport";
+import { RateComparisionReport } from "./components/reports/rate-comparision-report/RateComparisionReport";
+import { ItemRegisterGroupWiseReport } from "./components/reports/item-register-group-wise/ItemRegisterGroupWiseReport";
+import { InvoiceItemPendingPoReport } from "./components/reports/invoice-item-pending-po/InvoiceItemPendingPoReport";
+import { DocumentsReport } from "./components/reports/documents-report/DocumentsReport";
 import { Login } from "./components/Login";
 import { Page, Tab, SplitMode } from "./types";
 import { motion, AnimatePresence } from "motion/react";
@@ -702,7 +723,7 @@ function AppContent() {
       case "purchase-invoice-create":
         return <PurchaseInvoiceForm onBack={() => removeTab(tab.id)} />;
       case "aging-analysis":
-        return <AgingAnalysisReport />;
+        return <AgeingReport />;
       case "profit-loss":
         return <ProfitLossReport />;
       case "role-list":
@@ -775,6 +796,48 @@ function AppContent() {
         return <SalesRegisterReport />;
       case "purchase-register":
         return <PurchaseRegisterReport />;
+      case "sales-columnar":
+        return <SalesColumnarReport />;
+      case "purchase-columnar":
+        return <PurchaseColumnarReport />;
+      case "bank-reconciliation":
+        return <BankReconciliationReport />;
+      case "process-discount":
+        return <ProcessDiscountReport />;
+      case "group-summary":
+        return <GroupSummaryReport />;
+      case "dealer-analysis":
+        return <DealerAnalysisReport />;
+      case "day-book":
+        return <DayBookReport />;
+      case "gstr1-report":
+        return <Gstr1Report />;
+      case "gstr2-report":
+        return <Gstr2Report />;
+      case "gstr3b-report":
+        return <Gstr3bReport />;
+      case "process-tcs":
+        return <ProcessTcsReport />;
+      case "process-tds":
+        return <ProcessTdsReport />;
+      case "ledger-target-report":
+        return <LedgerTargetReport />;
+      case "msl-report":
+        return <MslReport />;
+      case "sales-person-report":
+        return <SalesPersonReport />;
+      case "sales-data-by-sales-person-report":
+        return <SalesDataBySalesPersonReport />;
+      case "counter-sale-report":
+        return <CounterSaleReport />;
+      case "rate-comparision-report":
+        return <RateComparisionReport />;
+      case "item-register-group-wise":
+        return <ItemRegisterGroupWiseReport />;
+      case "invoice-item-pending-po":
+        return <InvoiceItemPendingPoReport />;
+      case 'documents-report':
+        return <DocumentsReport />;
       case "pending-report":
         return <PendingReport />;
       case "supplier-wise-pending":
@@ -850,9 +913,13 @@ function AppContent() {
             "purchase-invoice-list": "Purchase Invoice",
             "ledger-register": "Ledger Register",
             "sales-register": "Sales Register",
+            "sales-data-by-sales-person-report": "Sales Data By Sales Person Report",
             "purchase-register": "Purchase Register",
+            "sales-columnar": "Sales Columnar",
+            "purchase-columnar": "Purchase Columnar",
+            "bank-reconciliation": "Bank Reconciliation",
             "purchase-invoice-create": "New Purchase Invoice",
-            "aging-analysis": "Aging Analysis Detail",
+            "aging-analysis": "Ageing Report",
             "profit-loss": "Profit & Loss Statement",
             "trial-balance-report": "Trial Balance Report",
             "current-stock-report": "Current Stock Report",
@@ -885,6 +952,23 @@ function AppContent() {
             "ledger-ageing-report": "Ledger Wise Ageing",
             "pending-report": "Pending Report",
             "supplier-wise-pending": "Purchase Invoice Adjustment Report",
+            "process-discount": "Process Discount",
+            "group-summary": "Group Summary",
+            "dealer-analysis": "Dealer Analysis",
+            "day-book": "Day Book",
+            "gstr1-report": "GSTR1 Report",
+            "gstr2-report": "GSTR2 Report",
+            "gstr3b-report": "GSTR3B Report",
+            "process-tcs": "Process TCS",
+            "process-tds": "Process TDS",
+            "ledger-target-report": "Ledger Target Report",
+            "msl-report": "MSL Report",
+            "sales-person-report": "Sales Person Report",
+            "counter-sale-report": "Counter Sale Report",
+            "rate-comparision-report": "Rate Comparision",
+            "item-register-group-wise": "Item Register Group Wise",
+            "invoice-item-pending-po": "Invoice Item Pending PO",
+            "documents-report": "Documents Report",
           };
           addTab(page, titles[page]);
         }}

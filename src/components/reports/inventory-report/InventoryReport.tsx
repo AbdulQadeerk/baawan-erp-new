@@ -657,7 +657,8 @@ export const InventoryReport: React.FC = () => {
           <div className="flex items-center space-x-2 mt-4 md:mt-0">
             <button
               onClick={submitReport}
-              className="w-10 h-10 rounded-lg bg-[#2D9E75] text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              disabled={loading}
+              className="w-10 h-10 flex items-center justify-center bg-[#2D9E75] text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="Search"
             >
               {loading ? (
@@ -668,20 +669,22 @@ export const InventoryReport: React.FC = () => {
             </button>
             <button
               onClick={clearFilters}
-              className="w-10 h-10 rounded-lg bg-lime-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center bg-lime-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer"
               title="Reset Filters"
             >
               <RotateCcw size={16} />
             </button>
             <button
-              className="w-10 h-10 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              disabled={loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="PDF Export"
             >
-              <FileText size={16} />
+              <Printer size={16} />
             </button>
             <button
               onClick={handleExport}
-              className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              disabled={exportLoading || loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
               title="Excel Export"
             >
               {exportLoading ? (
@@ -694,8 +697,8 @@ export const InventoryReport: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className="overflow-x-auto max-h-[calc(100vh-420px)]">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col mb-4">
+        <div className="overflow-auto custom-scrollbar max-h-[calc(100vh-320px)]">
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 z-10">
               <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
@@ -762,95 +765,44 @@ export const InventoryReport: React.FC = () => {
             </tbody>
           </table>
         </div>
-        {/* Pagination & Basic Info */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-slate-500 dark:text-slate-400">
+      </div>
+      {/* Pagination & Basic Info */}
+      <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="text-sm text-slate-800 dark:text-brand-yellow/90">
             Showing{" "}
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <span className="font-bold text-slate-950 dark:text-brand-yellow">
               1
             </span>{" "}
             to{" "}
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <span className="font-bold text-slate-950 dark:text-brand-yellow">
               {data.length}
             </span>{" "}
             of{" "}
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <span className="font-bold text-slate-950 dark:text-brand-yellow">
               {data.length}
             </span>{" "}
             results
           </div>
           <div className="flex items-center space-x-2">
-            <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-white dark:hover:bg-slate-700 text-slate-400 disabled:opacity-50 cursor-pointer">
+            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
               <ChevronsLeft size={16} />
             </button>
-            <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-white dark:hover:bg-slate-700 text-slate-400 disabled:opacity-50 cursor-pointer">
+            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
               <ChevronLeft size={16} />
             </button>
             <div className="flex items-center space-x-1 px-2">
-              <button className="w-8 h-8 rounded-md bg-[#2D9E75] text-white text-sm font-bold cursor-pointer">
+              <button className="w-8 h-8 rounded-md bg-slate-900 dark:bg-slate-800 text-white dark:text-brand-yellow text-sm font-bold cursor-pointer">
                 1
               </button>
             </div>
-            <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-white dark:hover:bg-slate-700 text-slate-400 cursor-pointer">
+            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
               <ChevronRight size={16} />
             </button>
-            <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-white dark:hover:bg-slate-700 text-slate-400 cursor-pointer">
+            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
               <ChevronsRight size={16} />
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Fixed Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40">
-        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          <div className="flex space-x-8">
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400">Total Rows:</span>
-              <span className="text-[#2D9E75] text-sm font-bold">
-                {data.length}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400">Filter Applied:</span>
-              <span
-                className="text-indigo-500 text-sm font-bold truncate max-w-[150px] sm:max-w-xs md:max-w-md"
-                title={
-                  [
-                    filters.dateWise && "Date Wise",
-                    filters.itemWise && "Item Wise",
-                    filters.ledgerWise && "Ledger Wise",
-                    filters.billWise && "Bill Type Wise",
-                    filters.spIdWise && "Stock Place Wise",
-                    filters.inventory && "Inventory",
-                  ]
-                    .filter(Boolean)
-                    .join(", ") || "None"
-                }
-              >
-                {[
-                  filters.dateWise && "Date Wise",
-                  filters.itemWise && "Item Wise",
-                  filters.ledgerWise && "Ledger Wise",
-                  filters.billWise && "Bill Type Wise",
-                  filters.spIdWise && "Stock Place Wise",
-                  filters.inventory && "Inventory",
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "None"}
-              </span>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center space-x-4">
-            <span className="bg-[#2D9E75]/10 text-[#2D9E75] px-3 py-1 rounded-full">
-              System Ready
-            </span>
-            <span className="text-[10px] font-normal lowercase">
-              v4.2.1-stable
-            </span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

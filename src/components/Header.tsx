@@ -60,6 +60,8 @@ import {
   LogOut,
   ListChecks,
   Book,
+  Percent,
+  Target,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -724,6 +726,39 @@ export const Header: React.FC<HeaderProps> = ({
                               )
                             }
                           />
+                          <MenuLink
+                            icon={<Landmark size={16} />}
+                            label="Bank Reconciliation"
+                            color="text-primary"
+                            onClick={() =>
+                              handleNavigate(
+                                "bank-reconciliation",
+                                "Bank Reconciliation",
+                              )
+                            }
+                          />
+                          <MenuLink
+                            icon={<FolderTree size={16} />}
+                            label="Group Summary"
+                            color="text-primary"
+                            onClick={() =>
+                              handleNavigate(
+                                "group-summary",
+                                "Group Summary",
+                              )
+                            }
+                          />
+                          <MenuLink
+                            icon={<Book size={16} />}
+                            label="Day Book"
+                            color="text-primary"
+                            onClick={() =>
+                              handleNavigate(
+                                "day-book",
+                                "Day Book",
+                              )
+                            }
+                          />
                         </div>
                       </div>
                     </div>
@@ -808,6 +843,11 @@ export const Header: React.FC<HeaderProps> = ({
                           icon={<Gavel size={18} />}
                           label="Statutory"
                           color="text-brand-red"
+                          active={activeMenu === "reports_statutory"}
+                          onMouseEnter={() =>
+                            setActiveMenu("reports_statutory")
+                          }
+                          onClick={() => setActiveMenu("reports_statutory")}
                         />
                         <ReportSidebarItem
                           icon={<Megaphone size={18} />}
@@ -1039,6 +1079,12 @@ export const Header: React.FC<HeaderProps> = ({
                             <ReportSubItem
                               icon={<UserSearch size={18} />}
                               label="Dealer Analysis"
+                              onClick={() =>
+                                handleNavigate(
+                                  "dealer-analysis",
+                                  "Dealer Analysis",
+                                )
+                              }
                             />
                           </>
                         )}
@@ -1054,7 +1100,9 @@ export const Header: React.FC<HeaderProps> = ({
                                 ? "Outstanding Reports"
                                 : activeMenu === "reports_register"
                                   ? "Register Reports"
-                                  : "Reports in Final Acc"}
+                                  : activeMenu === "reports_statutory"
+                                    ? "Statutory Reports"
+                                    : "Reports in Final Acc"}
                         </h3>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                           {activeMenu === "reports" ||
@@ -1375,6 +1423,141 @@ export const Header: React.FC<HeaderProps> = ({
                                   )
                                 }
                               />
+                              <ReportCard
+                                icon={<Receipt size={24} />}
+                                title="Sales Columnar"
+                                desc="Sales columnar register"
+                                color="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "sales-columnar",
+                                    "Sales Columnar",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Receipt size={24} />}
+                                title="Purchase Columnar"
+                                desc="Purchase columnar register"
+                                color="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "purchase-columnar",
+                                    "Purchase Columnar",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<BookOpen size={24} />}
+                                title="Process Discount"
+                                desc="Process customer discount & create CN"
+                                color="bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "process-discount",
+                                    "Process Discount",
+                                  )
+                                }
+                              />
+                            </>
+                          ) : activeMenu === "reports_statutory" ? (
+                            <>
+                              <ReportCard
+                                icon={<Shield size={24} />}
+                                title="GSTR1 Report"
+                                desc="GSTR1 tax return summary"
+                                color="bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr1-report",
+                                    "GSTR1 Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<ShieldCheck size={24} />}
+                                title="GSTR2 Report"
+                                desc="GSTR2 tax return summary"
+                                color="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr2-report",
+                                    "GSTR2 Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Shield size={24} />}
+                                title="GSTR3B Report"
+                                desc="GSTR3B tax return summary"
+                                color="bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr3b-report",
+                                    "GSTR3B Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Percent size={24} />}
+                                title="Process TCS"
+                                desc="Process and adjust TCS items"
+                                color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "process-tcs",
+                                    "Process TCS",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Percent size={24} />}
+                                title="Process TDS"
+                                desc="Process and adjust TDS items"
+                                color="bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "process-tds",
+                                    "Process TDS",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Target size={24} />}
+                                title="Ledger Target"
+                                desc="Ledger target sales performance"
+                                color="bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-target-report",
+                                    "Ledger Target Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Package size={24} />}
+                                title="MSL Report"
+                                desc="Minimum stock level report"
+                                color="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "msl-report",
+                                    "MSL Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Users size={24} />}
+                                title="Sales Person Report"
+                                desc="Sales person sales report"
+                                color="bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "sales-person-report",
+                                    "Sales Person Report",
+                                  )
+                                }
+                              />
                             </>
                           ) : (
                             <>
@@ -1507,6 +1690,150 @@ export const Header: React.FC<HeaderProps> = ({
                                   handleNavigate(
                                     "trial-balance-report",
                                     "Trial Balance Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Landmark size={24} />}
+                                title="Bank Reconciliation"
+                                desc="Reconcile bank accounts & books"
+                                color="bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "bank-reconciliation",
+                                    "Bank Reconciliation",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<FolderTree size={24} />}
+                                title="Group Summary"
+                                desc="Summary of account groups"
+                                color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "group-summary",
+                                    "Group Summary",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<UserSearch size={24} />}
+                                title="Dealer Analysis"
+                                desc="Analysis of dealer sales & growth"
+                                color="bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "dealer-analysis",
+                                    "Dealer Analysis",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Book size={24} />}
+                                title="Day Book"
+                                desc="Daily transaction summary"
+                                color="bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "day-book",
+                                    "Day Book",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Shield size={24} />}
+                                title="GSTR1 Report"
+                                desc="GSTR1 tax return summary"
+                                color="bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr1-report",
+                                    "GSTR1 Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<ShieldCheck size={24} />}
+                                title="GSTR2 Report"
+                                desc="GSTR2 tax return summary"
+                                color="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr2-report",
+                                    "GSTR2 Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Shield size={24} />}
+                                title="GSTR3B Report"
+                                desc="GSTR3B tax return summary"
+                                color="bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "gstr3b-report",
+                                    "GSTR3B Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Percent size={24} />}
+                                title="Process TCS"
+                                desc="Process and adjust TCS items"
+                                color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "process-tcs",
+                                    "Process TCS",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Percent size={24} />}
+                                title="Process TDS"
+                                desc="Process and adjust TDS items"
+                                color="bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "process-tds",
+                                    "Process TDS",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Target size={24} />}
+                                title="Ledger Target"
+                                desc="Ledger target sales performance"
+                                color="bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "ledger-target-report",
+                                    "Ledger Target Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Package size={24} />}
+                                title="MSL Report"
+                                desc="Minimum stock level report"
+                                color="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "msl-report",
+                                    "MSL Report",
+                                  )
+                                }
+                              />
+                              <ReportCard
+                                icon={<Users size={24} />}
+                                title="Sales Person Report"
+                                desc="Sales person sales report"
+                                color="bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400"
+                                onClick={() =>
+                                  handleNavigate(
+                                    "sales-person-report",
+                                    "Sales Person Report",
                                   )
                                 }
                               />

@@ -6,6 +6,7 @@ import {
   Loader2,
   FileText,
   AlertCircle,
+  Printer,
 } from "lucide-react";
 import { reportApi } from "../../../services/report.service";
 
@@ -112,7 +113,7 @@ export const SupplierWisePendingReport: React.FC = () => {
   );
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -132,10 +133,11 @@ export const SupplierWisePendingReport: React.FC = () => {
 
       {/* Filters Card */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              From Date
+        <div className="flex flex-wrap xl:flex-nowrap items-end gap-4">
+          {/* From Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              From Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -143,12 +145,14 @@ export const SupplierWisePendingReport: React.FC = () => {
               onChange={(e) =>
                 setFilters({ ...filters, fromDate: e.target.value })
               }
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${!filters.fromDate ? "border-red-500 focus:border-red-500" : "border-slate-200 dark:border-slate-700 focus:border-blue-500"}`}
             />
           </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              To Date
+
+          {/* To Date */}
+          <div className="w-full sm:w-36 shrink-0 space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              To Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -156,41 +160,51 @@ export const SupplierWisePendingReport: React.FC = () => {
               onChange={(e) =>
                 setFilters({ ...filters, toDate: e.target.value })
               }
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className={`w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${!filters.toDate ? "border-red-500 focus:border-red-500" : "border-slate-200 dark:border-slate-700 focus:border-blue-500"}`}
             />
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 justify-end">
-          <button
-            onClick={submitReport}
-            disabled={loading}
-            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-orange-600/20 disabled:opacity-70"
-          >
-            {loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Search size={16} />
-            )}
-            <span className="hidden sm:inline">Search</span>
-          </button>
-          <button
-            onClick={clearFilters}
-            className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700"
-          >
-            <RotateCcw size={16} />
-          </button>
-          <button
-            onClick={handleExport}
-            disabled={exportLoading}
-            className="p-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 disabled:opacity-70"
-          >
-            {exportLoading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <FileSpreadsheet size={16} />
-            )}
-          </button>
+          {/* Buttons */}
+          <div className="flex items-center space-x-2 shrink-0 pb-0.5">
+            <button
+              onClick={submitReport}
+              disabled={loading}
+              className="w-10 h-10 flex items-center justify-center bg-[#2D9E75] text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Search"
+            >
+              {loading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Search size={16} />
+              )}
+            </button>
+            <button
+              onClick={clearFilters}
+              className="w-10 h-10 flex items-center justify-center bg-lime-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer"
+              title="Reset Filters"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              disabled={loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="PDF Export"
+            >
+              <Printer size={16} />
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={exportLoading || loading || !data.length}
+              className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+              title="Excel Export"
+            >
+              {exportLoading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <FileSpreadsheet size={16} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -299,39 +313,39 @@ export const SupplierWisePendingReport: React.FC = () => {
         </div>
 
         {/* Footer Totals */}
-        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div className="px-4 py-3 bg-brand-yellow dark:bg-brand-yellow/10 border-t border-brand-yellow/20 dark:border-brand-yellow/5 flex items-center justify-between">
           <div className="flex gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <span className="text-xs font-bold text-slate-800 dark:text-brand-yellow/90 uppercase">
                 Total Rows:
               </span>
-              <span className="px-2 py-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs font-black">
+              <span className="px-2 py-0.5 bg-slate-900/10 dark:bg-brand-yellow/20 text-slate-900 dark:text-brand-yellow rounded text-[10px] font-bold">
                 {data.length}
               </span>
             </div>
           </div>
           <div className="flex gap-6">
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">
+              <p className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase mb-0.5">
                 Purchase Qty
               </p>
-              <p className="text-sm font-black text-blue-600 dark:text-blue-400">
+              <p className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">
                 {formatNumber(totalPurchaseQty)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">
+              <p className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase mb-0.5">
                 Inward Pending
               </p>
-              <p className="text-sm font-black text-orange-600 dark:text-orange-400">
+              <p className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">
                 {formatNumber(totalInwardPending)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">
+              <p className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase mb-0.5">
                 Outward Pending
               </p>
-              <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+              <p className="text-sm font-bold font-mono text-slate-950 dark:text-brand-yellow">
                 {formatNumber(totalOutwardPending)}
               </p>
             </div>
