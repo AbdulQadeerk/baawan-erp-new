@@ -59,13 +59,13 @@ const AutocompleteInput: React.FC<{
   return (
     <div className="relative" ref={ref}>
       <div
-        className={`w-full px-3 py-1 bg-white dark:bg-slate-900 border rounded-lg transition-all focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-yellow-500/20 ${
+        className={`w-full px-3 py-1 bg-white dark:bg-slate-900 border rounded-lg transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 ${
           open
-            ? "border-yellow-500 ring-2 ring-yellow-500/20"
+            ? "border-blue-500 ring-2 ring-blue-500/20"
             : "border-slate-200 dark:border-slate-700"
         }`}
       >
-        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block select-none mb-0.5">
+        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block select-none mb-0.5 uppercase tracking-wider">
           {label}
         </label>
         <div className="relative flex items-center">
@@ -400,35 +400,17 @@ export const PurchaseColumnarReport: React.FC = () => {
   const totalValue = lst.reduce((sum, x) => sum + (parseFloat(x.SalesValue) || 0), 0);
 
   return (
-    <div className="font-sans text-slate-700 dark:text-slate-200">
+    <div className="font-sans text-slate-700 dark:text-slate-200 pt-4 pb-20">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
-            <FileText size={20} />
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-2.5 rounded-xl text-blue-600 dark:text-blue-400">
+            <FileText size={22} />
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Purchase Columnar</h1>
             <p className="text-xs text-slate-500 font-medium">Purchase columnar monthly summary and details.</p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={handleExport}
-            disabled={exportLoading || loading || !lst.length}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-70"
-          >
-            {exportLoading ? <Loader2 size={18} className="animate-spin" /> : <FileSpreadsheet size={18} />}
-            Excel
-          </button>
-          <button 
-            onClick={handlePrint}
-            disabled={printLoading || loading || !lst.length}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-70"
-          >
-            {printLoading ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
-            Print
-          </button>
         </div>
       </div>
 
@@ -436,8 +418,8 @@ export const PurchaseColumnarReport: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-wrap items-end gap-4 flex-1">
-            <div className="w-full sm:w-36 shrink-0 space-y-1">
-              <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">From Date <span className="text-rose-500">*</span></label>
+            <div className="w-full sm:w-36 shrink-0">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">From Date <span className="text-rose-500">*</span></label>
               <input
                 type="date"
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
@@ -445,8 +427,8 @@ export const PurchaseColumnarReport: React.FC = () => {
                 onChange={(e) => setFromDate(e.target.value)}
               />
             </div>
-            <div className="w-full sm:w-36 shrink-0 space-y-1">
-              <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">To Date <span className="text-rose-500">*</span></label>
+            <div className="w-full sm:w-36 shrink-0">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">To Date <span className="text-rose-500">*</span></label>
               <input
                 type="date"
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
@@ -466,7 +448,7 @@ export const PurchaseColumnarReport: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center space-x-2 ml-auto shrink-0 mt-4 xl:mt-0 gap-y-2">
             <button 
               onClick={submitReport} 
               disabled={loading} 
@@ -491,6 +473,22 @@ export const PurchaseColumnarReport: React.FC = () => {
                 <Eye size={16} />
               </button>
             )}
+            <button 
+              onClick={handleExport}
+              disabled={exportLoading || loading || !lst.length}
+              title="Excel Export"
+              className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+            >
+              {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+            </button>
+            <button 
+              onClick={handlePrint}
+              disabled={printLoading || loading || !lst.length}
+              title="Print"
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+            >
+              {printLoading ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
+            </button>
           </div>
         </div>
       </div>
@@ -550,28 +548,30 @@ export const PurchaseColumnarReport: React.FC = () => {
 
       {/* Summary Footer Bar */}
       {lst.length > 0 && (
-        <footer className="sticky bottom-0 z-50 bg-brand-yellow dark:bg-brand-yellow/10 px-6 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] border-t border-brand-yellow/20 dark:border-brand-yellow/5 flex flex-wrap justify-center gap-8 md:gap-16 items-center -mx-6 mt-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Rows</span>
-            <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
-              {totalRows}
-            </span>
+        <div className="sticky bottom-0 mt-auto z-40 bg-brand-yellow dark:bg-brand-yellow/10 px-6 py-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-md border-t border-brand-yellow/20 dark:border-brand-yellow/5 flex flex-wrap justify-between items-center select-none">
+          <div className="flex flex-wrap items-center gap-8 md:gap-16">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Rows</span>
+              <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
+                {totalRows}
+              </span>
+            </div>
+            <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Amount</span>
+              <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
+                ₹ {H.formatNumber(totalAmount, precision)}
+              </span>
+            </div>
+            <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Value</span>
+              <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
+                ₹ {H.formatNumber(totalValue, precision)}
+              </span>
+            </div>
           </div>
-          <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Amount</span>
-            <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
-              ₹ {H.formatNumber(totalAmount, precision)}
-            </span>
-          </div>
-          <div className="h-8 w-px bg-slate-900/15 dark:bg-brand-yellow/20 hidden sm:block"></div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-tighter">Total Value</span>
-            <span className="text-xl font-extrabold text-slate-950 dark:text-brand-yellow tabular-nums">
-              ₹ {H.formatNumber(totalValue, precision)}
-            </span>
-          </div>
-        </footer>
+        </div>
       )}
 
       {/* Summary Data Modal */}
