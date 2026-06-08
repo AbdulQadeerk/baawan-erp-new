@@ -102,7 +102,8 @@ export type Page =
   | 'counter-sale-report'
   | 'rate-comparision-report'
   | 'invoice-item-pending-po'
-  | 'documents-report';
+  | 'documents-report'
+  | 'company-settings';
 
 export type SplitMode = 'single' | 'split-v' | 'split-h' | 'quad' | 'three-left';
 

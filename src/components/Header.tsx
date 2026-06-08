@@ -786,6 +786,20 @@ export const Header: React.FC<HeaderProps> = ({
               Permissions
             </button>
 
+            {/* Company Settings Link */}
+            <button
+              onClick={() =>
+                handleNavigate("company-settings", "Company Settings")
+              }
+              className={`h-12 flex items-center px-1 border-b-2 transition-colors hover:text-primary ${
+                currentPage === "company-settings"
+                  ? "text-primary border-primary"
+                  : "border-transparent"
+              }`}
+            >
+              Company Settings
+            </button>
+
             {/* Reports Mega Menu */}
             <div
               className="relative h-12 flex items-center"

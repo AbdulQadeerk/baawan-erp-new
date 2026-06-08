@@ -115,6 +115,7 @@ import { RateComparisionReport } from "./components/reports/rate-comparision-rep
 import { ItemRegisterGroupWiseReport } from "./components/reports/item-register-group-wise/ItemRegisterGroupWiseReport";
 import { InvoiceItemPendingPoReport } from "./components/reports/invoice-item-pending-po/InvoiceItemPendingPoReport";
 import { DocumentsReport } from "./components/reports/documents-report/DocumentsReport";
+import { CompanySetting } from "./components/masters/company-setting/CompanySetting";
 import { Login } from "./components/Login";
 import { Page, Tab, SplitMode } from "./types";
 import { motion, AnimatePresence } from "motion/react";
@@ -682,6 +683,8 @@ function AppContent() {
         );
       case "user-create":
         return <UserCreate onBack={() => removeTab(tab.id)} />;
+      case "company-settings":
+        return <CompanySetting />;
       case "project-site-list":
         return (
           <ProjectSiteList
