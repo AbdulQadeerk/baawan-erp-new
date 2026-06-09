@@ -767,8 +767,8 @@ export const InventoryReport: React.FC = () => {
         </div>
       </div>
       {/* Pagination & Basic Info */}
-      <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-sm text-slate-800 dark:text-brand-yellow/90">
+      <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 py-2.5 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4 select-none">
+        <div className="text-xs md:text-sm text-slate-800 dark:text-brand-yellow/90">
             Showing{" "}
             <span className="font-bold text-slate-950 dark:text-brand-yellow">
               1
@@ -783,22 +783,22 @@ export const InventoryReport: React.FC = () => {
             </span>{" "}
             results
           </div>
-          <div className="flex items-center space-x-2">
-            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
+          <div className="flex items-center space-x-1.5 md:space-x-2">
+            <button className="p-1.5 md:p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
               <ChevronsLeft size={16} />
             </button>
-            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
+            <button className="p-1.5 md:p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow disabled:opacity-30 cursor-pointer">
               <ChevronLeft size={16} />
             </button>
-            <div className="flex items-center space-x-1 px-2">
-              <button className="w-8 h-8 rounded-md bg-slate-900 dark:bg-slate-800 text-white dark:text-brand-yellow text-sm font-bold cursor-pointer">
+            <div className="flex items-center space-x-1 px-1 md:px-2">
+              <button className="w-7 h-7 md:w-8 md:h-8 rounded-md bg-slate-900 dark:bg-slate-800 text-white dark:text-brand-yellow text-xs md:text-sm font-bold cursor-pointer">
                 1
               </button>
             </div>
-            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
+            <button className="p-1.5 md:p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
               <ChevronRight size={16} />
             </button>
-            <button className="p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
+            <button className="p-1.5 md:p-2 border border-slate-900/10 dark:border-brand-yellow/20 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 text-slate-800 dark:text-brand-yellow cursor-pointer">
               <ChevronsRight size={16} />
             </button>
           </div>

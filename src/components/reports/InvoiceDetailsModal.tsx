@@ -247,7 +247,7 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
           {canPrev && (
             <button
               onClick={() => navigate("prev")}
-              className="absolute -left-5 top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
+              className="hidden sm:flex absolute -left-5 top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
             >
               <ChevronLeft size={20} />
             </button>
@@ -255,7 +255,7 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
           {canNext && (
             <button
               onClick={() => navigate("next")}
-              className="absolute -right-5 top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
+              className="hidden sm:flex absolute -right-5 top-1/2 -translate-y-1/2 z-50 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
             >
               <ChevronRight size={20} />
             </button>
@@ -263,49 +263,74 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
           {/* Counter Badge */}
           {invoiceList.length > 1 && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-full shadow-sm">
+            <div className="hidden sm:block absolute -top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-full shadow-sm">
               {index + 1} / {invoiceList.length}
             </div>
           )}
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800/50 rounded-t-2xl">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 text-white p-1.5 rounded flex items-center justify-center">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 px-4 sm:px-5 py-3 border-b border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800/50 rounded-t-2xl">
+            <div className="flex items-start gap-3 w-full md:w-auto">
+              <div className="bg-blue-600 text-white p-1.5 rounded flex items-center justify-center mt-0.5 flex-shrink-0">
                 <FileSpreadsheet size={16} />
               </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  {record?.bill_No || "—"}
-                  <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex flex-wrap items-center gap-2">
+                  <span className="truncate">{record?.bill_No || "—"}</span>
+                  <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] px-1.5 py-0.5 rounded font-semibold border border-blue-200 dark:border-blue-800 flex-shrink-0">
                     {invTypeText}
                   </span>
+                  
+                  {/* Mobile navigation inline controls */}
+                  {invoiceList.length > 1 && (
+                    <div className="flex items-center gap-1 md:hidden ml-2 flex-shrink-0 bg-slate-100 dark:bg-slate-850 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                      <button
+                        onClick={() => navigate("prev")}
+                        disabled={!canPrev}
+                        className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded disabled:opacity-30 text-slate-600 dark:text-slate-400 cursor-pointer"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                        {index + 1}/{invoiceList.length}
+                      </span>
+                      <button
+                        onClick={() => navigate("next")}
+                        disabled={!canNext}
+                        className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded disabled:opacity-30 text-slate-600 dark:text-slate-400 cursor-pointer"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
                 </h3>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 truncate mt-0.5">
                   Party: <span className="text-blue-600 dark:text-blue-400 font-semibold">{record?.ledgerData?.name || record?.partyName || "—"}</span> | Date: {formatDate(record?.date)}
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-1.5">
-              <button className="p-1.5 bg-white hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-blue-500 border border-slate-200 dark:border-slate-700" title="Edit">
-                <Pencil size={14} />
-              </button>
-              <button className="p-1.5 bg-white hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-red-500 border border-slate-200 dark:border-slate-700" title="Delete">
-                <Trash2 size={14} />
-              </button>
-              <button className="p-1.5 bg-white hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-emerald-500 border border-slate-200 dark:border-slate-700" title="WhatsApp">
-                <MessageCircle size={14} />
-              </button>
-              <button className="p-1.5 bg-white hover:bg-sky-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-sky-500 border border-slate-200 dark:border-slate-700" title="Email">
-                <Mail size={14} />
-              </button>
-              <button onClick={handlePrint} className="p-1.5 bg-white hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-indigo-500 border border-slate-200 dark:border-slate-700" title="Print">
-                <Printer size={14} />
-              </button>
-              <button onClick={onClose} className="p-1.5 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 rounded transition-colors text-slate-500 border border-slate-200 dark:border-slate-700" title="Close">
-                <X size={14} />
-              </button>
+            <div className="flex flex-wrap items-center gap-1.5 justify-start md:justify-end w-full md:w-auto border-t md:border-t-0 border-slate-200 dark:border-slate-800 pt-2.5 md:pt-0">
+              <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+                <button className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 rounded transition-colors text-blue-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="Edit">
+                  <Pencil size={14} />
+                </button>
+                <button className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-slate-700 rounded transition-colors text-red-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="Delete">
+                  <Trash2 size={14} />
+                </button>
+                <button className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 rounded transition-colors text-emerald-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="WhatsApp">
+                  <MessageCircle size={14} />
+                </button>
+                <button className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 rounded transition-colors text-sky-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="Email">
+                  <Mail size={14} />
+                </button>
+                <button onClick={handlePrint} className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 rounded transition-colors text-indigo-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="Print">
+                  <Printer size={14} />
+                </button>
+                <button onClick={onClose} className="flex-1 md:flex-initial p-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center" title="Close">
+                  <X size={14} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -613,20 +638,20 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center justify-center gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                 {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                   <button
                     onClick={() => {
                       /* Export handled by parent */
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-emerald-500/20"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
                   >
                     <FileSpreadsheet size={14} /> Export
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-blue-600/20">
+                  <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-blue-600/20 w-full sm:w-auto">
                     <Package size={14} /> Check Stock
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-rose-500/20">
+                  <button className="flex items-center justify-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-rose-500/20 w-full sm:w-auto">
                     <ClipboardList size={14} /> Check Pending
                   </button>
                 </div>

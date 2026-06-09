@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, RotateCcw, FileSpreadsheet, FileText, Eye, Loader2 } from 'lucide-react';
+import { Search, RotateCcw, FileSpreadsheet, Printer, Eye, Loader2 } from 'lucide-react';
 import { reportApi } from '../../services/report.service';
 import { commonApi } from '../../lib/api-client';
 import { InvoiceDetailsModal } from './InvoiceDetailsModal';
@@ -192,52 +192,117 @@ export const ItemRegisterView: React.FC<Props> = ({ itemId, stockPlaceId }) => {
   return (
     <div className="mt-4">
       {/* Filters Row */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">From Date <span className="text-red-500">*</span></label>
-            <input type="date" value={filters.fromDate} onChange={e => setFilters({ ...filters, fromDate: e.target.value })}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-4 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 w-full">
+          {/* Inputs Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                From Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={filters.fromDate}
+                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 dark:text-slate-200"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                To Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={filters.toDate}
+                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 dark:text-slate-200"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Stock Place
+              </label>
+              <select
+                value={filters.spIds}
+                onChange={(e) => setFilters({ ...filters, spIds: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-slate-700 dark:text-slate-200"
+              >
+                <option value="">Select Stock Place</option>
+                {stockPlaceList.map((sp: any) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">To Date <span className="text-red-500">*</span></label>
-            <input type="date" value={filters.toDate} onChange={e => setFilters({ ...filters, toDate: e.target.value })}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Stock Place</label>
-            <select value={filters.spIds} onChange={e => setFilters({ ...filters, spIds: e.target.value })}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-w-[160px]">
-              <option value="">Select Stock Place</option>
-              {stockPlaceList.map((sp: any) => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
-            </select>
-          </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-              <input type="checkbox" checked={filters.isOpeningStock} onChange={e => setFilters({ ...filters, isOpeningStock: e.target.checked })}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-              All Stock Places
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-              <input type="checkbox" checked={filters.stockDetail} onChange={e => setFilters({ ...filters, stockDetail: e.target.checked })}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-              Stock Balance In Details
-            </label>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={submitReport} className="p-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all" title="Search">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-            </button>
-            <button onClick={() => { setFilters({ fromDate: new Date().toISOString().split('T')[0], toDate: new Date().toISOString().split('T')[0], isOpeningStock: false, stockDetail: false, spIds: '' }); }}
-              className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 rounded-lg transition-all border border-slate-200 dark:border-slate-700" title="Clear">
-              <RotateCcw size={16} />
-            </button>
-            <button onClick={handleExport} className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all" title="Export Excel">
-              {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
-            </button>
-            <button onClick={handlePrint} className="p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-all" title="Print PDF">
-              {printLoading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-            </button>
+
+          {/* Controls & Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 flex-shrink-0">
+            {/* Checkboxes */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-1.5 sm:py-0">
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={filters.isOpeningStock}
+                  onChange={(e) => setFilters({ ...filters, isOpeningStock: e.target.checked })}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-800"
+                />
+                <span>All Stock Places</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={filters.stockDetail}
+                  onChange={(e) => setFilters({ ...filters, stockDetail: e.target.checked })}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-800"
+                />
+                <span>Stock Balance In Details</span>
+              </label>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto justify-start sm:justify-end pb-0.5 flex-shrink-0">
+              <button
+                onClick={submitReport}
+                disabled={loading}
+                className="w-10 h-10 flex items-center justify-center bg-[#2D9E75] text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+                title="Search"
+              >
+                {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              </button>
+              <button
+                onClick={() => {
+                  setFilters({
+                    fromDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+                    toDate: new Date().toISOString().split('T')[0],
+                    isOpeningStock: false,
+                    stockDetail: false,
+                    spIds: '',
+                  });
+                }}
+                className="w-10 h-10 flex items-center justify-center bg-lime-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                title="Clear Filters"
+              >
+                <RotateCcw size={16} />
+              </button>
+              <button
+                onClick={handleExport}
+                disabled={exportLoading || loading || !data.length}
+                className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+                title="Export to Excel"
+              >
+                {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+              </button>
+              <button
+                onClick={handlePrint}
+                disabled={printLoading || loading || !data.length}
+                className="w-10 h-10 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-70"
+                title="Print PDF"
+              >
+                {printLoading ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -285,7 +350,7 @@ export const ItemRegisterView: React.FC<Props> = ({ itemId, stockPlaceId }) => {
             </tbody>
           </table>
         </div>
-        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 flex justify-between">
+        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-2 text-center sm:text-left">
           <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Rows: {data.length}</span>
           <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Filtered Rows: {data.length}</span>
         </div>

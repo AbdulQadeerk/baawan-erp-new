@@ -182,7 +182,7 @@ const ItemDetailBanner: React.FC<{ data: any; onClose: () => void }> = ({
           <X size={16} />
         </button>
       </div>
-      <div className="flex gap-6 mt-2 text-sm border-t border-blue-200 dark:border-blue-800 pt-2">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 mt-2 text-sm border-t border-blue-200 dark:border-blue-800 pt-2">
         <div>
           <span className="font-bold text-blue-800 dark:text-blue-300">
             Note :-
@@ -624,7 +624,7 @@ export const CurrentStockReport: React.FC = () => {
       {/* Filters Card */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 mb-5">
         {/* Row 1: Autocomplete filters */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
           <AutocompleteInput
             label="Item Code"
             value={filters.item_CodeTxt}
@@ -677,8 +677,8 @@ export const CurrentStockReport: React.FC = () => {
         </div>
 
         {/* Row 2: Single Item + Stock Place + Buttons */}
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="min-w-[250px]">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4 w-full">
+          <div className="w-full sm:w-auto sm:min-w-[250px]">
             <AutocompleteInput
               label="Single Item"
               value={filters.item}
@@ -689,7 +689,7 @@ export const CurrentStockReport: React.FC = () => {
               templateType="item"
             />
           </div>
-          <div className="space-y-1 min-w-[180px]">
+          <div className="space-y-1 w-full sm:w-auto sm:min-w-[180px]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Stock Place
             </label>
@@ -708,7 +708,7 @@ export const CurrentStockReport: React.FC = () => {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 pt-2 2xl:pt-0 2xl:justify-end pb-0.5">
+          <div className="flex items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto justify-start sm:justify-end pb-0.5">
             <button
               onClick={submitReport}
               disabled={loading}
@@ -891,27 +891,27 @@ export const CurrentStockReport: React.FC = () => {
           </div>
 
           {/* Sticky yellow summary bar */}
-          <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 select-none">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-6">
+          <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 rounded-xl border border-brand-yellow/20 dark:border-brand-yellow/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-2.5 sm:p-4 select-none">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
+              <div className="flex flex-row items-center justify-center gap-4 sm:gap-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-800 dark:text-brand-yellow/90 text-sm font-medium">
+                  <span className="text-slate-800 dark:text-brand-yellow/90 text-xs sm:text-sm font-medium">
                     Total Items:
                   </span>
-                  <span className="bg-slate-900/10 dark:bg-brand-yellow/20 text-slate-900 dark:text-brand-yellow px-2 py-0.5 rounded text-xs font-bold">
+                  <span className="bg-slate-900/10 dark:bg-brand-yellow/20 text-slate-900 dark:text-brand-yellow px-1.5 py-0.5 sm:px-2 rounded text-[10px] sm:text-xs font-bold">
                     {data.length}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 border-l border-slate-900/10 dark:border-brand-yellow/20 pl-6">
-                  <span className="text-slate-800 dark:text-brand-yellow/90 text-sm font-medium">
-                    Filtered Results:
+                <div className="flex items-center gap-2 border-l border-slate-900/10 dark:border-brand-yellow/20 pl-4 sm:pl-6">
+                  <span className="text-slate-800 dark:text-brand-yellow/90 text-xs sm:text-sm font-medium">
+                    Filtered:
                   </span>
-                  <span className="bg-white/80 dark:bg-slate-800 text-slate-950 dark:text-brand-yellow px-2 py-0.5 rounded text-xs font-bold border border-slate-900/10 dark:border-brand-yellow/20">
+                  <span className="bg-white/80 dark:bg-slate-800 text-slate-950 dark:text-brand-yellow px-1.5 py-0.5 sm:px-2 rounded text-[10px] sm:text-xs font-bold border border-slate-900/10 dark:border-brand-yellow/20">
                     {data.length} Rows
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end">
                 <div className="flex items-center gap-1">
                   <button className="p-1.5 rounded-md hover:bg-slate-900/10 dark:hover:bg-brand-yellow/20 transition-colors text-slate-900 dark:text-brand-yellow cursor-pointer">
                     <ChevronsLeft size={16} />

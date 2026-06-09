@@ -29,7 +29,7 @@ export const StockPlaceTab: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-[calc(100vh-8rem)]">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col lg:h-[calc(100vh-10.5rem)] h-auto">
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {view === 'list' ? (
           <StockPlaceList 

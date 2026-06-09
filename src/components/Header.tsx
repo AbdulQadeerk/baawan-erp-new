@@ -62,6 +62,8 @@ import {
   Book,
   Percent,
   Target,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -85,16 +87,27 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showSplitMenu, setShowSplitMenu] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedMobileSection, setExpandedMobileSection] = useState<string | null>(null);
 
   const handleNavigate = (page: Page, title: string) => {
     setCurrentPage(page);
     setActiveMenu(null);
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
       <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-2 lg:gap-8">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 mr-1"
+            title="Toggle Menu"
+          >
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleNavigate("dashboard", "Dashboard")}
@@ -120,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="hidden md:block text-right">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               ERP Administrator
@@ -129,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div
-            className="relative"
+            className="hidden lg:block relative"
             onMouseEnter={() => setShowSplitMenu(true)}
             onMouseLeave={() => setShowSplitMenu(false)}
           >
@@ -164,6 +177,26 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </AnimatePresence>
           </div>
+
+          <button
+            onClick={() => {
+              if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => {
+                  console.error(
+                    `Error attempting to enable full-screen mode: ${err.message}`,
+                  );
+                });
+              } else {
+                if (document.exitFullscreen) {
+                  document.exitFullscreen();
+                }
+              }
+            }}
+            className="hidden md:block lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500"
+            title="Toggle Fullscreen"
+          >
+            <Maximize2 size={20} />
+          </button>
 
           <div className="relative group">
             <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500">
@@ -205,7 +238,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Sub-navigation */}
-      <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 px-4 h-12 flex items-center relative">
+      <div className="hidden lg:flex bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 px-4 h-12 items-center relative">
         <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between text-sm font-medium text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-6 h-full">
             <button
@@ -1877,6 +1910,269 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer Navigation */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90]"
+            />
+
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed top-0 left-0 bottom-0 w-[280px] max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl z-[100] flex flex-col h-full border-r border-slate-200 dark:border-slate-800"
+            >
+              {/* Drawer Header */}
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-tr from-brand-red to-brand-amber rounded-lg flex items-center justify-center text-white font-bold text-base shadow-md">
+                    B
+                  </div>
+                  <span className="text-base font-bold tracking-tight text-slate-800 dark:text-white">
+                    baawan.com
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                {/* 1. Core Navigation (CRM, E-Commerce, CMS) */}
+                <div className="space-y-1 pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all text-left">
+                    <LayoutDashboard size={16} /> CRM
+                  </button>
+                  <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all text-left">
+                    <ShoppingCart size={16} /> E-Commerce
+                  </button>
+                  <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all text-left">
+                    <FileText size={16} /> CMS
+                  </button>
+                </div>
+
+                {/* 2. Sub-navigation Items */}
+                <div className="space-y-2">
+                  {/* Dashboard */}
+                  <button
+                    onClick={() => handleNavigate("dashboard", "Dashboard")}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-bold rounded-lg text-left transition-all ${
+                      currentPage === "dashboard"
+                        ? "bg-slate-100 dark:bg-slate-800 text-brand-red"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <Home size={16} /> Dashboard
+                  </button>
+
+                  {/* Accordion Categories */}
+                  {[
+                    {
+                      id: "master",
+                      label: "Master",
+                      icon: <Landmark size={16} />,
+                      items: [
+                        { label: "Ledger List", page: "ledger-list", title: "Ledger Master" },
+                        { label: "Group List", page: "group-list", title: "Group Master" },
+                        { label: "Currency List", page: "currency-list", title: "Currency Master" },
+                        { label: "Item List", page: "item-list", title: "Item Master" },
+                        { label: "BOM List", page: "bom-list", title: "BOM Master" },
+                        { label: "Unit List", page: "unit-list", title: "Unit Master" },
+                        { label: "Stock Place List", page: "stock-place-list", title: "Stock Place Master" },
+                        { label: "Extra Charges", page: "extra-charge-list", title: "Extra Charge Master" },
+                        { label: "Terms & Cond.", page: "terms-list", title: "Terms & Conditions" },
+                        { label: "User List", page: "user-list", title: "User Master" },
+                        { label: "User Roles", page: "role-list", title: "User Role Master" },
+                        { label: "Sales Person List", page: "sales-person-list", title: "Sales Person Master" },
+                        { label: "Project Site List", page: "project-site-list", title: "Project Site Master" },
+                      ]
+                    },
+                    {
+                      id: "transactions",
+                      label: "Transactions",
+                      icon: <Receipt size={16} />,
+                      items: [
+                        { label: "Quotation", page: "dashboard", title: "Dashboard" },
+                        { label: "Order", page: "dashboard", title: "Dashboard" },
+                        { label: "Schedule to Invoice", page: "schedule-to-invoice", title: "Schedule to Invoice" },
+                        { label: "Sales Invoice", page: "invoice-list", title: "Sales Invoice" },
+                        { label: "Return", page: "dashboard", title: "Dashboard" },
+                      ]
+                    },
+                    {
+                      id: "inventory",
+                      label: "Inventory",
+                      icon: <Package size={16} />,
+                      items: [
+                        { label: "Movement Analysis", page: "inventory-movement-analysis", title: "Inventory Movement Analysis" },
+                        { label: "Item Stock Ledger", page: "item-stock-ledger", title: "Item Stock Ledger" },
+                        { label: "Current Stock", page: "current-stock-report", title: "Current Stock Report" },
+                        { label: "BOM Assembly Builder", page: "bom-builder", title: "BOM Assembly Builder" },
+                      ]
+                    },
+                    {
+                      id: "accounts",
+                      label: "Accounts",
+                      icon: <CreditCard size={16} />,
+                      items: [
+                        { label: "Receipt Vouchers", page: "receipt-voucher-list", title: "Receipt Vouchers" },
+                        { label: "New Receipt", page: "receipt-voucher-create", title: "New Receipt Voucher" },
+                        { label: "Payment Vouchers", page: "payment-voucher-list", title: "Payment Vouchers" },
+                        { label: "New Payment", page: "payment-voucher-create", title: "New Payment Voucher" },
+                        { label: "Chart of Accounts", page: "chart-of-accounts", title: "Chart of Accounts" },
+                        { label: "Outstanding Report", page: "outstanding-report", title: "Outstanding Report" },
+                        { label: "Trial Balance", page: "trial-balance-report", title: "Trial Balance Report" },
+                        { label: "Bill-wise Drilldown", page: "bill-wise-drilldown", title: "Bill-wise Drilldown" },
+                      ]
+                    },
+                    {
+                      id: "reports",
+                      label: "Reports",
+                      icon: <PieChart size={16} />,
+                      items: [
+                        { label: "All Reports", page: "all-reports", title: "All Reports" },
+                        { label: "Inventory Report", page: "inventory-report", title: "Inventory Report" },
+                        { label: "Movement Analysis", page: "inventory-movement-analysis", title: "Inventory Movement Analysis" },
+                        { label: "Stock Valuation", page: "stock-valuation-report", title: "Stock Valuation Report" },
+                        { label: "Sales Register with Tax", page: "sales-register-tax", title: "Sales Register with Tax" },
+                        { label: "Sales Margin Report", page: "sales-margin-report", title: "Sales Margin Report" },
+                        { label: "Sales Commission", page: "sales-commission-report", title: "Sales Commission & Performance" },
+                        { label: "Sales Order Summary", page: "sales-order-summary", title: "Sales Order Summary" },
+                      ]
+                    }
+                  ].map((section) => {
+                    const isExpanded = expandedMobileSection === section.id;
+                    return (
+                      <div key={section.id} className="space-y-1">
+                        <button
+                          onClick={() => setExpandedMobileSection(isExpanded ? null : section.id)}
+                          className="w-full flex items-center justify-between px-3 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all text-left"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {section.icon}
+                            <span>{section.label}</span>
+                          </div>
+                          <ChevronDown
+                            size={16}
+                            className={`text-slate-400 transition-transform duration-200 ${
+                              isExpanded ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden pl-7 space-y-1"
+                            >
+                              {section.items.map((sub, sidx) => (
+                                <button
+                                  key={sidx}
+                                  onClick={() => handleNavigate(sub.page as Page, sub.title)}
+                                  className={`w-full flex items-center py-1.5 px-3 text-xs font-semibold rounded-md text-left transition-all ${
+                                    currentPage === sub.page
+                                      ? "text-primary"
+                                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                                  }`}
+                                >
+                                  {sub.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+
+                  {/* Invoice */}
+                  <button
+                    onClick={() => handleNavigate("invoice-list", "Sales Invoice")}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-bold rounded-lg text-left transition-all ${
+                      currentPage === "invoice-list"
+                        ? "bg-slate-100 dark:bg-slate-800 text-brand-red"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <Receipt size={16} /> Invoice
+                  </button>
+
+                  {/* Permissions */}
+                  <button
+                    onClick={() => handleNavigate("permissions-matrix", "Permissions Matrix")}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-bold rounded-lg text-left transition-all ${
+                      currentPage === "permissions-matrix"
+                        ? "bg-slate-100 dark:bg-slate-800 text-primary"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <ShieldCheck size={16} /> Permissions
+                  </button>
+
+                  {/* Company Settings */}
+                  <button
+                    onClick={() => handleNavigate("company-settings", "Company Settings")}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-bold rounded-lg text-left transition-all ${
+                      currentPage === "company-settings"
+                        ? "bg-slate-100 dark:bg-slate-800 text-primary"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <Settings size={16} /> Company Settings
+                  </button>
+
+                  {/* Quick Links */}
+                  <button
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all text-left"
+                  >
+                    <LinkIcon size={16} /> Quick Links
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 space-y-3">
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    ERP Administrator
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    01/04/2025 - 31/03/2026
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (window.confirm("Are you sure you want to sign out?")) {
+                      onLogout();
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 bg-red-50 dark:bg-red-955/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-xs font-bold transition-colors"
+                >
+                  <LogOut size={14} /> Sign Out
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

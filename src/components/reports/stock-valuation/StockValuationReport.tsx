@@ -215,24 +215,24 @@ export const StockValuationReport: React.FC = () => {
   const totalBalValue = data.reduce((s, i) => s + (parseFloat(i.BalStockValue) || 0), 0);
 
   // Dynamic Valuation Breakdown Calculation
-  const brandValuations = data.reduce((acc, item) => {
+  const brandValuations = data.reduce((acc: Record<string, number>, item) => {
     const brand = item.Brand || 'Others';
     const val = parseFloat(item.BalStockValue) || 0;
     if (val > 0) acc[brand] = (acc[brand] || 0) + val;
     return acc;
   }, {} as Record<string, number>);
 
-  const sortedBrands = Object.entries(brandValuations).sort((a, b) => b[1] - a[1]);
+  const sortedBrands = (Object.entries(brandValuations) as [string, number][]).sort((a, b) => b[1] - a[1]);
   const specificBrands = sortedBrands.filter(b => b[0] !== 'Others' && b[0] !== '');
   
-  const finalTop1 = specificBrands[0] || ['N/A', 0];
-  const finalTop2 = specificBrands[1] || ['N/A', 0];
+  const finalTop1 = (specificBrands[0] || ['N/A', 0]) as [string, number];
+  const finalTop2 = (specificBrands[1] || ['N/A', 0]) as [string, number];
   
   const othersVal = sortedBrands
     .filter(b => b[0] !== finalTop1[0] && b[0] !== finalTop2[0])
-    .reduce((sum, b) => sum + b[1], 0);
+    .reduce((sum: number, b) => sum + b[1], 0);
 
-  const totalPositiveVal = sortedBrands.reduce((sum, b) => sum + b[1], 0);
+  const totalPositiveVal = sortedBrands.reduce((sum: number, b) => sum + b[1], 0);
 
   const top1Pct = totalPositiveVal > 0 ? ((finalTop1[1] / totalPositiveVal) * 100).toFixed(1) : '0.0';
   const top2Pct = totalPositiveVal > 0 ? ((finalTop2[1] / totalPositiveVal) * 100).toFixed(1) : '0.0';
@@ -414,6 +414,34 @@ export const StockValuationReport: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Sticky Footer Summary Bar */}
+          <footer className="sticky bottom-0 z-10 mt-6 bg-brand-yellow dark:bg-brand-yellow/10 px-4 py-2.5 md:px-6 md:py-4 rounded-xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] flex flex-col md:flex-row justify-between items-center gap-3 border border-brand-yellow/20 select-none">
+            <div className="grid grid-cols-2 md:flex items-center gap-4 md:gap-12 w-full md:w-auto">
+              <div className="flex flex-col">
+                <span className="text-[9px] md:text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest leading-tight">Total Unique Items</span>
+                <span className="text-sm md:text-xl font-black text-slate-950 dark:text-brand-yellow leading-tight mt-0.5">
+                  {data.length > 0 ? formatNumber(data.length) + ' SKUs' : '0 SKUs'}
+                </span>
+              </div>
+              <div className="flex flex-col border-l border-slate-900/10 dark:border-brand-yellow/10 pl-4 md:border-l-0 md:pl-0">
+                <span className="text-[9px] md:text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest leading-tight">Total Bal Stock</span>
+                <span className="text-sm md:text-xl font-black text-slate-950 dark:text-brand-yellow leading-tight mt-0.5">
+                  {data.length > 0 ? formatNumber(totalBalStock) + ' Units' : '0 Units'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between md:justify-start gap-3 md:gap-4 bg-slate-900/10 dark:bg-brand-yellow/20 px-4 py-1.5 md:px-6 md:py-2 rounded-xl border border-slate-900/10 dark:border-brand-yellow/20 w-full md:w-auto">
+              <div className="flex flex-col items-start md:items-end">
+                <span className="text-[9px] md:text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest leading-tight">Grand Total Bal Value</span>
+                <span className="text-lg md:text-3xl font-black text-slate-950 dark:text-brand-yellow leading-tight">
+                  {data.length > 0 ? '₹' + formatNumber(totalBalValue) : '₹0.00'}
+                </span>
+              </div>
+              <div className="h-6 md:h-10 w-[2px] bg-slate-900/10 dark:bg-brand-yellow/20"></div>
+              <Landmark className="w-5 h-5 md:w-9 md:h-9 text-slate-950 dark:text-brand-yellow flex-shrink-0" />
+            </div>
+          </footer>
         </div>
 
         {/* Sidebar */}
@@ -476,34 +504,6 @@ export const StockValuationReport: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Sticky Footer Summary Bar */}
-      <footer className="sticky bottom-0 z-10 mt-6 bg-brand-yellow dark:bg-brand-yellow/10 px-6 py-4 rounded-xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] flex flex-wrap items-center justify-between gap-4 border border-brand-yellow/20">
-        <div className="flex flex-wrap items-center gap-8 md:gap-12">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest">Total Unique Items</span>
-            <span className="text-xl font-black text-slate-950 dark:text-brand-yellow">
-              {data.length > 0 ? formatNumber(data.length) + ' SKUs' : '0 SKUs'}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest">Total Bal Stock</span>
-            <span className="text-xl font-black text-slate-950 dark:text-brand-yellow">
-              {data.length > 0 ? formatNumber(totalBalStock) + ' Units' : '0 Units'}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 bg-slate-900/10 dark:bg-brand-yellow/20 px-6 py-2 rounded-xl border border-slate-900/10 dark:border-brand-yellow/20">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-black text-slate-800/80 dark:text-brand-yellow/70 uppercase tracking-widest">Grand Total Bal Value</span>
-            <span className="text-3xl font-black text-slate-950 dark:text-brand-yellow">
-              {data.length > 0 ? '₹' + formatNumber(totalBalValue) : '₹0.00'}
-            </span>
-          </div>
-          <div className="h-10 w-[2px] bg-slate-900/10 dark:bg-brand-yellow/20"></div>
-          <Landmark size={36} className="text-slate-950 dark:text-brand-yellow" />
-        </div>
-      </footer>
     </div>
   );
 };

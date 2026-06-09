@@ -94,7 +94,7 @@ export const AnnouncementsTab: React.FC = () => {
 
   if (view === 'form') {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-[calc(100vh-8rem)]">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col lg:h-[calc(100vh-10.5rem)] h-auto">
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div className="flex items-center gap-4">
             <button 
@@ -159,7 +159,7 @@ export const AnnouncementsTab: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-[calc(100vh-8rem)] relative">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col lg:h-[calc(100vh-10.5rem)] h-auto relative">
       <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
           <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">

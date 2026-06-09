@@ -809,16 +809,16 @@ export const ItemRegisterReport: React.FC = () => {
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 border border-brand-yellow/20 dark:border-brand-yellow/5 py-3 px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] rounded-xl">
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-6">
-          <div className="flex flex-wrap items-center gap-4 md:gap-8">
-            <div className="flex items-center gap-3">
-              <Package className="text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8" />
-              <div>
-                <p className="text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight">
-                  Total Received
+      <div className="sticky bottom-0 z-10 bg-brand-yellow dark:bg-brand-yellow/10 border border-brand-yellow/20 dark:border-brand-yellow/5 py-2 px-3 sm:py-3 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] rounded-xl select-none">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-6">
+          <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4 md:gap-8 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5 sm:gap-3 justify-center sm:justify-start">
+              <Package className="hidden sm:block text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8 flex-shrink-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight leading-tight">
+                  Received
                 </p>
-                <p className="text-lg font-black text-slate-950 dark:text-brand-yellow leading-none">
+                <p className="text-xs sm:text-lg font-black text-slate-950 dark:text-brand-yellow leading-tight mt-0.5">
                   {data.length > 0
                     ? formatNumber(
                         data.reduce(
@@ -831,13 +831,13 @@ export const ItemRegisterReport: React.FC = () => {
               </div>
             </div>
             <div className="hidden sm:block w-[1px] h-8 bg-slate-900/10 dark:bg-brand-yellow/20"></div>
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8" />
-              <div>
-                <p className="text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight">
-                  Total Issued
+            <div className="flex items-center gap-1.5 sm:gap-3 justify-center sm:justify-start border-l sm:border-l-0 border-slate-900/10 dark:border-brand-yellow/10 pl-2 sm:pl-0">
+              <CheckCircle2 className="hidden sm:block text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8 flex-shrink-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight leading-tight">
+                  Issued
                 </p>
-                <p className="text-lg font-black text-slate-950 dark:text-brand-yellow leading-none">
+                <p className="text-xs sm:text-lg font-black text-slate-950 dark:text-brand-yellow leading-tight mt-0.5">
                   {data.length > 0
                     ? formatNumber(
                         data.reduce(
@@ -850,13 +850,13 @@ export const ItemRegisterReport: React.FC = () => {
               </div>
             </div>
             <div className="hidden sm:block w-[1px] h-8 bg-slate-900/10 dark:bg-brand-yellow/20"></div>
-            <div className="flex items-center gap-3">
-              <MinusCircle className="text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8" />
-              <div>
-                <p className="text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight">
-                  Closing Balance
+            <div className="flex items-center gap-1.5 sm:gap-3 justify-center sm:justify-start border-l sm:border-l-0 border-slate-900/10 dark:border-brand-yellow/10 pl-2 sm:pl-0">
+              <MinusCircle className="hidden sm:block text-slate-900 dark:text-brand-yellow bg-slate-900/10 dark:bg-brand-yellow/20 p-1.5 rounded-lg w-8 h-8 flex-shrink-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-800 dark:text-brand-yellow/90 uppercase tracking-tight leading-tight">
+                  Balance
                 </p>
-                <p className="text-lg font-black text-slate-950 dark:text-brand-yellow leading-none">
+                <p className="text-xs sm:text-lg font-black text-slate-950 dark:text-brand-yellow leading-tight mt-0.5">
                   {data.length > 0
                     ? formatNumber(data[data.length - 1].Balance)
                     : "-"}
@@ -864,8 +864,8 @@ export const ItemRegisterReport: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-800/80 dark:text-brand-yellow/70 italic uppercase">
-            <Clock size={14} />
+          <div className="flex items-center gap-1 text-[9px] sm:text-[11px] font-bold text-slate-800/80 dark:text-brand-yellow/70 italic uppercase mt-1 sm:mt-0">
+            <Clock size={12} className="sm:w-3.5 sm:h-3.5" />
             Last updated: Just now
           </div>
         </div>

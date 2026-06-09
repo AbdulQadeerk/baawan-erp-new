@@ -187,11 +187,68 @@ export const CompanySetting: React.FC = () => {
 
   return (
     <div className="w-full p-2 sm:p-4 lg:px-6">
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Mobile Dropdown Selector */}
+        <div className="lg:hidden w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+              {(() => {
+                const activeItem = menuSections
+                  .flatMap((s) => s.items)
+                  .find((i) => i.id === activeTab);
+                return activeItem ? activeItem.icon : <Settings size={18} />;
+              })()}
+            </div>
+            <div className="flex-1 relative">
+              <label className="absolute left-3 top-1 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                Settings Module
+              </label>
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value as MainTab)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pt-5 pb-2 px-3 text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer"
+              >
+                {menuSections.map((section, sIdx) => (
+                  <optgroup
+                    key={sIdx}
+                    label={section.title}
+                    className="bg-white dark:bg-slate-900 text-xs text-slate-400 font-semibold"
+                  >
+                    {section.items.map((item) => (
+                      <option
+                        key={item.id}
+                        value={item.id}
+                        className="text-slate-800 dark:text-slate-200 font-semibold text-sm"
+                      >
+                        {item.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Left Sidebar Container */}
-        <div className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-4 h-[calc(100vh-8rem)]">
+        <div className="hidden lg:flex w-full lg:w-72 flex-shrink-0 flex-col gap-3 lg:sticky lg:top-[155px]">
           {/* Navigation Card */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-h-0">
+          <div className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-h-0">
             {/* Sidebar Header */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
               <div className="flex items-center gap-3">
@@ -214,65 +271,66 @@ export const CompanySetting: React.FC = () => {
               </div>
             </div>
 
-          {/* Sidebar Navigation */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-6 custom-scrollbar">
-            {menuSections.map((section, idx) => {
-              const visibleItems = section.items.filter(
-                (item) =>
-                  !searchTerm ||
-                  item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  item.subtitle
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()),
-              );
+            {/* Sidebar Navigation */}
+            <div className="h-[290px] overflow-y-auto p-3 space-y-6 custom-scrollbar">
+              {menuSections.map((section, idx) => {
+                const visibleItems = section.items.filter(
+                  (item) =>
+                    !searchTerm ||
+                    item.title
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()) ||
+                    item.subtitle
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()),
+                );
 
-              if (visibleItems.length === 0) return null;
+                if (visibleItems.length === 0) return null;
 
-              return (
-                <div key={idx} className="space-y-1">
-                  <h3 className="px-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
-                    {section.title}
-                  </h3>
-                  {visibleItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id as MainTab)}
-                      className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${
-                        activeTab === item.id
-                          ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      <div
-                        className={`mt-0.5 transition-colors ${
+                return (
+                  <div key={idx} className="space-y-1">
+                    <h3 className="px-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                      {section.title}
+                    </h3>
+                    {visibleItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id as MainTab)}
+                        className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${
                           activeTab === item.id
-                            ? "text-indigo-600 dark:text-indigo-400"
-                            : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
+                            ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300"
                         }`}
                       >
-                        {item.icon}
-                      </div>
-                      <div>
                         <div
-                          className={`text-sm font-semibold ${
+                          className={`mt-0.5 transition-colors ${
                             activeTab === item.id
-                              ? "text-indigo-700 dark:text-indigo-400"
-                              : "text-slate-700 dark:text-slate-200"
+                              ? "text-indigo-600 dark:text-indigo-400"
+                              : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                           }`}
                         >
-                          {item.title}
+                          {item.icon}
                         </div>
-                        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
-                          {item.subtitle}
+                        <div>
+                          <div
+                            className={`text-sm font-semibold ${
+                              activeTab === item.id
+                                ? "text-indigo-700 dark:text-indigo-400"
+                                : "text-slate-700 dark:text-slate-200"
+                            }`}
+                          >
+                            {item.title}
+                          </div>
+                          <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                            {item.subtitle}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Help Section Card */}
@@ -298,7 +356,7 @@ export const CompanySetting: React.FC = () => {
         </div>
 
         {/* Right Content Area */}
-        <div className="flex-1 min-w-0">{renderActiveTab()}</div>
+        <div className="flex-1 min-w-0 w-full">{renderActiveTab()}</div>
       </div>
     </div>
   );

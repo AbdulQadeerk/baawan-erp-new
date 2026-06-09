@@ -972,6 +972,7 @@ function AppContent() {
             "item-register-group-wise": "Item Register Group Wise",
             "invoice-item-pending-po": "Invoice Item Pending PO",
             "documents-report": "Documents Report",
+            "company-settings": "Company Settings",
           };
           addTab(page, titles[page]);
         }}
