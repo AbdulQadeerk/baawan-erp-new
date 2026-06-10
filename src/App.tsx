@@ -117,6 +117,8 @@ import { InvoiceItemPendingPoReport } from "./components/reports/invoice-item-pe
 import { DocumentsReport } from "./components/reports/documents-report/DocumentsReport";
 import { CompanySetting } from "./components/masters/company-setting/CompanySetting";
 import { Login } from "./components/Login";
+import { AIChat } from "./components/AIChat";
+import { AIInsights } from "./components/AIInsights";
 import { Page, Tab, SplitMode } from "./types";
 import { motion, AnimatePresence } from "motion/react";
 import { FileText, Package, Loader2, Maximize2 } from "lucide-react";
@@ -847,6 +849,10 @@ function AppContent() {
         return <SupplierWisePendingReport />;
       case "all-reports":
         return <AllReports onModuleClick={addTab} />;
+      case "ai-chat":
+        return <AIChat />;
+      case "ai-insights":
+        return <AIInsights />;
       default:
         return <Dashboard />;
     }
@@ -874,6 +880,8 @@ function AppContent() {
           const titles: Record<Page, string> = {
             dashboard: "Dashboard",
             "all-reports": "All Reports",
+            "ai-chat": "Baawan AI Assistant",
+            "ai-insights": "AI Strategic Advisor",
             "invoice-list": "Invoice List",
             "invoice-create": "New Invoice",
             "outstanding-report": "Outstanding Report",

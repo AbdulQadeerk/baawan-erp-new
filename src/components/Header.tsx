@@ -64,6 +64,7 @@ import {
   Target,
   Menu,
   X,
+  Sparkles,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -129,6 +130,12 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:opacity-80">
               <FileText size={18} /> CMS
+            </button>
+            <button 
+              onClick={() => handleNavigate("ai-chat", "Baawan AI Assistant")}
+              className="flex items-center gap-1.5 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:opacity-80 cursor-pointer"
+            >
+              <Sparkles size={18} className="animate-pulse" /> Baawan AI
             </button>
           </nav>
         </div>

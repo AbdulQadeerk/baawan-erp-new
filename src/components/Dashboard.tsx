@@ -27,6 +27,7 @@ import {
   PieChart,
   TrendingUp,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { dashboardService } from "../services/api";
@@ -195,6 +196,15 @@ export const Dashboard: React.FC<{
                 color="rose"
                 onClick={() =>
                   onModuleClick?.("aging-analysis", "Aging Analysis Detail")
+                }
+              />
+              <ModuleCard
+                icon={<Sparkles size={24} className="text-primary animate-pulse" />}
+                title="AI Strategic Advisor"
+                subtitle="Business health metrics"
+                color="indigo"
+                onClick={() =>
+                  onModuleClick?.("ai-insights", "AI Strategic Advisor")
                 }
               />
             </div>
@@ -415,15 +425,18 @@ export const Dashboard: React.FC<{
           </div>
 
           {/* Support Card */}
-          <div className="bg-gradient-to-br from-primary to-indigo-700 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer shadow-lg shadow-primary/20">
+          <div 
+            onClick={() => onModuleClick?.("ai-chat", "Baawan AI Assistant")}
+            className="bg-gradient-to-br from-primary to-indigo-700 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer shadow-lg shadow-primary/20"
+          >
             <div className="relative z-10">
               <h4 className="font-bold mb-1">Need help?</h4>
               <p className="text-xs text-white/80 mb-4">
-                Contact our priority support for instant assistance.
+                Ask our Baawan AI chatbot for instant assistance and queries.
               </p>
               <div className="flex items-center gap-2 text-sm font-bold bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 w-fit transition-colors">
-                <MessageSquare size={16} />
-                Live Chat
+                <Sparkles size={16} className="text-amber-400 animate-pulse" />
+                Ask Baawan AI
               </div>
             </div>
             <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">

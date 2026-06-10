@@ -1,6 +1,8 @@
 export type Page = 
   | 'dashboard' 
   | 'all-reports'
+  | 'ai-chat'
+  | 'ai-insights'
   | 'invoice-list' 
   | 'invoice-create' 
   | 'outstanding-report'
