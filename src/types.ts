@@ -114,6 +114,7 @@ export interface Tab {
   type: Page;
   title: string;
   closable: boolean;
+  params?: any;
 }
 
 export interface BOM {

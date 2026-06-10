@@ -87,6 +87,31 @@ export const AIChat: React.FC = () => {
         const { text, history: updatedHistory } = response.data;
         if (updatedHistory) {
           setHistory(updatedHistory);
+
+          // Check if the latest model response executed the 'check_stock' tool
+          let searchItemName = "";
+          for (let idx = updatedHistory.length - 1; idx >= 0; idx--) {
+            const msg = updatedHistory[idx];
+            if (msg.role === 'model') {
+              const part = msg.parts.find((p: any) => p.functionCall && p.functionCall.name === 'check_stock');
+              if (part) {
+                searchItemName = part.functionCall.args?.itemName || "";
+                break;
+              }
+            }
+          }
+
+          if (searchItemName) {
+            // Dispatch window event to open current stock tab
+            const event = new CustomEvent("open-tab", {
+              detail: {
+                type: "current-stock-report",
+                title: "Current Stock Report",
+                params: { itemName: searchItemName }
+              }
+            });
+            window.dispatchEvent(event);
+          }
         } else {
           setHistory(prev => [...prev, {
             role: 'model',
@@ -139,12 +164,52 @@ export const AIChat: React.FC = () => {
 
     switch (name) {
       case "check_stock":
-        if (typeof result === 'string') return <p className="text-xs italic text-slate-500 mt-1">{result}</p>;
+        if (typeof result === 'string') {
+          return (
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <p className="text-xs italic text-slate-500">{result}</p>
+              <button 
+                onClick={() => {
+                  const event = new CustomEvent("open-tab", {
+                    detail: {
+                      type: "current-stock-report",
+                      title: "Current Stock Report",
+                      params: { itemName: result.includes("No items found") ? "" : result }
+                    }
+                  });
+                  window.dispatchEvent(event);
+                }}
+                className="text-[10px] font-bold text-primary hover:underline cursor-pointer bg-none border-none p-0"
+              >
+                Go to Report Page →
+              </button>
+            </div>
+          );
+        }
         const items = Array.isArray(result) ? result : [];
         if (items.length === 0) return <p className="text-xs italic text-slate-500 mt-1">No items found.</p>;
         return (
-          <div className="mt-2 overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-            <table className="w-full text-left border-collapse text-[11px]">
+          <div className="space-y-1.5 mt-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live Results</span>
+              <button 
+                onClick={() => {
+                  const event = new CustomEvent("open-tab", {
+                    detail: {
+                      type: "current-stock-report",
+                      title: "Current Stock Report",
+                      params: { itemName: items[0]?.itename || items[0]?.itemName || "" }
+                    }
+                  });
+                  window.dispatchEvent(event);
+                }}
+                className="text-[10px] font-bold text-primary hover:underline cursor-pointer bg-none border-none p-0 flex items-center gap-1"
+              >
+                View in Report Grid →
+              </button>
+            </div>
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+              <table className="w-full text-left border-collapse text-[11px]">
               <thead>
                 <tr className="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 text-slate-500">
                   <th className="px-3 py-2">Item Code</th>
@@ -165,7 +230,8 @@ export const AIChat: React.FC = () => {
               </tbody>
             </table>
           </div>
-        );
+        </div>
+      );
 
       case "get_ledger_info":
         if (typeof result === 'string') return <p className="text-xs italic text-slate-500 mt-1">{result}</p>;

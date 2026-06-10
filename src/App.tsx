@@ -242,35 +242,44 @@ function AppContent() {
     }
   }, [isDark]);
 
-  // Listen for custom events to open modals from anywhere
+  // Listen for custom events to open modals or tabs from anywhere
   useEffect(() => {
     const handleOpenPreview = () => setIsPreviewOpen(true);
     const handleOpenStock = () => setIsStockModalOpen(true);
     const handleOpenWidgetLibrary = () => setIsWidgetLibraryOpen(true);
+    const handleOpenTab = (e: Event) => {
+      const customEvent = e as CustomEvent<{ type: Page; title: string; params?: any }>;
+      if (customEvent.detail) {
+        const { type, title, params } = customEvent.detail;
+        addTab(type, title, params);
+      }
+    };
 
     window.addEventListener("open-invoice-preview", handleOpenPreview);
     window.addEventListener("open-stock-modal", handleOpenStock);
     window.addEventListener("open-widget-library", handleOpenWidgetLibrary);
+    window.addEventListener("open-tab", handleOpenTab);
 
     return () => {
       window.removeEventListener("open-invoice-preview", handleOpenPreview);
       window.removeEventListener("open-stock-modal", handleOpenStock);
-      window.removeEventListener(
-        "open-widget-library",
-        handleOpenWidgetLibrary,
-      );
+      window.removeEventListener("open-widget-library", handleOpenWidgetLibrary);
+      window.removeEventListener("open-tab", handleOpenTab);
     };
-  }, []);
+  }, [tabs, splitMode, paneActiveTabIds, focusedPaneIndex, activeTabId]);
 
   // Scroll to top whenever active tab changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [activeTabId]);
 
-  const addTab = (type: Page, title: string) => {
-    // Check if tab already exists by type and title
-    const existingTab = tabs.find((t) => t.type === type && t.title === title);
+  const addTab = (type: Page, title: string, params?: any) => {
+    // Check if tab already exists by type (so we update params instead of duplicating tabs)
+    const existingTab = tabs.find((t) => t.type === type);
     if (existingTab) {
+      if (params !== undefined) {
+        setTabs(prev => prev.map(t => t.id === existingTab.id ? { ...t, params } : t));
+      }
       if (splitMode === "single") {
         setActiveTabId(existingTab.id);
       } else {
@@ -286,6 +295,7 @@ function AppContent() {
       type,
       title,
       closable: true,
+      params,
     };
     setTabs([...tabs, newTab]);
 
@@ -742,7 +752,7 @@ function AppContent() {
       case "trial-balance-report":
         return <TrialBalanceReport />;
       case "current-stock-report":
-        return <CurrentStockReport />;
+        return <CurrentStockReport params={tab.params} />;
       case "receipt-voucher-create":
         return <ReceiptVoucherForm />;
       case "bi-dashboard":

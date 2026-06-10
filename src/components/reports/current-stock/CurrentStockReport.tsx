@@ -205,7 +205,7 @@ const ItemDetailBanner: React.FC<{ data: any; onClose: () => void }> = ({
 };
 
 // ─── Main Current Stock Report ─────────────────────────────────────────────
-export const CurrentStockReport: React.FC = () => {
+export const CurrentStockReport: React.FC<{ params?: any }> = ({ params }) => {
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [printLoading, setPrintLoading] = useState(false);
@@ -304,6 +304,59 @@ export const CurrentStockReport: React.FC = () => {
 
     singleItemRef.current?.focus();
   }, []);
+
+  // ─── Auto-submit when params change ────────────────────────────────────
+  useEffect(() => {
+    if (params) {
+      const searchName = params.itemName || null;
+      const searchCode = params.itemCode || null;
+      
+      setFilters({
+        brand: null,
+        category: null,
+        sizes: null,
+        type: null,
+        itemGroup: null,
+        item_CodeTxt: searchCode ? { name: searchCode } : null,
+        name: searchName ? { name: searchName } : null,
+        item: null,
+        stockPlace: "",
+      });
+
+      const fetchStock = async () => {
+        setLoading(true);
+        try {
+          const result = await reportApi.currentStock({
+            brand: null,
+            category: null,
+            sizes: null,
+            type: null,
+            itemGroup: null,
+            item_CodeTxt: searchCode,
+            name: searchName,
+            itemId: null,
+            spId: null,
+          });
+          if (result?.length) {
+            const keys = Object.keys(result[0]).filter((k) => k !== "itemGroup");
+            setColumns(keys);
+            setData(result);
+          } else {
+            setData([]);
+            setColumns([]);
+          }
+        } catch (err) {
+          console.error("Auto fetch stock failed:", err);
+          setData([]);
+          setColumns([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchStock();
+    }
+  }, [params]);
 
   // ─── Build filter payload (mirrors Angular getFilters) ─────────────────
   const getFilters = useCallback(
