@@ -89,19 +89,21 @@ export const AIChat: React.FC = () => {
           setHistory(updatedHistory);
 
           // Check if the latest model response executed the 'check_stock' tool
+          let hasCheckStock = false;
           let searchItemName = "";
           for (let idx = updatedHistory.length - 1; idx >= 0; idx--) {
             const msg = updatedHistory[idx];
             if (msg.role === 'model') {
               const part = msg.parts.find((p: any) => p.functionCall && p.functionCall.name === 'check_stock');
               if (part) {
+                hasCheckStock = true;
                 searchItemName = part.functionCall.args?.itemName || "";
                 break;
               }
             }
           }
 
-          if (searchItemName) {
+          if (hasCheckStock) {
             // Dispatch window event to open current stock tab
             const event = new CustomEvent("open-tab", {
               detail: {
@@ -186,7 +188,32 @@ export const AIChat: React.FC = () => {
             </div>
           );
         }
-        const items = Array.isArray(result) ? result : [];
+
+        // Handle object output (e.g. when searching all stock)
+        if (result && !Array.isArray(result) && result.message) {
+          return (
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <p className="text-xs italic text-slate-500">{result.message}</p>
+              <button 
+                onClick={() => {
+                  const event = new CustomEvent("open-tab", {
+                    detail: {
+                      type: "current-stock-report",
+                      title: "Current Stock Report",
+                      params: { itemName: "" }
+                    }
+                  });
+                  window.dispatchEvent(event);
+                }}
+                className="text-[10px] font-bold text-primary hover:underline cursor-pointer bg-none border-none p-0"
+              >
+                Go to Report Page →
+              </button>
+            </div>
+          );
+        }
+
+        const items = Array.isArray(result) ? result : (result.sampleItems || []);
         if (items.length === 0) return <p className="text-xs italic text-slate-500 mt-1">No items found.</p>;
         return (
           <div className="space-y-1.5 mt-2">

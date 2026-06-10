@@ -29,7 +29,7 @@ export default async function handler(req: any, res: any) {
     });
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
         ...history,
         { role: "user", parts: [{ text: message }] }
@@ -46,13 +46,12 @@ export default async function handler(req: any, res: any) {
           functionDeclarations: [
             {
               name: "check_stock",
-              description: "Check the current stock of an item by name or code.",
+              description: "Check the current stock of an item by name or code. Can be left empty or omitted to search all items.",
               parameters: {
                 type: Type.OBJECT,
                 properties: {
-                  itemName: { type: Type.STRING, description: "The name or code of the item to check stock for." }
-                },
-                required: ["itemName"]
+                  itemName: { type: Type.STRING, description: "The name or code of the item to check stock for (optional)." }
+                }
               }
             },
             {
@@ -127,17 +126,36 @@ export default async function handler(req: any, res: any) {
             if (sessionId) {
               try {
                 const stockRes = await axios.post(`${BASE_URL}/api/Report/CurrentStock`, {
-                  name: args.itemName,
+                  brand: null,
+                  category: null,
+                  sizes: null,
+                  type: null,
+                  itemGroup: null,
+                  item_CodeTxt: null,
+                  name: args.itemName || null,
+                  itemId: null,
+                  spId: null,
                   sessionId
                 }, {
                   headers: { 'X-Session-ID': sessionId }
                 });
                 const items = stockRes.data || [];
-                const searchResult = items.filter((i: any) => 
-                  (i.itename || i.itemName || '').toLowerCase().includes(queryName) || 
-                  (i.itemcode || i.itemCode || '').toLowerCase().includes(queryName)
-                );
-                resultData = searchResult.length > 0 ? searchResult : "No items found with that name in live database.";
+                const searchResult = queryName
+                  ? items.filter((i: any) => 
+                      (i.itename || i.itemName || '').toLowerCase().includes(queryName) || 
+                      (i.itemcode || i.itemCode || '').toLowerCase().includes(queryName)
+                    )
+                  : items;
+                
+                if (!queryName) {
+                  resultData = {
+                    message: `Found ${items.length} items in live database. Redirecting to stock report page...`,
+                    totalItems: items.length,
+                    sampleItems: items.slice(0, 5)
+                  };
+                } else {
+                  resultData = searchResult.length > 0 ? searchResult : "No items found with that name in live database.";
+                }
               } catch (apiErr: any) {
                 console.error("Live stock check failed, falling back", apiErr.message);
                 resultData = { error: "Failed to query live stock database." };
@@ -150,7 +168,13 @@ export default async function handler(req: any, res: any) {
             if (sessionId) {
               try {
                 const ledgerRes = await axios.post(`${BASE_URL}/api/Ledger/Search`, {
-                  name: args.ledgerName,
+                  isSync: false,
+                  name: args.ledgerName || null,
+                  assignedUserID: null,
+                  groups: [],
+                  includeChildGroups: true,
+                  toDate: null,
+                  lockFreeze: false,
                   sessionId
                 }, {
                   headers: { 'X-Session-ID': sessionId }
@@ -174,7 +198,13 @@ export default async function handler(req: any, res: any) {
               try {
                 // Step 1: find ledger ID
                 const ledgerRes = await axios.post(`${BASE_URL}/api/Ledger/Search`, {
-                  name: args.partyName,
+                  isSync: false,
+                  name: args.partyName || null,
+                  assignedUserID: null,
+                  groups: [],
+                  includeChildGroups: true,
+                  toDate: null,
+                  lockFreeze: false,
                   sessionId
                 }, {
                   headers: { 'X-Session-ID': sessionId }
@@ -184,9 +214,15 @@ export default async function handler(req: any, res: any) {
                 
                 if (foundLedger) {
                   const ledgerId = foundLedger.ledger_id || foundLedger.id;
+                  const today = new Date();
+                  const dd = String(today.getDate()).padStart(2, '0');
+                  const mm = String(today.getMonth() + 1).padStart(2, '0');
+                  const yyyy = today.getFullYear();
                   const outstandingRes = await axios.post(`${BASE_URL}/api/Report/LedgerOutstanding`, {
                     ledgers: [ledgerId],
-                    toDate: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    detailed: false,
+                    toDate: `${dd}/${mm}/${yyyy}`,
+                    isOverDueOnBillDate: false,
                     sessionId
                   }, {
                     headers: { 'X-Session-ID': sessionId }
@@ -378,28 +414,42 @@ export default async function handler(req: any, res: any) {
         });
       }
 
-      const finalResponse = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: [
-          ...history,
-          { role: "user", parts: [{ text: message }] },
-          { role: "model", parts: response.candidates?.[0]?.content?.parts || [] },
-          { role: "user", parts: results as any }
-        ],
-        config: {
-          systemInstruction: "You are Baawan AI. Provide a natural language summary of the tool results. If no data was found, clearly state that to the user.",
+        const toolNames = functionCalls.map(c => c.name);
+        let finalOutput = "I have fetched the requested data from the live ERP database.";
+        if (toolNames.includes("check_stock")) {
+          let requestedItem = "";
+          for (const call of functionCalls) {
+            if (call.name === "check_stock") {
+              requestedItem = (call.args as any)?.itemName || "";
+              break;
+            }
+          }
+          if (requestedItem) {
+            finalOutput = `Here is the live stock information for **"${requestedItem}"** retrieved from the ERP system. I have also opened the Current Stock report page for you.`;
+          } else {
+            finalOutput = "Here is the stock summary retrieved from the live database. I have opened the Current Stock report page showing all items.";
+          }
+        } else if (toolNames.includes("get_ledger_info")) {
+          finalOutput = "Here are the ledger details retrieved from the live ERP system:";
+        } else if (toolNames.includes("get_outstanding")) {
+          finalOutput = "Here are the outstanding bills retrieved from the live database:";
+        } else if (toolNames.includes("get_financial_summary")) {
+          finalOutput = "Here is the Profit & Loss summary from the live ERP system:";
+        } else if (toolNames.includes("create_invoice")) {
+          finalOutput = "The sales invoice has been successfully created in the ERP database!";
         }
-      });
 
-      const finalOutput = finalResponse.text?.trim() || "I've processed your request.";
-      return res.json({
-        text: finalOutput,
-        history: [
-          ...history,
-          { role: "user", parts: [{ text: message }] },
-          { role: "model", parts: [{ text: finalOutput }] }
-        ]
-      });
+        return res.json({
+          text: finalOutput,
+          history: [
+            ...history,
+            { role: "user", parts: [{ text: message }] },
+            { role: "model", parts: [
+              { text: finalOutput },
+              ...results
+            ] as any }
+          ]
+        });
     }
 
     const outputText = response.text?.trim() || "I'm not sure how to respond to that.";
